@@ -10,6 +10,6 @@
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
   <f:entry title="Path" field="pathToVersionOne">
-    <f:textbox field="pathToVersionOne" />
+    <f:textbox field="pathToVersionOne" default="http://localhost/VersionOne"/>      
   </f:entry>
 </j:jelly>

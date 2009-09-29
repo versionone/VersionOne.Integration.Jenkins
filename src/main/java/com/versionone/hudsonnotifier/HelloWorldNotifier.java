@@ -1,6 +1,7 @@
 package com.versionone.hudsonnotifier;
 import hudson.Launcher;
 import hudson.Extension;
+import hudson.scm.ChangeLogSet;
 import hudson.util.FormValidation;
 import hudson.model.Build;
 import hudson.model.BuildListener;
@@ -22,8 +23,11 @@ import com.versionone.om.V1Instance;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 
+@Extension
 public class HelloWorldNotifier extends Notifier {
     private String pathToVersionOne;
 
@@ -59,6 +63,28 @@ public class HelloWorldNotifier extends Notifier {
             listener.getLogger().println("Version One connection is NOT ok:\n"+ex.getMessage());
         }
         // this also shows how you can consult the global configuration of the builder
+        listener.getLogger().println("Result: " + build.getResult());
+        listener.getLogger().println("Description: " + build.getDescription());
+        listener.getLogger().println("Project: " + build.getProject().getName());
+        listener.getLogger().println("ChangeSet (kind): " + build.getChangeSet().getKind());
+        GregorianCalendar now = new GregorianCalendar();
+
+        listener.getLogger().println("Time: " + (now.getTime().getTime() - build.getTimestamp().getTime().getTime()));
+        //SubversionChangeLogSet for Subversion
+        for (Object item : build.getChangeSet().getItems()) {
+            ChangeLogSet.Entry changeSetData = ((ChangeLogSet.Entry) item);
+            listener.getLogger().println("Message: " + changeSetData.getMsg());
+            listener.getLogger().println("Author: " + changeSetData.getAuthor());
+            for (ChangeLogSet.AffectedFile file : changeSetData.getAffectedFiles()) {
+                listener.getLogger().println("File: " + file.getPath());
+            }
+            //listener.getLogger().println("ChangeSet (Items): " + item.toString());
+        }
+
+        // we can recognize who init this build user or triger by data in actions(build.getActions()):
+        // hudson.model.Cause$UserCause - user
+        // hudson.triggers.SCMTrigger$SCMTriggerCause - trigger by Subversion update
+        // build.getActions().get(0); or verify all data in loop
         
         return true;
     }
