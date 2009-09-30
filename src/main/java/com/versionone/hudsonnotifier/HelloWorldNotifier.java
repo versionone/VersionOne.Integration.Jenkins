@@ -156,19 +156,15 @@ public class HelloWorldNotifier extends Notifier {
                 }
             }.process();
             */
-            boolean isOk = true;
+
             try {
                 aaa.validate();
-
-            } catch (Exception ex) {
-                isOk = false;
-            }
-
-            if (isOk) {
                 return FormValidation.ok("Connection is valid.");
-            } else {
+            } catch (Exception ex) {
                 return FormValidation.error("Connection is not valid.");
+
             }
+
         }
 
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
