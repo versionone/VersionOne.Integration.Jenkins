@@ -17,6 +17,8 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerResponse;
+import com.versionone.apiclient.*;
 import com.versionone.om.V1Instance;
 
 
@@ -24,35 +26,34 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 
 @Extension
 public class HelloWorldNotifier extends Notifier {
-    private String pathToVersionOne;
+
 
     @DataBoundConstructor
-    public HelloWorldNotifier(String pathToVersionOne) {
-        this.pathToVersionOne = pathToVersionOne;
-    }
-
-    public String getPathToVersionOne() {
-        return pathToVersionOne;
-    }
-
     public HelloWorldNotifier() {
-        int i = 0;
+        //this.pathToVersionOne = pathToVersionOne;
     }
+
+    //public String getPathToVersionOne() {
+        //return pathToVersionOne;
+    //}
+    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
     @Override
-    public BuildStepDescriptor getDescriptor() {
-        return (BuildStepDescriptor)super.getDescriptor();
+    public DescriptorImpl getDescriptor() {
+        return DESCRIPTOR;
     }
 
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         // this is where you 'build' the project
         // since this is a dummy, we just say 'hello world' and call that a build
         //V1APIConnector aaa = new V1APIConnector("http://jsdksrv01:8080","admin","admin");
-        V1Instance aaa = new V1Instance(pathToVersionOne,"admin","admin");
+        V1Instance aaa = new V1Instance(getDescriptor().getPathToVersionOne(),"admin","admin");
         try {
             aaa.validate();
             //System.out.println("Version One connection is ok");
@@ -90,13 +91,26 @@ public class HelloWorldNotifier extends Notifier {
 
     @Extension // this marker indicates Hudson that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        private String pathToVersionOne;
 
+        /*
+        @DataBoundConstructor
+        public DescriptorImpl(String pathToVersionOne) {
+            this.pathToVersionOne = pathToVersionOne;
+        }
+        */
+
+        
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
         public String getDisplayName() {
             return "VersionOne integration settings";
+        }
+
+        public String getHelpFile() {
+            return "/plugin/HudsonIntegration/help-globalConfig.html";
         }
 
 
@@ -109,20 +123,69 @@ public class HelloWorldNotifier extends Notifier {
          *      Indicates the outcome of the validation. This is sent to the browser.
          */
         public FormValidation doCheckPathToVersionOne(@QueryParameter String value) throws IOException, ServletException {
-            if(value.length()==0)
-                return FormValidation.error("Please set a path");
-            if(value.length()<4)
+            if(value.length()==0) {
+                return FormValidation.error("VersionOne server URL must not be empty");
+            }
+            if(value.length()<4) {
                 return FormValidation.warning("Isn't the path too short?");
+            }
+            try {
+                new URL(value);
+            } catch (MalformedURLException e) {
+                FormValidation.warning("invalidUrl", "Invalid server URL format");
+            }
+
+
             return FormValidation.ok();
+        }
+
+        public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
+                                     @QueryParameter("pathToVersionOne") final String path) throws IOException, ServletException {
+            final V1Instance aaa = new V1Instance(path, "admin", "admin");
+            /*
+            new FormFieldValidator(req, rsp, true) {
+
+                @Override
+                protected void check() throws IOException, ServletException {
+                    try {
+                        aaa.validate();
+                        ok("Success");
+                    } catch (Exception e) {
+                        error("Connection invalide : " + e.getMessage());
+                    }
+                }
+            }.process();
+            */
+            boolean isOk = true;
+            try {
+                aaa.validate();
+
+            } catch (Exception ex) {
+                isOk = false;
+            }
+
+            if (isOk) {
+                return FormValidation.ok("Connection is valid.");
+            } else {
+                return FormValidation.error("Connection is not valid.");
+            }
         }
 
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
             // to persist global configuration information,
             // set that to properties and call save().
+            pathToVersionOne = o.getString("pathToVersionOne");
             save();
             return super.configure(req,o);
         }
+
+        public String getPathToVersionOne() {
+            return pathToVersionOne;
+        }
     }
+
+
+
 
 }
 
