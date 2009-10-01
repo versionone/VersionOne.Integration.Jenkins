@@ -30,18 +30,20 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 
-@Extension
 public class HelloWorldNotifier extends Notifier {
 
-
+    /*
     @DataBoundConstructor
-    public HelloWorldNotifier() {
+    public HelloWorldNotifier(Boolean enable) {
         //this.pathToVersionOne = pathToVersionOne;
+        this.enable = enable;
     }
+    */
 
     //public String getPathToVersionOne() {
         //return pathToVersionOne;
     //}
+    @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
     @Override
@@ -62,6 +64,7 @@ public class HelloWorldNotifier extends Notifier {
             //System.out.println("Version One connection is NOT ok:\n"+ex.getMessage());
             listener.getLogger().println("Version One connection is NOT ok:\n"+ex.getMessage());
         }
+        listener.getLogger().println(getDescriptor().getPathToVersionOne());
         // this also shows how you can consult the global configuration of the builder
         listener.getLogger().println("Result: " + build.getResult());
         listener.getLogger().println("Description: " + build.getDescription());
@@ -80,7 +83,7 @@ public class HelloWorldNotifier extends Notifier {
             }
             //listener.getLogger().println("ChangeSet (Items): " + item.toString());
         }
-
+        listener.getLogger().println("------------------------------------");
         // we can recognize who init this build user or triger by data in actions(build.getActions()):
         // hudson.model.Cause$UserCause - user
         // hudson.triggers.SCMTrigger$SCMTriggerCause - trigger by Subversion update
@@ -89,7 +92,7 @@ public class HelloWorldNotifier extends Notifier {
         return true;
     }
 
-    @Extension // this marker indicates Hudson that this is an implementation of an extension point.
+    //@Extension // this marker indicates Hudson that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private String pathToVersionOne;
 
@@ -99,6 +102,10 @@ public class HelloWorldNotifier extends Notifier {
             this.pathToVersionOne = pathToVersionOne;
         }
         */
+        public DescriptorImpl() {
+            super(HelloWorldNotifier.class);
+            load();
+        }
 
         
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -106,7 +113,7 @@ public class HelloWorldNotifier extends Notifier {
         }
 
         public String getDisplayName() {
-            return "VersionOne integration settings";
+            return "VersionOne integration";
         }
 
         public String getHelpFile() {
@@ -142,20 +149,6 @@ public class HelloWorldNotifier extends Notifier {
         public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
                                      @QueryParameter("pathToVersionOne") final String path) throws IOException, ServletException {
             final V1Instance aaa = new V1Instance(path, "admin", "admin");
-            /*
-            new FormFieldValidator(req, rsp, true) {
-
-                @Override
-                protected void check() throws IOException, ServletException {
-                    try {
-                        aaa.validate();
-                        ok("Success");
-                    } catch (Exception e) {
-                        error("Connection invalide : " + e.getMessage());
-                    }
-                }
-            }.process();
-            */
 
             try {
                 aaa.validate();
@@ -178,6 +171,14 @@ public class HelloWorldNotifier extends Notifier {
         public String getPathToVersionOne() {
             return pathToVersionOne;
         }
+
+        /**
+         * Creates a new instance of {@link HelloWorldNotifier} from a submitted form.
+         */
+        public HelloWorldNotifier newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            return new HelloWorldNotifier();
+        }
+
     }
 
 

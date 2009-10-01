@@ -1,1 +1,1 @@
-mvn hpi:run -Djetty.port=8090
+mvn hpi:run -Djetty.port=8090 >>debug.txt
