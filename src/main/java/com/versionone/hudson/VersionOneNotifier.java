@@ -71,16 +71,10 @@ public class VersionOneNotifier extends Notifier {
 		return true;
 	}
 
-	//@Extension // this marker indicates Hudson that this is an implementation of an extension point.
 	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+
 		private String pathToVersionOne;
 
-		/*
-				@DataBoundConstructor
-				public DescriptorImpl(String pathToVersionOne) {
-					this.pathToVersionOne = pathToVersionOne;
-				}
-				*/
 		public DescriptorImpl() {
 			super(VersionOneNotifier.class);
 			load();
@@ -88,7 +82,7 @@ public class VersionOneNotifier extends Notifier {
 
 
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-			return true;  //To change body of implemented methods use File | Settings | File Templates.
+			return true;
 		}
 
 		public String getDisplayName() {
@@ -119,27 +113,22 @@ public class VersionOneNotifier extends Notifier {
 				FormValidation.warning("invalidUrl", "Invalid server URL format");
 			}
 
-
 			return FormValidation.ok();
 		}
 
 		public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
 											   @QueryParameter("pathToVersionOne") final String path) throws IOException, ServletException {
-			final V1Instance aaa = new V1Instance(path, "admin", "admin");
+			final V1Instance v1 = new V1Instance(path, "admin", "admin");
 
 			try {
-				aaa.validate();
+				v1.validate();
 				return FormValidation.ok("Connection is valid.");
 			} catch (Exception ex) {
 				return FormValidation.error("Connection is not valid.");
-
 			}
-
 		}
 
 		public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
-			// to persist global configuration information,
-			// set that to properties and call save().
 			pathToVersionOne = o.getString("pathToVersionOne");
 			save();
 			return super.configure(req, o);
@@ -155,9 +144,6 @@ public class VersionOneNotifier extends Notifier {
 		public VersionOneNotifier newInstance(StaplerRequest req, JSONObject formData) throws FormException {
 			return new VersionOneNotifier();
 		}
-
 	}
-
-
 }
 
