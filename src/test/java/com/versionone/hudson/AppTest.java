@@ -37,6 +37,8 @@ public class AppTest extends HudsonTestCase {
 	public void test2() throws IOException, SAXException {
 		final HtmlPage page = new WebClient().goTo("configure");
 		assertElementPresentByName(page, "com-versionone-hudson-VersionOneNotifier");
+		int j = 3;
+		int i = ((2009 - 2004) + j) > 1 ? 0 : 1;
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package com.versionone.hudson;
 
+import com.versionone.om.ApplicationUnavailableException;
+import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
 import hudson.Extension;
 import hudson.Launcher;
@@ -38,9 +40,12 @@ public class VersionOneNotifier extends Notifier {
 		try {
 			instance.validate();
 			listener.getLogger().println("VersionOne connection validated.");
-		} catch (Exception ex) {
+		} catch (ApplicationUnavailableException e) {
 			listener.getLogger().println("VersionOne connection failed:");
-			ex.printStackTrace(listener.getLogger());
+			e.printStackTrace(listener.getLogger());
+		} catch (AuthenticationException e) {
+			listener.getLogger().println("VersionOne authentication failed:");
+			e.printStackTrace(listener.getLogger());
 		}
 
 		listener.getLogger().println(getDescriptor().getPathToVersionOne());
