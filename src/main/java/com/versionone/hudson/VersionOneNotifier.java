@@ -27,16 +27,16 @@ import java.util.GregorianCalendar;
 public class VersionOneNotifier extends Notifier {
 
 	@Extension
-	public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
+	public static final Descriptor DESCRIPTOR = new Descriptor();
 
 	@Override
-	public DescriptorImpl getDescriptor() {
+	public Descriptor getDescriptor() {
 		return DESCRIPTOR;
 	}
 
 	// This is where you 'build' the project
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-		final V1Instance instance = new V1Instance(getDescriptor().getPathToVersionOne(), "admin", "admin");
+		final V1Instance instance = new V1Instance(getDescriptor().getV1Path(), "admin", "admin");
 		try {
 			instance.validate();
 			listener.getLogger().println("VersionOne connection validated.");
@@ -48,7 +48,7 @@ public class VersionOneNotifier extends Notifier {
 			e.printStackTrace(listener.getLogger());
 		}
 
-		listener.getLogger().println(getDescriptor().getPathToVersionOne());
+		listener.getLogger().println(getDescriptor().getV1Path());
 		// this also shows how you can consult the global configuration of the builder
 		listener.getLogger().println("Result: " + build.getResult());
 		listener.getLogger().println("Description: " + build.getDescription());
@@ -76,11 +76,17 @@ public class VersionOneNotifier extends Notifier {
 		return true;
 	}
 
-	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+	public static final class Descriptor extends BuildStepDescriptor<Publisher> {
 
-		private String pathToVersionOne;
+		private static final String V1_PATH = "v1Path";
+		private static final String V1_LOGIN = "v1Login";
+		private static final String V1_PASSWORD = "v1Password";
 
-		public DescriptorImpl() {
+		private String v1Path;
+		private String v1Login;
+		private String v1Password;
+
+		public Descriptor() {
 			super(VersionOneNotifier.class);
 			load();
 		}
@@ -91,7 +97,7 @@ public class VersionOneNotifier extends Notifier {
 		}
 
 		public String getDisplayName() {
-			return "VersionOne integration";
+			return "VersionOne";
 		}
 
 		public String getHelpFile() {
@@ -115,32 +121,44 @@ public class VersionOneNotifier extends Notifier {
 			try {
 				new URL(value);
 			} catch (MalformedURLException e) {
-				FormValidation.warning("invalidUrl", "Invalid server URL format");
+				return FormValidation.warning("Invalid server URL format");
 			}
 
 			return FormValidation.ok();
 		}
 
 		public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
-											   @QueryParameter("pathToVersionOne") final String path) throws IOException, ServletException {
-			final V1Instance v1 = new V1Instance(path, "admin", "admin");
-
+											   @QueryParameter(V1_PATH) final String path,
+											   @QueryParameter(V1_LOGIN) final String login,
+											   @QueryParameter(V1_PASSWORD) final String password) throws IOException, ServletException {
 			try {
-				v1.validate();
+				new V1Instance(path, login, password).validate();
 				return FormValidation.ok("Connection is valid.");
-			} catch (Exception ex) {
-				return FormValidation.error("Connection is not valid.");
+			} catch (ApplicationUnavailableException e) {
+				return FormValidation.error("Cannot connect to specified path.");
+			} catch (AuthenticationException e) {
+				return FormValidation.error("Wrong login or password.");
 			}
 		}
 
 		public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
-			pathToVersionOne = o.getString("pathToVersionOne");
+			v1Path = o.getString(V1_PATH);
+			v1Login = o.getString(V1_LOGIN);
+			v1Password = o.getString(V1_PASSWORD);
 			save();
-			return super.configure(req, o);
+			return true;
 		}
 
-		public String getPathToVersionOne() {
-			return pathToVersionOne;
+		public String getV1Path() {
+			return v1Path;
+		}
+
+		public String getV1Login() {
+			return v1Login;
+		}
+
+		public String getV1Password() {
+			return v1Password;
 		}
 
 		/**
