@@ -53,6 +53,7 @@ public class AppTest extends HudsonTestCase {
 	 * @param page the page to check
 	 * @param name the expected Name of an element in the page
 	 */
+    /*
 	public static void assertElementPresentByName(final HtmlPage page, final String name) {
 		try {
 			page.getHtmlElementsByName(name);
@@ -60,4 +61,5 @@ public class AppTest extends HudsonTestCase {
 			throw new AssertionError("The page does not contain an element with name '" + name + "'.");
 		}
 	}
+	*/
 }
