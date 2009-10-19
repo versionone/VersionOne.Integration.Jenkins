@@ -11,6 +11,7 @@ import hudson.util.DescribableList;
 import org.apache.commons.io.FileUtils;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.xml.sax.SAXException;
+import org.junit.Ignore;
 
 import java.io.IOException;
 
@@ -34,6 +35,7 @@ public class AppTest extends HudsonTestCase {
 		assertTrue(s.contains("echo hello"));
 	}
 
+    @Ignore
 	public void test2() throws IOException, SAXException {
 		final HtmlPage page = new WebClient().goTo("configure");
 		assertElementPresentByName(page, "com-versionone-hudson-VersionOneNotifier");
