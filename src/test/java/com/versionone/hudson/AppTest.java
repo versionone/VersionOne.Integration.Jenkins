@@ -1,6 +1,6 @@
 package com.versionone.hudson;
 
-/*
+
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.model.Descriptor;
@@ -15,12 +15,12 @@ import org.xml.sax.SAXException;
 import org.junit.Ignore;
 
 import java.io.IOException;
-*/
 
 
-//public class AppTest extends HudsonTestCase {
 
-    /*
+public class AppTest extends HudsonTestCase {
+
+
 	public void test1() throws Exception {
 		FreeStyleProject project = createFreeStyleProject();
 		project.getBuildersList().add(new BatchFile("echo hello"));
@@ -37,9 +37,9 @@ import java.io.IOException;
 		String s = FileUtils.readFileToString(build.getLogFile());
 		assertTrue(s.contains("echo hello"));
 	}
-	*/
 
-    /*
+
+
     @Ignore
 	public void test2() throws IOException, SAXException {
 		final HtmlPage page = new WebClient().goTo("configure");
@@ -47,7 +47,6 @@ import java.io.IOException;
 		int j = 3;
 		int i = ((2009 - 2004) + j) > 1 ? 0 : 1;
 	}
-	*/
 
 	/**
 	 * Verifies that the specified page contains an element with the specified ID.
@@ -55,7 +54,7 @@ import java.io.IOException;
 	 * @param page the page to check
 	 * @param name the expected Name of an element in the page
 	 */
-    /*
+
 	public static void assertElementPresentByName(final HtmlPage page, final String name) {
 		try {
 			page.getHtmlElementsByName(name);
@@ -63,5 +62,5 @@ import java.io.IOException;
 			throw new AssertionError("The page does not contain an element with name '" + name + "'.");
 		}
 	}
-	*/
-//}
+
+}
