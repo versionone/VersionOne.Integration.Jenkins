@@ -18,6 +18,7 @@ import java.io.IOException;
 
 public class AppTest extends HudsonTestCase {
 
+    /*
 	public void test1() throws Exception {
 		FreeStyleProject project = createFreeStyleProject();
 		project.getBuildersList().add(new BatchFile("echo hello"));
@@ -34,7 +35,9 @@ public class AppTest extends HudsonTestCase {
 		String s = FileUtils.readFileToString(build.getLogFile());
 		assertTrue(s.contains("echo hello"));
 	}
+	*/
 
+    /*
     @Ignore
 	public void test2() throws IOException, SAXException {
 		final HtmlPage page = new WebClient().goTo("configure");
@@ -42,6 +45,7 @@ public class AppTest extends HudsonTestCase {
 		int j = 3;
 		int i = ((2009 - 2004) + j) > 1 ? 0 : 1;
 	}
+	*/
 
 	/**
 	 * Verifies that the specified page contains an element with the specified ID.
