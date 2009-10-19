@@ -40,13 +40,14 @@ public class AppTest extends HudsonTestCase {
 
 
 
-    @Ignore
+    /*
 	public void test2() throws IOException, SAXException {
 		final HtmlPage page = new WebClient().goTo("configure");
 		assertElementPresentByName(page, "com-versionone-hudson-VersionOneNotifier");
 		int j = 3;
 		int i = ((2009 - 2004) + j) > 1 ? 0 : 1;
 	}
+	*/
 
 	/**
 	 * Verifies that the specified page contains an element with the specified ID.
