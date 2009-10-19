@@ -16,7 +16,7 @@ import org.junit.Ignore;
 import java.io.IOException;
 
 
-public class AppTest extends HudsonTestCase {
+//public class AppTest extends HudsonTestCase {
 
     /*
 	public void test1() throws Exception {
@@ -62,4 +62,4 @@ public class AppTest extends HudsonTestCase {
 		}
 	}
 	*/
-}
+//}
