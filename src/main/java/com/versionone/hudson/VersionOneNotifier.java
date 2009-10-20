@@ -97,7 +97,8 @@ public class VersionOneNotifier extends Notifier {
 		}
 
 		public String getDisplayName() {
-			return "VersionOne";
+			//return "VersionOne Notifier";
+            return MessagesRes.VersionOne_Notifier();
 		}
 
 		public String getHelpFile() {
