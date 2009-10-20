@@ -18,26 +18,9 @@
 			  is mapped to our resources/ directory, so this is a convenient way to serve
 			  static resources.
 			-->
-		<!--
-			<f:entry title="French"
-			  description="Check if we should say hello in French"
-			  help="${rootURL}/plugin/HudsonIntegration/help-globalConfig.html">
-
-				we'll have on input field. In HTML, single "namespace" is shared between
-				all form components in one <form>, so we need to choose a name that doesn't
-				collide with other plugins. The 'descriptor' variable represents our descriptor
-				object, so we use that to determine the initial value for this form.
-
-			  <f:checkbox name="hello_world.useFrench" checked="${descriptor.useFrench()}" />
-			</f:entry>
-
-			<f:entry title="VersionOne"
-			  description="Check if you want to use the VersionOne integration"
-			  help="${rootURL}/plugin/HudsonIntegration/help-globalConfig.html">
-			  -->
 
 		<f:entry title="${%Path}" field="v1Path">
-			<f:textbox field="v1Path" default="http://localhost/VersionOne"/>
+			<f:textbox default="http://localhost/VersionOne"/>
 		</f:entry>
 		<f:entry title="${%Login}" field="v1Login">
 			<f:textbox default="admin"/>
@@ -48,6 +31,5 @@
 
 		<f:validateButton title="${%Test connection}" progress="${%Testing....}"
 						  method="testConnection" with="v1Path,v1Login,v1Password"/>
-
 	</f:section>
 </j:jelly>

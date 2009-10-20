@@ -18,8 +18,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.GregorianCalendar;
@@ -34,7 +32,6 @@ public class VersionOneNotifier extends Notifier {
 		return DESCRIPTOR;
 	}
 
-	// This is where you 'build' the project
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 		final V1Instance instance = new V1Instance(getDescriptor().getV1Path(), "admin", "admin");
 		try {
@@ -107,38 +104,34 @@ public class VersionOneNotifier extends Notifier {
 
 
 		/**
-		 * Performs on-the-fly validation of the form field 'name'.
+		 * Performs on-the-fly validation of the form field 'path'.
 		 *
 		 * @param value This parameter receives the value that the user has typed.
 		 * @return Indicates the outcome of the validation. This is sent to the browser.
 		 */
-		public FormValidation doCheckPathToVersionOne(@QueryParameter String value) throws IOException, ServletException {
+		public FormValidation doCheckV1Path(@QueryParameter String value) {
 			if (value.length() == 0) {
-				return FormValidation.error("VersionOne server URL must not be empty");
-			}
-			if (value.length() < 4) {
-				return FormValidation.warning("Isn't the path too short?");
+				return FormValidation.error(MessagesRes.pathCannotBeEmpty());
 			}
 			try {
 				new URL(value);
 			} catch (MalformedURLException e) {
-				return FormValidation.warning("Invalid server URL format");
+				return FormValidation.warning(MessagesRes.pathWrong());
 			}
-
 			return FormValidation.ok();
 		}
 
 		public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
 											   @QueryParameter(V1_PATH) final String path,
 											   @QueryParameter(V1_LOGIN) final String login,
-											   @QueryParameter(V1_PASSWORD) final String password) throws IOException, ServletException {
+											   @QueryParameter(V1_PASSWORD) final String password) {
 			try {
 				new V1Instance(path, login, password).validate();
-				return FormValidation.ok("Connection is valid.");
+				return FormValidation.ok(MessagesRes.connectionValid());
 			} catch (ApplicationUnavailableException e) {
-				return FormValidation.error("Cannot connect to specified path.");
+				return FormValidation.error(MessagesRes.connectionFailedPath());
 			} catch (AuthenticationException e) {
-				return FormValidation.error("Wrong login or password.");
+				return FormValidation.error(MessagesRes.connectionFailedUsername());
 			}
 		}
 
@@ -165,9 +158,8 @@ public class VersionOneNotifier extends Notifier {
 		/**
 		 * Creates a new instance of {@link VersionOneNotifier} from a submitted form.
 		 */
-		public VersionOneNotifier newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+		public VersionOneNotifier newInstance(StaplerRequest req, JSONObject formData) {
 			return new VersionOneNotifier();
 		}
 	}
 }
-
