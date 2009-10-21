@@ -69,15 +69,6 @@ public class VersionOneNotifier extends Notifier {
 		// hudson.model.Cause$UserCause - user
 		// hudson.triggers.SCMTrigger$SCMTriggerCause - trigger by Subversion update
 		// build.getActions().get(0); or verify all data in loop
-        if (true) {
-            try {
-                int i=0;
-                i++;
-                System.out.println(i);
-            } catch(Exception a) {
-                System.out.println(a);
-            }
-        }
 
 
 
