@@ -4,7 +4,6 @@ import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.VcsModification;
 import hudson.model.*;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -55,9 +54,7 @@ public class HudsonBuildInfo implements BuildInfo {
     }
 
     public Iterable<VcsModification> getChanges() {
-//        build.getChanges(SelectPrevBuildPolicy.SINCE_LAST_BUILD, true);
-//        return build.getContainingChanges();
-        return Collections.EMPTY_LIST;
+        return new VcsChanges(build.getChangeSet());
     }
 
     /**
