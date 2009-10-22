@@ -205,7 +205,7 @@ public class V1Worker {
     }
 
     private Set<PrimaryWorkitem> determineWorkitems(String comment) {
-        List<String> ids = getWorkitemsIds(comment, config.getPatternObj());
+        List<String> ids = getWorkitemsIds(comment, config.pattern);
         Set<PrimaryWorkitem> result = new HashSet<PrimaryWorkitem>(ids.size());
 
         for (String id : ids) {
@@ -226,7 +226,7 @@ public class V1Worker {
 
         WorkitemFilter filter = new WorkitemFilter();
         filter.find.setSearchString(reference);
-        filter.find.fields.add(config.getReferenceField());
+        filter.find.fields.add(config.referenceField);
         Collection<Workitem> workitems = config.getV1Instance().get().workitems(filter);
         for (Workitem workitem : workitems) {
             if (workitem instanceof PrimaryWorkitem) {

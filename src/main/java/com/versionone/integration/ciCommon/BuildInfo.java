@@ -1,12 +1,10 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
-//import jetbrains.buildServer.vcs.SVcsModification;
-
 import java.util.Date;
 
 /**
- * This interface provides information about build to {@lin com.versionone.integration.ciCommon.V1Worker}.
+ * This interface provides information about build to {@link com.versionone.integration.ciCommon.V1Worker}.
  */
 public interface BuildInfo {
 
@@ -55,7 +53,7 @@ public interface BuildInfo {
     /**
      * Gets list of VCS changes included in the build.
      *
-     * @return list of changes.
+     * @return Iterable of VCS changes.
      */
     Iterable<VcsModification> getChanges();
 

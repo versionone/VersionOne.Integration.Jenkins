@@ -10,61 +10,33 @@ import com.versionone.om.V1Instance;
 
 import java.util.regex.Pattern;
 
-public class V1Config {
+public final class V1Config {
 
-    protected String url = "";
-    protected String userName;
-    protected String password;
-    protected Pattern pattern;
-    protected String referenceField;
+    public final String url;
+    public final String userName;
+    public final String password;
+    public final Pattern pattern;
+    public final String referenceField;
+    public final Boolean isFullyQualifiedBuildName;
+
     private V1Instance v1Instance;
-    protected Boolean isFullyQualifiedBuildName;
 
-    public String getUrl() {
-        return url;
+    public V1Config() {
+        url = "http://localhost/VersionOne/";
+        userName = "admin";
+        password = "admin";
+        pattern = Pattern.compile("[A-Z]{1,2}-[0-9]+");
+        referenceField = "Number";
+        isFullyQualifiedBuildName = true;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Pattern getPatternObj() {
-        return pattern;
-    }
-
-    public String getReferenceField() {
-        return referenceField;
-    }
-
-    public void setUrl(String url) {
+    public V1Config(String url, String userName, String password, Pattern pattern,
+                    String referenceField, Boolean fullyQualifiedBuildName) {
         this.url = url;
-    }
-
-    public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setPattern(Pattern pattern) {
         this.pattern = pattern;
-    }
-
-    public void setReferenceField(String referenceField) {
         this.referenceField = referenceField;
-    }
-
-    public Boolean isFullyQualifiedBuildName() {
-        return isFullyQualifiedBuildName;
-    }
-
-    public void setFullyQualifiedBuildName(Boolean fullyQualifiedBuildName) {
         isFullyQualifiedBuildName = fullyQualifiedBuildName;
     }
 
@@ -75,41 +47,28 @@ public class V1Config {
      */
     public boolean isConnectionValid() {
         try {
-            connect();
+            checkConnectionValid();
             return true;
         } catch (SDKException e) {
-            v1Instance = null;
             return false;
         }
     }
 
+    public void checkConnectionValid() throws AuthenticationException, ApplicationUnavailableException {
+        getV1Instance().validate();
+    }
+
     /**
-     * getting connection to VersionOne server this method MAY BE called ONLY after {@link #isConnectionValid()}
+     * Get instance of connection to VersionOne with settings from this class.
      *
      * @return connection to VersionOne
      */
     public V1Instance getV1Instance() {
         if (v1Instance == null) {
-            throw new IllegalStateException("You must call isConnectionValid() before calling getV1Instance()");
-        }
-        return v1Instance;
-    }
-
-    public void setDefaults() {
-        url = "http://localhost/VersionOne/";
-        userName = "admin";
-        password = "admin";
-        pattern = Pattern.compile("[A-Z]{1,2}-[0-9]+");
-        referenceField = "Number";
-        isFullyQualifiedBuildName = true;
-    }
-
-    private V1Instance connect() throws AuthenticationException, ApplicationUnavailableException {
-        if (v1Instance == null) {
-            if (getUserName() == null) {
-                v1Instance = new V1Instance(getUrl());
+            if (userName == null) {
+                v1Instance = new V1Instance(url);
             } else {
-                v1Instance = new V1Instance(getUrl(), getUserName(), getPassword());
+                v1Instance = new V1Instance(url, userName, password);
             }
             v1Instance.validate();
         }
@@ -119,11 +78,11 @@ public class V1Config {
     @Override
     public String toString() {
         return "Config{" +
-                "referenceField='" + referenceField + '\'' +
-                ", pattern=" + pattern +
-                ", password='" + password + '\'' +
+                "url='" + url + '\'' +
                 ", userName='" + userName + '\'' +
-                ", url='" + url + '\'' +
+                ", password='" + password + '\'' +
+                ", referenceField='" + referenceField + '\'' +
+                ", pattern=" + pattern +
                 '}';
     }
 
