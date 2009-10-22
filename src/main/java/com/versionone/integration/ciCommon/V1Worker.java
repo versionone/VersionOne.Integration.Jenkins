@@ -12,14 +12,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-public class V1Worker {
-
-    //Statuses of notify
-    public final static int NOTIFY_SUCCESS = 0;
-    public final static int NOTIFY_FAIL_CONNECTION = 1;
-    public final static int NOTIFY_FAIL_DUPLICATE = 2;
-    public final static int NOTIFY_FAIL_NO_BUILDPROJECT = 3;
+public class V1Worker implements Worker {
 
     private final V1Config config;
 
@@ -130,22 +123,8 @@ public class V1Worker {
      */
     public static String getModificationDescription(Iterable<VcsModification> changes) {
         //Create Set to filter changes uniquee by User and Comment
-        Set<VcsModification> comments = new TreeSet<VcsModification>(
-
-                //Compares only by UserName and Comment
-                new Comparator<VcsModification>() {
-                    public int compare(VcsModification o1, VcsModification o2) {
-                        int equal = o1.getUserName().compareTo(o2.getUserName());
-                        if (equal == 0) {
-                            equal = o1.getComment().compareTo(o2.getComment());
-                        }
-                        return equal;
-                    }
-                });
-//        comments.addAll(changes);
-
-        StringBuilder result = new StringBuilder(comments.size() * 64);
-        for (Iterator<VcsModification> it = comments.iterator(); it.hasNext();) {
+        StringBuilder result = new StringBuilder(256);
+        for (Iterator<VcsModification> it = changes.iterator(); it.hasNext();) {
             VcsModification mod = it.next();
             result.append(mod.getUserName());
             result.append(": ");
@@ -167,8 +146,15 @@ public class V1Worker {
             Collection<ChangeSet> changeSetList = config.getV1Instance().get().changeSets(filter);
             if (changeSetList.isEmpty()) {
                 // We don't have one yet. Create one.
-                String name = '\'' + change.getUserName() + "\' on \'" + new DB.DateTime(change.getDate()) + '\'';
-                ChangeSet changeSet = config.getV1Instance().create().changeSet(name, id);
+                StringBuilder name = new StringBuilder();
+                name.append('\'');
+                name.append(change.getUserName());
+                if (change.getDate() != null) {
+                    name.append("\' on \'");
+                    name.append(new DB.DateTime(change.getDate()));
+                }
+                name.append('\'');
+                ChangeSet changeSet = config.getV1Instance().create().changeSet(name.toString(), id);
                 changeSet.setDescription(change.getComment());
                 changeSetList = new ArrayList<ChangeSet>(1);
                 changeSetList.add(changeSet);
@@ -221,7 +207,7 @@ public class V1Worker {
      * @param reference The identifier in the check-in comment.
      * @return A collection of matching PrimaryWorkitems.
      */
-    public List<PrimaryWorkitem> getPrimaryWorkitemsByReference(String reference) {
+    private List<PrimaryWorkitem> getPrimaryWorkitemsByReference(String reference) {
         List<PrimaryWorkitem> result = new ArrayList<PrimaryWorkitem>();
 
         WorkitemFilter filter = new WorkitemFilter();

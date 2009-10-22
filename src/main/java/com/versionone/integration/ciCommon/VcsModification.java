@@ -1,21 +1,20 @@
+/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
 import java.util.Date;
 
-/**
- * Created by IntelliJ IDEA.
- * User: rozhnev
- * Date: 22.10.2009
- * Time: 14:31:15
- * To change this template use File | Settings | File Templates.
- */
 public interface VcsModification {
 
-	String getUserName();
+    String getUserName();
 
-	String getComment();
+    String getComment();
 
-	Date getDate();
+    /**
+     * Get modification date.
+     *
+     * @return Date and time the modification occur. Or null.
+     */
+    Date getDate();
 
-	String getId();
+    String getId();
 }

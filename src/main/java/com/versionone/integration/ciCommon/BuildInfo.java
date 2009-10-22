@@ -4,7 +4,7 @@ package com.versionone.integration.ciCommon;
 import java.util.Date;
 
 /**
- * This interface provides information about build to {@link com.versionone.integration.ciCommon.V1Worker}.
+ * This interface provides information about build to {@link Worker}.
  */
 public interface BuildInfo {
 

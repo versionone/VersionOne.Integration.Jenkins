@@ -30,12 +30,20 @@ public final class V1Config {
         isFullyQualifiedBuildName = true;
     }
 
-    public V1Config(String url, String userName, String password, Pattern pattern,
+    /**
+     * @param url
+     * @param userName
+     * @param password
+     * @param pattern                 RegEx
+     * @param referenceField
+     * @param fullyQualifiedBuildName
+     */
+    public V1Config(String url, String userName, String password, String pattern,
                     String referenceField, Boolean fullyQualifiedBuildName) {
         this.url = url;
         this.userName = userName;
         this.password = password;
-        this.pattern = pattern;
+        this.pattern = Pattern.compile(pattern);
         this.referenceField = referenceField;
         isFullyQualifiedBuildName = fullyQualifiedBuildName;
     }
