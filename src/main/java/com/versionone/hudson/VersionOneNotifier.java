@@ -3,6 +3,7 @@ package com.versionone.hudson;
 import com.versionone.om.ApplicationUnavailableException;
 import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
+import com.versionone.integration.ciCommon.BuildInfo;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -33,7 +34,7 @@ public class VersionOneNotifier extends Notifier {
 	}
 
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-		final V1Instance instance = new V1Instance(getDescriptor().getV1Path(), "admin", "admin");
+		final V1Instance instance = new V1Instance(getDescriptor().getV1Path(), getDescriptor().getV1Login(), getDescriptor().getV1Password());
 		try {
 			instance.validate();
 			listener.getLogger().println("VersionOne connection validated.");
@@ -47,6 +48,19 @@ public class VersionOneNotifier extends Notifier {
 
 		listener.getLogger().println(getDescriptor().getV1Path());
 		// this also shows how you can consult the global configuration of the builder
+
+        BuildInfo buildInfo = new HudsonBuildInfo(build);
+        listener.getLogger().println("Result: " + buildInfo.isSuccessful());
+        listener.getLogger().println("BuildId: " + buildInfo.getBuildId());
+        listener.getLogger().println("getElapsedTime: " + buildInfo.getElapsedTime());
+        listener.getLogger().println("getStartTime: " + buildInfo.getStartTime());
+        listener.getLogger().println("getBuildName: " + buildInfo.getBuildName());
+        listener.getLogger().println("getProjectName: " + buildInfo.getProjectName());
+        listener.getLogger().println("getUrl: " + buildInfo.getUrl());
+        listener.getLogger().println("isForced: " + buildInfo.isForced());
+
+
+        /*
 		listener.getLogger().println("Result: " + build.getResult());
 		listener.getLogger().println("Description: " + build.getDescription());
 		listener.getLogger().println("Project: " + build.getProject().getName());
@@ -69,13 +83,7 @@ public class VersionOneNotifier extends Notifier {
 		// hudson.model.Cause$UserCause - user
 		// hudson.triggers.SCMTrigger$SCMTriggerCause - trigger by Subversion update
 		// build.getActions().get(0); or verify all data in loop
-        if (true && true) {
-            int i=0;
-            i++;
-            System.out.println(i);
-        }
-
-
+		*/
 
 
 		return true;
