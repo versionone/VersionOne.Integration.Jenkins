@@ -1,15 +1,14 @@
 package com.versionone.hudson;
 
+import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.om.ApplicationUnavailableException;
 import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
-import com.versionone.integration.ciCommon.BuildInfo;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.scm.ChangeLogSet;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
@@ -21,7 +20,6 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.GregorianCalendar;
 
 public class VersionOneNotifier extends Notifier {
 
@@ -62,7 +60,7 @@ public class VersionOneNotifier extends Notifier {
 
         /*
 		listener.getLogger().println("Result: " + build.getResult());
-		listener.getLogger().println("Description: " + build.getDescription());
+		listener.getLogger().println("Description: " + build.getComment());
 		listener.getLogger().println("Project: " + build.getProject().getName());
 		listener.getLogger().println("ChangeSet (kind): " + build.getChangeSet().getKind());
 		GregorianCalendar now = new GregorianCalendar();

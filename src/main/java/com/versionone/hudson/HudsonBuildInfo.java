@@ -1,15 +1,12 @@
 package com.versionone.hudson;
 
-import hudson.model.AbstractBuild;
-import hudson.model.Action;
-import hudson.model.Cause;
-import hudson.model.CauseAction;
-import hudson.model.Hudson;
+import com.versionone.integration.ciCommon.BuildInfo;
+import com.versionone.integration.ciCommon.VcsModification;
+import hudson.model.*;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
-import com.versionone.integration.ciCommon.BuildInfo;
 
 
 public class HudsonBuildInfo implements BuildInfo {
@@ -57,12 +54,11 @@ public class HudsonBuildInfo implements BuildInfo {
         return false;
     }
 
-    /*
-    public List<SVcsModification> getChanges() {
-        build.getChanges(SelectPrevBuildPolicy.SINCE_LAST_BUILD, true);
-        return build.getContainingChanges();
+    public Iterable<VcsModification> getChanges() {
+//        build.getChanges(SelectPrevBuildPolicy.SINCE_LAST_BUILD, true);
+//        return build.getContainingChanges();
+        return Collections.EMPTY_LIST;
     }
-    */
 
     /**
      * Return URL to the current build results.

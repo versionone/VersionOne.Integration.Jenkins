@@ -4,7 +4,6 @@ package com.versionone.integration.ciCommon;
 //import jetbrains.buildServer.vcs.SVcsModification;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * This interface provides information about build to {@lin com.versionone.integration.ciCommon.V1Worker}.
@@ -58,7 +57,7 @@ public interface BuildInfo {
      *
      * @return list of changes.
      */
-    //List<SVcsModification> getChanges();
+    Iterable<VcsModification> getChanges();
 
     /**
      * @return url of build results web page.
