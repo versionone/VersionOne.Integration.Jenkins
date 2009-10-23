@@ -43,7 +43,7 @@ public class HudsonBuildInfo implements BuildInfo {
         //return build.getTriggeredBy().isTriggeredByUser();
         for (Action action : build.getActions()) {
             if (action instanceof CauseAction) {
-                for (Object cause : ((CauseAction)action).getCauses()) {
+                for (Object cause : ((CauseAction) action).getCauses()) {
                     if (cause instanceof Cause.UserCause) {
                         return true;
                     }
@@ -51,6 +51,10 @@ public class HudsonBuildInfo implements BuildInfo {
             }
         }
         return false;
+    }
+
+    public boolean hasChanges() {
+        return build.getChangeSet().isEmptySet();
     }
 
     public Iterable<VcsModification> getChanges() {

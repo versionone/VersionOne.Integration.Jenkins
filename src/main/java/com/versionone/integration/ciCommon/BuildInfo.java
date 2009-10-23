@@ -51,6 +51,13 @@ public interface BuildInfo {
     boolean isForced();
 
     /**
+     * Check whether build have any VCS changes.
+     *
+     * @return
+     */
+    boolean hasChanges();
+
+    /**
      * Gets list of VCS changes included in the build.
      *
      * @return Iterable of VCS changes.

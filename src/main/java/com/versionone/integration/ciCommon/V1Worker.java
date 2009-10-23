@@ -23,30 +23,28 @@ public class V1Worker implements Worker {
     /**
      * Adds to the VersionOne BuildRun and ChangesSet.
      */
-    public int submitBuildRun(BuildInfo info) {
+    public int submitBuildRun(final BuildInfo info) {
         //cancel notification if connection is not valide
         if (!config.isConnectionValid()) {
             return NOTIFY_FAIL_CONNECTION;
         }
 
-        BuildProject buildProject = getBuildProject(info);
-
-        if (buildProject != null) {
-            if (isNoBuildExist(buildProject, info)) {
-                BuildRun buildRun = createBuildRun(buildProject, info);
-                setChangeSets(buildRun, info);
-                return NOTIFY_SUCCESS;
-            } else {
-                return NOTIFY_FAIL_DUPLICATE;
-            }
+        final BuildProject buildProject = getBuildProject(info);
+        if (buildProject == null) {
+            return NOTIFY_FAIL_NO_BUILDPROJECT;
         }
-        return NOTIFY_FAIL_NO_BUILDPROJECT;
+        if (!isNoBuildExist(buildProject, info)) {
+            return NOTIFY_FAIL_DUPLICATE;
+        }
+        final BuildRun buildRun = createBuildRun(buildProject, info);
+        if (info.hasChanges()) {
+            setChangeSets(buildRun, info);
+        }
+        return NOTIFY_SUCCESS;
     }
 
-    private static String getBuildName(BuildInfo info) {
-        String buildName;
-        buildName = info.getProjectName() + " - build." + info.getBuildName();
-        return buildName;
+    private static String getBuildName(final BuildInfo info) {
+        return info.getProjectName() + " - build." + info.getBuildName();
     }
 
     private boolean isNoBuildExist(BuildProject buildProject, BuildInfo info) {
@@ -86,7 +84,7 @@ public class V1Worker implements Worker {
         run.getSource().setCurrentValue(getSourceName(info.isForced()));
         run.getStatus().setCurrentValue(getStatusName(info.isSuccessful()));
 
-        if (info.getChanges().iterator().hasNext()) {
+        if (info.hasChanges()) {
             run.setDescription(getModificationDescription(info.getChanges()));
         }
         run.save();

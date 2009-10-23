@@ -30,6 +30,15 @@ public final class V1Config {
         isFullyQualifiedBuildName = true;
     }
 
+    public V1Config(String url, String userName, String password) {
+        this.url = url;
+        this.userName = userName;
+        this.password = password;
+        pattern = Pattern.compile("[A-Z]{1,2}-[0-9]+");
+        referenceField = "Number";
+        isFullyQualifiedBuildName = true;
+    }
+
     /**
      * @param url
      * @param userName
