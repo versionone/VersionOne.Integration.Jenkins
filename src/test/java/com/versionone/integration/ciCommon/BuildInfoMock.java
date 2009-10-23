@@ -1,7 +1,7 @@
 package com.versionone.integration.ciCommon;
 
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.HashMap;
 
 public class BuildInfoMock implements BuildInfo {
 
@@ -11,7 +11,7 @@ public class BuildInfoMock implements BuildInfo {
     public long elapsedTime;
     public boolean successful;
     public boolean forced;
-    public LinkedList<VcsModification> changes = new LinkedList<VcsModification>();
+    public HashMap<String, VcsModification> changes = new HashMap<String, VcsModification>();
     public String url;
     public String buildName;
 
@@ -44,7 +44,7 @@ public class BuildInfoMock implements BuildInfo {
     }
 
     public Iterable<VcsModification> getChanges() {
-        return changes;
+        return changes.values();
     }
 
     public String getUrl() {
