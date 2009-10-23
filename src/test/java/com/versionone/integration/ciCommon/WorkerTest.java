@@ -4,6 +4,7 @@ package com.versionone.integration.ciCommon;
 import com.versionone.om.BuildProject;
 import com.versionone.om.V1Instance;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Date;
@@ -21,6 +22,7 @@ public class WorkerTest {
     private static final String STORY1 = "B-01007";
 
     @Test
+    @Ignore("This is integrational test. See WorkerTest description.")
     public void test() {
         final Date now = new Date();
         V1Config cfg = new V1Config("http://integsrv01/VersionOne", "admin", "admin");
