@@ -4,11 +4,8 @@ package com.versionone.integration.ciCommon;
 import com.versionone.DB;
 import com.versionone.om.*;
 import com.versionone.om.filters.BuildRunFilter;
-import com.versionone.DB;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.jvnet.hudson.test.HudsonTestCase;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -27,8 +24,8 @@ public class WorkerTest {
     private static final String STORY1 = "B-01007";
 
     @Test
-    @Ignore("This is integrational test. See WorkerTest description.")
-    public void test() {
+//    @Ignore("This is integrational test. See WorkerTest description.")
+public void test() {
         final Date now = new Date();
         int random = new Random().nextInt();
         final V1Config cfg = new V1Config("http://integsrv01/VersionOne", "admin", "admin");

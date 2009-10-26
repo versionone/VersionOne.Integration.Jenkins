@@ -16,23 +16,31 @@ public class MessagesRes {
         return new Localizable(holder, "VersionOne.Notifier");
     }
 
-	public static String connectionValid() {
-		return holder.format("connectionValid");
-	}
+    public static String connectionValid() {
+        return holder.format("connectionValid");
+    }
 
-	public static String connectionFailedPath() {
-		return holder.format("connectionFailedPath");
-	}
+    public static String connectionFailedPath() {
+        return holder.format("connectionFailedPath");
+    }
 
-	public static String connectionFailedUsername() {
-		return holder.format("connectionFailedUsername");
-	}
+    public static String connectionFailedUsername() {
+        return holder.format("connectionFailedUsername");
+    }
 
-	public static String pathCannotBeEmpty() {
-		return holder.format("pathCannotBeEmpty");
-	}
+    public static String connectionFailedRefField() {
+        return holder.format("connectionFailedRefField");
+    }
 
-	public static String pathWrong() {
-		return holder.format("pathWrong");
-	}
+    public static String cannotBeEmpty() {
+        return holder.format("cannotBeEmpty");
+    }
+
+    public static String pathWrong() {
+        return holder.format("pathWrong");
+    }
+
+    public static String pattternWrong() {
+        return holder.format("patternWrong");
+    }
 }

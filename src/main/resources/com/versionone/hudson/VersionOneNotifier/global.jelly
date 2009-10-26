@@ -22,14 +22,20 @@
 		<f:entry title="${%Path}" field="v1Path">
 			<f:textbox default="http://localhost/VersionOne"/>
 		</f:entry>
-		<f:entry title="${%Login}" field="v1Login">
+		<f:entry title="${%Username}" field="v1Username">
 			<f:textbox default="admin"/>
 		</f:entry>
 		<f:entry title="${%Password}" field="v1Password">
 			<f:password default="admin"/>
 		</f:entry>
+		<f:entry title="${%RefField}" field="v1RefField">
+			<f:textbox default="Number"/>
+		</f:entry>
+		<f:entry title="${%Pattern}" field="v1Pattern">
+			<f:textbox default="[A-Z]{1,2}-[0-9]+"/>
+		</f:entry>
 
-		<f:validateButton title="${%Test connection}" progress="${%Testing....}"
-						  method="testConnection" with="v1Path,v1Login,v1Password"/>
+		<f:validateButton title="${%TestConnection}" progress="${%Testing}"
+						  method="testConnection" with="v1Path,v1Username,v1Password,v1RefField"/>
 	</f:section>
 </j:jelly>
