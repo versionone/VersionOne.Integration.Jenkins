@@ -38,7 +38,7 @@ public class VcsChanges implements Iterable<VcsModification> {
         }
 
         public boolean hasNext() {
-            if (items[i] instanceof SubversionChangeLogSet.LogEntry) {
+            if (items.length >0 && items[0] instanceof SubversionChangeLogSet.LogEntry) {
                 return items.length > i + 1;
             } else {
                 return false;
