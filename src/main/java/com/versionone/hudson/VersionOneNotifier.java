@@ -1,6 +1,9 @@
 package com.versionone.hudson;
 
 import com.versionone.integration.ciCommon.BuildInfo;
+import com.versionone.integration.ciCommon.VcsModification;
+import com.versionone.integration.ciCommon.V1Config;
+import com.versionone.integration.ciCommon.V1Worker;
 import com.versionone.om.ApplicationUnavailableException;
 import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
@@ -32,6 +35,14 @@ public class VersionOneNotifier extends Notifier {
 	}
 
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+        //System.setProperty("javax.xml.parsers.DocumentBuilderFactory","com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImp");
+        V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Login(), getDescriptor().getV1Password(), "[A-Z]{1,2}-[0-9]+]", "Number", false);
+        V1Worker worker = new V1Worker(config);
+        BuildInfo buildInfo = new HudsonBuildInfo(build);
+        worker.submitBuildRun(buildInfo);
+
+
+        /*
 		final V1Instance instance = new V1Instance(getDescriptor().getV1Path(), getDescriptor().getV1Login(), getDescriptor().getV1Password());
 		try {
 			instance.validate();
@@ -56,6 +67,15 @@ public class VersionOneNotifier extends Notifier {
         listener.getLogger().println("getProjectName: " + buildInfo.getProjectName());
         listener.getLogger().println("getUrl: " + buildInfo.getUrl());
         listener.getLogger().println("isForced: " + buildInfo.isForced());
+
+        for (VcsModification change : buildInfo.getChanges()) {
+            listener.getLogger().println("---Comment: " + change.getComment());
+            listener.getLogger().println("---UserName: " + change.getUserName());
+            listener.getLogger().println("---Id: " + change.getId());
+            listener.getLogger().println("---Date: " + change.getDate());
+
+        }
+        */
 
 
         /*

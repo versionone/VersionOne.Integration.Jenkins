@@ -3,6 +3,7 @@ package com.versionone.hudson;
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.VcsModification;
 import hudson.model.*;
+import hudson.scm.SubversionChangeLogSet;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -11,9 +12,12 @@ import java.util.GregorianCalendar;
 public class HudsonBuildInfo implements BuildInfo {
 
     private final AbstractBuild build;
+    private final long elapsedTime;
 
     public HudsonBuildInfo(AbstractBuild build) {
         this.build = build;
+        GregorianCalendar now = new GregorianCalendar();
+        elapsedTime = now.getTime().getTime() - build.getTimestamp().getTime().getTime();
     }
 
     @SuppressWarnings({"ConstantConditions"})
@@ -30,13 +34,12 @@ public class HudsonBuildInfo implements BuildInfo {
     }
 
     public long getElapsedTime() {
-        GregorianCalendar now = new GregorianCalendar();
-        return (now.getTime().getTime() - build.getTimestamp().getTime().getTime()) * 1000;
+        return elapsedTime;
     }
 
     public boolean isSuccessful() {
         //return build.getBuildStatus().isSuccessful();
-        return build.getResult().toString().equals("SUCCESS");
+        return build.getResult() == Result.SUCCESS;
     }
 
     public boolean isForced() {
@@ -54,11 +57,22 @@ public class HudsonBuildInfo implements BuildInfo {
     }
 
     public boolean hasChanges() {
-        return build.getChangeSet().isEmptySet();
+        if (!build.getChangeSet().isEmptySet() && isSupportedVcs()) {
+            return true;
+        }
+        return false;
     }
 
     public Iterable<VcsModification> getChanges() {
-        return new VcsChanges(build.getChangeSet());
+        if (isSupportedVcs()) {
+            return new VcsChanges(build.getChangeSet());
+        }
+
+        return null;
+    }
+
+    private boolean isSupportedVcs() {
+        return build.getChangeSet().iterator().next() instanceof SubversionChangeLogSet.LogEntry;    
     }
 
     /**
@@ -73,7 +87,8 @@ public class HudsonBuildInfo implements BuildInfo {
     }
 
     public String getBuildName() {
-        return build.getProject().getLastBuild().getDisplayName();
+        //return build.getProject().getLastBuild().getDisplayName();
+        return "build." + getBuildId();
     }
 
     /*

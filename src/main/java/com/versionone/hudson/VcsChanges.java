@@ -2,16 +2,21 @@ package com.versionone.hudson;
 
 import com.versionone.integration.ciCommon.VcsModification;
 import hudson.scm.ChangeLogSet;
+import hudson.scm.CVSChangeLogSet;
+import hudson.scm.SubversionChangeLogSet;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
+import java.text.ParseException;
 
 /**
- * Created by IntelliJ IDEA.
- * User: rozhnev
- * Date: 22.10.2009
- * Time: 15:19:10
- * To change this template use File | Settings | File Templates.
+ *
+ * Store for Visual Control Source changes
+ *
  */
 public class VcsChanges implements Iterable<VcsModification> {
     private final ChangeLogSet changeSet;
@@ -25,7 +30,7 @@ public class VcsChanges implements Iterable<VcsModification> {
     }
 
     private class VcsIterator implements Iterator<VcsModification>, VcsModification {
-        private int i = 0;
+        private int i = -1;
         final Object[] items;
 
         public VcsIterator(Object[] items) {
@@ -33,7 +38,11 @@ public class VcsChanges implements Iterable<VcsModification> {
         }
 
         public boolean hasNext() {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
+            if (items[i] instanceof SubversionChangeLogSet.LogEntry) {
+                return items.length > i + 1;
+            } else {
+                return false;
+            }
         }
 
         public VcsModification next() {
@@ -47,19 +56,37 @@ public class VcsChanges implements Iterable<VcsModification> {
 
         //==========================================================
         public String getUserName() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return ((ChangeLogSet.Entry)items[i]).getAuthor().getFullName();  //To change body of implemented methods use File | Settings | File Templates.
         }
 
         public String getComment() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return ((ChangeLogSet.Entry)items[i]).getMsg();  //To change body of implemented methods use File | Settings | File Templates.
         }
 
         public Date getDate() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            Date date = null;
+            DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss.S'Z'");
+            df.setTimeZone(TimeZone.getDefault());
+
+            // for additing CVS need to work with CVSChangeLogSet.CVSChangeLog
+            if (items[i] instanceof SubversionChangeLogSet.LogEntry) {
+                try {
+                    date = df.parse(((SubversionChangeLogSet.LogEntry)items[i]).getDate());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return date;
         }
 
         public String getId() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            String revision = null;
+            // for additing CVS need to work with CVSChangeLogSet.CVSChangeLog
+            if (items[i] instanceof SubversionChangeLogSet.LogEntry) {
+                revision = String.valueOf(((SubversionChangeLogSet.LogEntry) items[i]).getRevision());
+            }
+            return revision;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }

@@ -4,9 +4,11 @@ package com.versionone.integration.ciCommon;
 import com.versionone.DB;
 import com.versionone.om.*;
 import com.versionone.om.filters.BuildRunFilter;
+import com.versionone.DB;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.jvnet.hudson.test.HudsonTestCase;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -19,7 +21,7 @@ import java.util.Random;
  * BuildProject must be connected to a Project.
  * The Project must contains Stories
  */
-public class WorkerTest {
+public class WorkerTest extends HudsonTestCase {
     private static final String BUILDPROJECT_ID = "BuildProject:1083";
     private static final String BUILDPROJECT_REFERENCE = "WorkerTest";
     private static final String STORY1 = "B-01007";
@@ -86,6 +88,17 @@ public class WorkerTest {
             Assert.assertTrue(change.getDescription().contains(info.changes.get(id).getComment()));
         }
     }
+
+
+    @Test
+    public void createBuildRunTest() {
+        V1Config cfg = new V1Config("http://integsrv01/VersionOne", "admin", "admin");
+        V1Instance v1 = cfg.getV1Instance();
+        BuildProject x = v1.get().buildProjectByID(BUILDPROJECT_ID);
+
+        x.createBuildRun("Testing build", new DB.DateTime(new Date()));
+    }
+
 
     private void checkWorkitemCollection(String storyName, Collection<PrimaryWorkitem> z) {
         Assert.assertEquals(1, z.size());
