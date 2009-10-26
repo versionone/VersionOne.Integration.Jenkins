@@ -21,7 +21,7 @@ import java.util.Random;
  * BuildProject must be connected to a Project.
  * The Project must contains Stories
  */
-public class WorkerTest extends HudsonTestCase {
+public class WorkerTest {
     private static final String BUILDPROJECT_ID = "BuildProject:1083";
     private static final String BUILDPROJECT_REFERENCE = "WorkerTest";
     private static final String STORY1 = "B-01007";
@@ -87,16 +87,6 @@ public class WorkerTest extends HudsonTestCase {
             Assert.assertTrue(change.getName().contains(d));
             Assert.assertTrue(change.getDescription().contains(info.changes.get(id).getComment()));
         }
-    }
-
-
-    @Test
-    public void createBuildRunTest() {
-        V1Config cfg = new V1Config("http://integsrv01/VersionOne", "admin", "admin");
-        V1Instance v1 = cfg.getV1Instance();
-        BuildProject x = v1.get().buildProjectByID(BUILDPROJECT_ID);
-
-        x.createBuildRun("Testing build", new DB.DateTime(new Date()));
     }
 
 
