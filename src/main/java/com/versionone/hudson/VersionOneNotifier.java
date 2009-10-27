@@ -9,6 +9,7 @@ import com.versionone.integration.ciCommon.VcsModification;
 import com.versionone.om.ApplicationUnavailableException;
 import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
+import com.versionone.om.PrimaryWorkitem;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -27,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.Set;
 
 public class VersionOneNotifier extends Notifier {
 
@@ -44,7 +46,7 @@ public class VersionOneNotifier extends Notifier {
 
         //String name = System.getProperty("javax.xml.transform.TransformerFactory");
         //String name2 = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
-        V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Username(), getDescriptor().getV1Password(), "[A-Z]{1,2}-[0-9]+]", "Number", false);
+        V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Username(), getDescriptor().getV1Password(), getDescriptor().getV1Pattern(), getDescriptor().getV1RefField(), false);
         V1Worker worker = new V1Worker(config);
         BuildInfo buildInfo = new HudsonBuildInfo(build);
         listener.getLogger().println("hasChanges: " + buildInfo.hasChanges());

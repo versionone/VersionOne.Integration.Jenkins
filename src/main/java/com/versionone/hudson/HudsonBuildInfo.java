@@ -87,8 +87,7 @@ public class HudsonBuildInfo implements BuildInfo {
     }
 
     public String getBuildName() {
-        //return build.getProject().getLastBuild().getDisplayName();
-        return "build." + getBuildId();
+        return build.getProject().getLastBuild().getDisplayName();       
     }
 
     /*
