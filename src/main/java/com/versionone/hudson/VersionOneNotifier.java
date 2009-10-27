@@ -5,6 +5,7 @@ import com.versionone.apiclient.MetaException;
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
+import com.versionone.integration.ciCommon.VcsModification;
 import com.versionone.om.ApplicationUnavailableException;
 import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
@@ -39,10 +40,26 @@ public class VersionOneNotifier extends Notifier {
 
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         //System.setProperty("javax.xml.parsers.DocumentBuilderFactory","com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImp");
+
+
+        //String name = System.getProperty("javax.xml.transform.TransformerFactory");
+        //String name2 = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
         V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Username(), getDescriptor().getV1Password(), "[A-Z]{1,2}-[0-9]+]", "Number", false);
         V1Worker worker = new V1Worker(config);
         BuildInfo buildInfo = new HudsonBuildInfo(build);
-        worker.submitBuildRun(buildInfo);
+        listener.getLogger().println("hasChanges: " + buildInfo.hasChanges());
+        for (VcsModification change : buildInfo.getChanges()) {
+            listener.getLogger().println("id: " + change.getId());
+            listener.getLogger().println("date: " + change.getDate());
+            listener.getLogger().println("comment: " + change.getComment());
+            listener.getLogger().println("user name: " + change.getUserName());
+        }
+
+        int result = worker.submitBuildRun(buildInfo);
+        if (result == V1Worker.NOTIFY_SUCCESS) {
+            listener.getLogger().println("Information was transfered to the VersionOne successfully");
+        }
+
 
 
         /*
