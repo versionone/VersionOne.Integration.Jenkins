@@ -204,5 +204,13 @@ public class VersionOneNotifier extends Notifier {
         public VersionOneNotifier newInstance(StaplerRequest req, JSONObject formData) {
             return new VersionOneNotifier();
         }
+
+        void setData(String v1Path, String v1Username, String v1Password, String v1RefField, String v1Pattern) {
+            this.v1Path = v1Path;
+            this.v1Username = v1Username;
+            this.v1Password = v1Password;
+            this.v1RefField = v1RefField;
+            this.v1Pattern = v1Pattern;
+        }
     }
 }

@@ -27,6 +27,7 @@ public class AppTest extends HudsonTestCase {
 //		List<Action> actions = project.getActions();
 		DescribableList<Publisher, Descriptor<Publisher>> publishers = project.getPublishersList();
 		VersionOneNotifier versionOneNotifier = new VersionOneNotifier();
+        versionOneNotifier.getDescriptor().setData("http://fake_address/VersionOne/", "admin", "admin", "[A-Z]{1,2}-[0-9]+", "Number");
 //		VersionOneNotifier.DESCRIPTOR.configure()
 		publishers.add(versionOneNotifier);
 

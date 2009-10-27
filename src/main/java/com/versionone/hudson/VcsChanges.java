@@ -27,7 +27,7 @@ public class VcsChanges implements Iterable<VcsModification> {
         return new VcsIterator(changeSet.getItems());
     }
 
-    private class VcsIterator implements Iterator<VcsModification>, VcsModification {
+    private static class VcsIterator implements Iterator<VcsModification>, VcsModification {
         private int i = -1;
         final Object[] items;
 
