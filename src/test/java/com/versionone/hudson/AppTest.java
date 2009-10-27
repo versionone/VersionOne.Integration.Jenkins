@@ -23,7 +23,7 @@ public class AppTest extends HudsonTestCase {
 
 	public void test1() throws Exception {
 		FreeStyleProject project = createFreeStyleProject();
-		project.getBuildersList().add(new BatchFile("echo hello"));
+		//project.getBuildersList().add(new BatchFile("echo hello"));
 //		List<Action> actions = project.getActions();
 		DescribableList<Publisher, Descriptor<Publisher>> publishers = project.getPublishersList();
 		VersionOneNotifier versionOneNotifier = new VersionOneNotifier();
@@ -35,7 +35,7 @@ public class AppTest extends HudsonTestCase {
 
 		// TODO: change this to use HtmlUnit
 		String s = FileUtils.readFileToString(build.getLogFile());
-		assertTrue(s.contains("echo hello"));
+		assertTrue(s.contains("VersionOne:"));
 	}
 
 

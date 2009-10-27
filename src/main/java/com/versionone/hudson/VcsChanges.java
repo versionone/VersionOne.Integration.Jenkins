@@ -2,12 +2,10 @@ package com.versionone.hudson;
 
 import com.versionone.integration.ciCommon.VcsModification;
 import hudson.scm.ChangeLogSet;
-import hudson.scm.CVSChangeLogSet;
 import hudson.scm.SubversionChangeLogSet;
 
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
@@ -82,7 +80,7 @@ public class VcsChanges implements Iterable<VcsModification> {
             if (items[i] instanceof SubversionChangeLogSet.LogEntry) {
                 revision = String.valueOf(((SubversionChangeLogSet.LogEntry) items[i]).getRevision());
             }
-            return revision;  //To change body of implemented methods use File | Settings | File Templates.
+            return revision;
         }
     }
 }

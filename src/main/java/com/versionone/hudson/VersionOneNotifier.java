@@ -5,11 +5,9 @@ import com.versionone.apiclient.MetaException;
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
-import com.versionone.integration.ciCommon.VcsModification;
 import com.versionone.om.ApplicationUnavailableException;
 import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
-import com.versionone.om.PrimaryWorkitem;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -28,7 +26,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import java.util.Set;
 
 public class VersionOneNotifier extends Notifier {
 
@@ -49,73 +46,25 @@ public class VersionOneNotifier extends Notifier {
         V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Username(), getDescriptor().getV1Password(), getDescriptor().getV1Pattern(), getDescriptor().getV1RefField(), false);
         V1Worker worker = new V1Worker(config);
         BuildInfo buildInfo = new HudsonBuildInfo(build);
+        /*
         listener.getLogger().println("hasChanges: " + buildInfo.hasChanges());
         for (VcsModification change : buildInfo.getChanges()) {
             listener.getLogger().println("id: " + change.getId());
             listener.getLogger().println("date: " + change.getDate());
             listener.getLogger().println("comment: " + change.getComment());
             listener.getLogger().println("user name: " + change.getUserName());
-        }
+        }*/
 
         int result = worker.submitBuildRun(buildInfo);
         if (result == V1Worker.NOTIFY_SUCCESS) {
-            listener.getLogger().println("Information was transfered to the VersionOne successfully");
+            listener.getLogger().println(MessagesRes.processSuccess());
+        } else if (result == V1Worker.NOTIFY_FAIL_CONNECTION) {
+            listener.getLogger().println(MessagesRes.connectionIsNotCorrect());
+        } else if (result == V1Worker.NOTIFY_FAIL_DUPLICATE) {
+            listener.getLogger().println(MessagesRes.buildRunAlreadyExist());
+        } else if (result == V1Worker.NOTIFY_FAIL_NO_BUILDPROJECT) {
+            listener.getLogger().println(MessagesRes.buildProjectNotFound());
         }
-
-
-
-        /*
-		final V1Instance instance = new V1Instance(getDescriptor().getV1Path(), getDescriptor().getV1Login(), getDescriptor().getV1Password());
-		try {
-			instance.validate();
-			listener.getLogger().println("VersionOne connection validated.");
-		} catch (ApplicationUnavailableException e) {
-			listener.getLogger().println("VersionOne connection failed:");
-			e.printStackTrace(listener.getLogger());
-		} catch (AuthenticationException e) {
-			listener.getLogger().println("VersionOne authentication failed:");
-			e.printStackTrace(listener.getLogger());
-		}
-
-		listener.getLogger().println(getDescriptor().getV1Path());
-		// this also shows how you can consult the global configuration of the builder
-
-        BuildInfo buildInfo = new HudsonBuildInfo(build);
-        listener.getLogger().println("Result: " + buildInfo.isSuccessful());
-        listener.getLogger().println("BuildId: " + buildInfo.getBuildId());
-        listener.getLogger().println("getElapsedTime: " + buildInfo.getElapsedTime());
-        listener.getLogger().println("getStartTime: " + buildInfo.getStartTime());
-        listener.getLogger().println("getBuildName: " + buildInfo.getBuildName());
-        listener.getLogger().println("getProjectName: " + buildInfo.getProjectName());
-        listener.getLogger().println("getUrl: " + buildInfo.getUrl());
-        listener.getLogger().println("isForced: " + buildInfo.isForced());
-
-
-        /*
-		listener.getLogger().println("Result: " + build.getResult());
-		listener.getLogger().println("Description: " + build.getComment());
-		listener.getLogger().println("Project: " + build.getProject().getName());
-		listener.getLogger().println("ChangeSet (kind): " + build.getChangeSet().getKind());
-		GregorianCalendar now = new GregorianCalendar();
-
-		listener.getLogger().println("Time: " + (now.getTime().getTime() - build.getTimestamp().getTime().getTime()));
-		//SubversionChangeLogSet for Subversion
-		for (Object item : build.getChangeSet().getItems()) {
-			ChangeLogSet.Entry changeSetData = ((ChangeLogSet.Entry) item);
-			listener.getLogger().println("Message: " + changeSetData.getMsg());
-			listener.getLogger().println("Author: " + changeSetData.getAuthor());
-			for (ChangeLogSet.AffectedFile file : changeSetData.getAffectedFiles()) {
-				listener.getLogger().println("File: " + file.getPath());
-			}
-			//listener.getLogger().println("ChangeSet (Items): " + item.toString());
-		}
-		listener.getLogger().println("------------------------------------");
-		// we can recognize who init this build user or triger by data in actions(build.getActions()):
-		// hudson.model.Cause$UserCause - user
-		// hudson.triggers.SCMTrigger$SCMTriggerCause - trigger by Subversion update
-		// build.getActions().get(0); or verify all data in loop
-		*/
-
 
         return true;
     }
@@ -188,6 +137,17 @@ public class VersionOneNotifier extends Notifier {
             return FormValidation.ok();
         }
 
+        /**
+         * Verify connection and field
+         *
+         * @param req request
+         * @param rsp respond
+         * @param path path to the VersionOne
+         * @param username user name to VersionOne
+         * @param password password to VersionOne
+         * @param refField field will be used to connect buildruns and changesets to story
+         * @return
+         */
         public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
                                                @QueryParameter(V1_PATH) final String path,
                                                @QueryParameter(V1_USERNAME) final String username,

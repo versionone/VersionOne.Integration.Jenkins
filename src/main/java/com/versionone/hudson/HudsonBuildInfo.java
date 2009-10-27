@@ -71,8 +71,20 @@ public class HudsonBuildInfo implements BuildInfo {
         return null;
     }
 
+
+    /**
+     *
+     * @return true - if any commits were to SVN 
+     *         false - if no one commit was found or all commits was made not to SVN
+     */
     private boolean isSupportedVcs() {
-        return build.getChangeSet().iterator().next() instanceof SubversionChangeLogSet.LogEntry;    
+        for(Object change : build.getChangeSet()) {
+            if (change instanceof SubversionChangeLogSet.LogEntry) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

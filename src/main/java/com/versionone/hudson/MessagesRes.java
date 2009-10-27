@@ -43,4 +43,20 @@ public class MessagesRes {
     public static String pattternWrong() {
         return holder.format("patternWrong");
     }
+
+    public static String processSuccess() {
+        return holder.format("processedSuccessfully");
+    }
+
+    public static String connectionIsNotCorrect() {
+        return holder.format("connectionIsNotCorrect");
+    }
+
+    public static String buildRunAlreadyExist() {
+        return holder.format("buildRunAlreadyExist");
+    }
+
+    public static String buildProjectNotFound() {
+        return holder.format("buildProjectNotFound");
+    }
 }
