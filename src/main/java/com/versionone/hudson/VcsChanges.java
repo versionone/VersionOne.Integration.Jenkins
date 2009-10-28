@@ -17,14 +17,14 @@ import java.text.ParseException;
  *
  */
 public class VcsChanges implements Iterable<VcsModification> {
-    private final ChangeLogSet changeSet;
+    private final Object[] changeSet;
 
-    public VcsChanges(ChangeLogSet changeSet) {
+    public VcsChanges(Object[] changeSet) {
         this.changeSet = changeSet;
     }
 
     public Iterator<VcsModification> iterator() {
-        return new VcsIterator(changeSet.getItems());
+        return new VcsIterator(changeSet);
     }
 
     private static class VcsIterator implements Iterator<VcsModification>, VcsModification {
