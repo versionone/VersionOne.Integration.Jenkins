@@ -1,3 +1,4 @@
+/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
 import org.jmock.Expectations;
@@ -6,22 +7,17 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import hudson.model.AbstractBuild;
-
 import hudson.model.Run;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
-import hudson.model.Project;
 import hudson.model.FreeStyleProject;
 import hudson.model.FreeStyleBuild;
-import hudson.model.Job;
 import com.versionone.hudson.HudsonBuildInfo;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
 
 
-public class HudsonBuildInfoTester {
+public class HudsonBuildInfoTest {
     private Mockery mockery = new Mockery() {
         {
             setImposteriser(ClassImposteriser.INSTANCE);

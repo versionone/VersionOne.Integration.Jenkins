@@ -38,11 +38,6 @@ public class VersionOneNotifier extends Notifier {
     }
 
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-        //System.setProperty("javax.xml.parsers.DocumentBuilderFactory","com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImp");
-
-
-        //String name = System.getProperty("javax.xml.transform.TransformerFactory");
-        //String name2 = System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
         V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Username(), getDescriptor().getV1Password(), getDescriptor().getV1Pattern(), getDescriptor().getV1RefField(), false);
         V1Worker worker = new V1Worker(config);
         BuildInfo buildInfo = new HudsonBuildInfo(build);
