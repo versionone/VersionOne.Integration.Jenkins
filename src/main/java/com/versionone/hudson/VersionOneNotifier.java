@@ -40,6 +40,7 @@ public class VersionOneNotifier extends Notifier {
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Username(), getDescriptor().getV1Password(), getDescriptor().getV1Pattern(), getDescriptor().getV1RefField(), false);
         V1Worker worker = new V1Worker(config);
+        new HudsonChangeLogAnnotator(worker, config.pattern).register();
         BuildInfo buildInfo = new HudsonBuildInfo(build);
         /*
         listener.getLogger().println("hasChanges: " + buildInfo.hasChanges());

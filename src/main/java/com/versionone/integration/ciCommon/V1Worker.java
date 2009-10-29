@@ -245,4 +245,16 @@ public class V1Worker implements Worker {
 
         return result;
     }
+
+    /**
+     * Create short information about workitem by display id
+     *
+     * @param id idsplay id of workitem
+     * @return short information about workitem
+     */
+    public WorkitemData getWorkitemData(String id) {
+        Workitem workitem = config.getV1Instance().get().workitemByDisplayID(id);        
+
+        return new WorkitemData(workitem, config.url);
+    }
 }
