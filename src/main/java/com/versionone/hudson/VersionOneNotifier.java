@@ -11,10 +11,10 @@ import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.scm.ChangeLogAnnotator;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.scm.ChangeLogAnnotator;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
@@ -45,32 +45,25 @@ public class VersionOneNotifier extends Notifier {
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
             if (annot instanceof HudsonChangeLogAnnotator) {
-                ((HudsonChangeLogAnnotator)annot).setData(worker, config.pattern);
+                ((HudsonChangeLogAnnotator) annot).setData(worker, config.pattern);
             }
         }
         BuildInfo buildInfo = new HudsonBuildInfo(build);
 
-
-        /*
-        listener.getLogger().println("hasChanges: " + buildInfo.hasChanges());
-        for (VcsModification change : buildInfo.getChanges()) {
-            listener.getLogger().println("id: " + change.getId());
-            listener.getLogger().println("date: " + change.getDate());
-            listener.getLogger().println("comment: " + change.getComment());
-            listener.getLogger().println("user name: " + change.getUserName());
-        }*/
-        int result = worker.submitBuildRun(buildInfo);
-
-        if (result == V1Worker.NOTIFY_SUCCESS) {
-            listener.getLogger().println(MessagesRes.processSuccess());
-        } else if (result == V1Worker.NOTIFY_FAIL_CONNECTION) {
-            listener.getLogger().println(MessagesRes.connectionIsNotCorrect());
-        } else if (result == V1Worker.NOTIFY_FAIL_DUPLICATE) {
-            listener.getLogger().println(MessagesRes.buildRunAlreadyExist());
-        } else if (result == V1Worker.NOTIFY_FAIL_NO_BUILDPROJECT) {
-            listener.getLogger().println(MessagesRes.buildProjectNotFound());
+        switch (worker.submitBuildRun(buildInfo)) {
+            case V1Worker.NOTIFY_SUCCESS:
+                listener.getLogger().println(MessagesRes.processSuccess());
+                break;
+            case V1Worker.NOTIFY_FAIL_CONNECTION:
+                listener.getLogger().println(MessagesRes.connectionIsNotCorrect());
+                break;
+            case V1Worker.NOTIFY_FAIL_DUPLICATE:
+                listener.getLogger().println(MessagesRes.buildRunAlreadyExist());
+                break;
+            case V1Worker.NOTIFY_FAIL_NO_BUILDPROJECT:
+                listener.getLogger().println(MessagesRes.buildProjectNotFound());
+                break;
         }
-
         return true;
     }
 
@@ -145,9 +138,9 @@ public class VersionOneNotifier extends Notifier {
         /**
          * Verify connection and field
          *
-         * @param req request
-         * @param rsp respond
-         * @param path path to the VersionOne
+         * @param req      request
+         * @param rsp      respond
+         * @param path     path to the VersionOne
          * @param username user name to VersionOne
          * @param password password to VersionOne
          * @param refField field will be used to connect buildruns and changesets to story
