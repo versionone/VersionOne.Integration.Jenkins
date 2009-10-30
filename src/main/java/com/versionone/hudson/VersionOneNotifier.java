@@ -1,3 +1,4 @@
+/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.hudson;
 
 import com.versionone.apiclient.IMetaModel;
@@ -14,7 +15,6 @@ import hudson.scm.ChangeLogAnnotator;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Hudson;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
@@ -169,7 +169,7 @@ public class VersionOneNotifier extends Notifier {
             } catch (AuthenticationException e) {
                 return FormValidation.error(MessagesRes.connectionFailedUsername());
             } catch (MetaException e) {
-                return FormValidation.error(MessagesRes.connectionFailedRefField());
+                return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
             }
         }
 

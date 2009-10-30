@@ -1,3 +1,4 @@
+/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.hudson;
 
 
@@ -28,8 +29,8 @@ public class MessagesRes {
         return holder.format("connectionFailedUsername");
     }
 
-    public static String connectionFailedRefField() {
-        return holder.format("connectionFailedRefField");
+    public static String connectionFailedRefField(Object string) {
+        return holder.format("connectionFailedRefField", string);
     }
 
     public static String cannotBeEmpty() {

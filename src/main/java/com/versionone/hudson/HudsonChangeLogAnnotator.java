@@ -23,9 +23,9 @@ public class HudsonChangeLogAnnotator extends ChangeLogAnnotator {
     private Pattern pattern;
 
     /**
-     * Setter for processing data
+     * Setter for data handlers
      * @param worker DataLayer for working with VersionOne
-     * @param pattern patter to find info about Workitems from the VersionOne
+     * @param pattern pattern to find info about Workitems from the VersionOne
      */
     public void setData(V1Worker worker, Pattern pattern) {
         this.worker = worker;
@@ -34,6 +34,9 @@ public class HudsonChangeLogAnnotator extends ChangeLogAnnotator {
 
 
     public void annotate(AbstractBuild<?,?> build, Entry change, MarkupText text) {
+        if (worker == null || pattern == null ) {
+            return;
+        }
 
         for(SubText token : text.findTokens(pattern)) {
             WorkitemData workitemData = worker.getWorkitemData(token.group(0));

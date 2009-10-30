@@ -40,12 +40,12 @@ public final class V1Config {
     }
 
     /**
-     * @param url
-     * @param userName
-     * @param password
-     * @param pattern                 RegEx
-     * @param referenceField
-     * @param fullyQualifiedBuildName
+     * @param url Url to the VersionOne
+     * @param userName User name to the VesionOne
+     * @param password Password to the VersionOne
+     * @param pattern Regular expression for connecting to workitems in the VersionOne
+     * @param referenceField Name of field which use in comments of commit to VCS to connect with VersionOne
+     * @param fullyQualifiedBuildName use full name of build
      */
     public V1Config(String url, String userName, String password, String pattern,
                     String referenceField, Boolean fullyQualifiedBuildName) {

@@ -28,7 +28,7 @@ public class HudsonBuildInfoTest {
     public void test() {
         final String buildName = "Build name";
         final String projectName = "Project name";
-        final String url = "http://url_to_hudson/Project_name/";
+        //final String url = "http://url_to_hudson/Project_name/";
         final int buildId = 1;
         //final long elapsedTime = 11111111;
         final Date startDate = new Date();
@@ -37,10 +37,9 @@ public class HudsonBuildInfoTest {
         timestamp.setGregorianChange(startDate);
         timestamp.add(GregorianCalendar.MINUTE, -10);
 
-        @SuppressWarnings("unchecked")
 
         final FreeStyleBuild build = mockery.mock(FreeStyleBuild.class, "build");
-        final AbstractProject<FreeStyleProject, FreeStyleBuild> project = mockery.mock(AbstractProject.class, "project");
+        final FreeStyleProject project = mockery.mock(FreeStyleProject.class, "project");
         final Run lastBuild = mockery.mock(Run.class, "last build");
         mockery.checking(new Expectations() {
         {
