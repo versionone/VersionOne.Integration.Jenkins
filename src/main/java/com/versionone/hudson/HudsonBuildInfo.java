@@ -9,8 +9,8 @@ import hudson.scm.ChangeLogSet;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedList;
 
 
 public class HudsonBuildInfo implements BuildInfo {
@@ -72,7 +72,7 @@ public class HudsonBuildInfo implements BuildInfo {
     }
 
     private Object[] getSuportedChangeSets(ChangeLogSet changeSet) {
-        Set<Object> supportedChanges = new HashSet<Object>();
+        List<Object> supportedChanges = new LinkedList<Object>();
         for(Object change : changeSet) {
             if (isSubversion(change)) {
                 supportedChanges.add(change);
