@@ -17,7 +17,6 @@ import hudson.scm.ChangeLogSet;
 import hudson.scm.SubversionChangeLogSet;
 import hudson.scm.CVSChangeLogSet;
 import com.versionone.hudson.HudsonBuildInfo;
-import com.versionone.hudson.VcsChanges;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -37,16 +36,13 @@ public class HudsonBuildInfoTest {
     public void test() {
         final String buildName = "Build name";
         final String projectName = "Project name";
-        //final String url = "http://url_to_hudson/Project_name/";
         final int buildId = 1;
-        //final long elapsedTime = 11111111;
         final Date startDate = new Date();
         final boolean isForced = true; // user initiated build  
         final GregorianCalendar timestamp = new GregorianCalendar();
         final String[] comments = new String[]{"message 1", "message 3"};
         timestamp.setGregorianChange(startDate);
         timestamp.add(GregorianCalendar.MINUTE, -10);
-
 
         final FreeStyleBuild build = mockery.mock(FreeStyleBuild.class, "build");
         final FreeStyleProject project = mockery.mock(FreeStyleProject.class, "project");
@@ -58,8 +54,7 @@ public class HudsonBuildInfoTest {
         final CVSChangeLogSet.Entry modification2 = mockery.mock(CVSChangeLogSet.Entry.class, "changelist 2 cvs");
         final SubversionChangeLogSet.LogEntry modification3 = mockery.mock(SubversionChangeLogSet.LogEntry.class, "changelist 3 svn");
         final List<Action> actions = Arrays.asList(action);
-        final List userCauses = Arrays.asList(userCause);
-        //final Object[] allModifications = new Object[] {modification1, modification2, modification3}; 
+        final List userCauses = Arrays.asList(userCause); 
 
         final Iterator iterator = mockery.mock(Iterator.class, "iterator"); 
 
@@ -120,22 +115,17 @@ public class HudsonBuildInfoTest {
         BuildInfo info = new HudsonBuildInfo(build);
         Iterable<VcsModification> supportedVcsChange = info.getChanges();
         int i = 0;
-        for (Iterator<VcsModification> change = supportedVcsChange.iterator(); change.hasNext();) {
-            VcsModification mod = change.next();
+        for (VcsModification mod : supportedVcsChange) {
             Assert.assertEquals(comments[i], mod.getComment());
             i++;
         }
-
-        //Assert.assertEquals(2, i);
 
         Assert.assertEquals(buildName, info.getBuildName());
         Assert.assertEquals(projectName, info.getProjectName());
         Assert.assertEquals(new Long(buildId), new Long(info.getBuildId()));
         Assert.assertEquals(new Long(timestamp.getTime().getTime()), new Long(info.getStartTime().getTime()));
         Assert.assertEquals(isForced, info.isForced());
-        //Assert.assertEquals(new Date().getTime() - timestamp.getTime().getTime(), info.getElapsedTime());
-        //System.out.println(new Date().getTime() - timestamp.getTime().getTime());
-        //info.getUrl();
+
     }
 
 }

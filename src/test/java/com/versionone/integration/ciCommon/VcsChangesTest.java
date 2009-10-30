@@ -62,5 +62,52 @@ public class VcsChangesTest {
         Assert.assertTrue(result.contains(desc2));
     }
 
+    @Test
+    public void test() {
+        final String[] userNames = new String[]{"user name 1", "user name 2"};
+        final String[] descriptions = new String[]{"description 1", "description 2"};
+        final int[] revision = new int[]{1, 2};
+
+
+        final SubversionChangeLogSet.LogEntry modification1 = mockery.mock(SubversionChangeLogSet.LogEntry.class, "changelist 1");
+        final User user1 = mockery.mock(User.class, "user 1");
+        final SubversionChangeLogSet.LogEntry modification2 = mockery.mock(SubversionChangeLogSet.LogEntry.class, "changelist 2");
+        final User user2 = mockery.mock(User.class, "user 2");
+
+        VcsChanges modifications = new VcsChanges(new Object[]{modification1, modification2});
+
+        mockery.checking(new Expectations() {
+            {
+                allowing(modification1).getMsg();
+                will(returnValue(descriptions[0]));
+                allowing(modification1).getAuthor();
+                will(returnValue(user1));
+                allowing(user1).getFullName();
+                will(returnValue(userNames[0]));
+                allowing(modification1).getRevision();
+                will(returnValue(revision[0]));
+
+
+                allowing(modification2).getMsg();
+                will(returnValue(descriptions[1]));
+                allowing(modification2).getAuthor();
+                will(returnValue(user2));
+                allowing(user2).getFullName();
+                will(returnValue(userNames[1]));
+                allowing(modification2).getRevision();
+                will(returnValue(revision[1]));
+            }
+        });
+
+        int i = 0;
+        for (VcsModification mod : modifications) {
+            Assert.assertEquals(descriptions[i], mod.getComment());
+            Assert.assertEquals(userNames[i], mod.getUserName());
+            Assert.assertEquals(String.valueOf(revision[i]), mod.getId());
+            i++;
+        }
+
+    }
+
 
 }
