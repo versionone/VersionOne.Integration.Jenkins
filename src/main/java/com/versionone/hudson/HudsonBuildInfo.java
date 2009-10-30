@@ -65,7 +65,7 @@ public class HudsonBuildInfo implements BuildInfo {
     public Iterable<VcsModification> getChanges() {
         Object[] supportedVcs = getSuportedChangeSets(build.getChangeSet());
         if (supportedVcs.length > 0) {
-            return new VcsChanges(getSuportedChangeSets(build.getChangeSet()));
+            return new VcsChanges(supportedVcs);
         }
 
         return null;
