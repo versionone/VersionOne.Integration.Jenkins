@@ -20,7 +20,7 @@ public class VcsChanges implements Iterable<VcsModification> {
     private final Object[] changeSet;
 
     public VcsChanges(Object[] changeSet) {
-        this.changeSet = changeSet;
+        this.changeSet = changeSet.clone();
     }
 
     public Iterator<VcsModification> iterator() {

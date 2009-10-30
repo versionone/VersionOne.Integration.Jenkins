@@ -13,23 +13,30 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Random;
 
-/**
- * To run this test BuildProject must be created on V1 server.
- * A reference of the BuildProject must be set to <b>WorkerTest</b>.
- * BuildProject must be connected to a Project.
- * The Project must contains Stories
- */
+
 public class WorkerTest {
+    //connection credentions
+    private static final String URL_TO_V1 = "http://integsrv01/VersionOne/";
+    private static final String PASSWORD_TO_V1 = "admin";
+    private static final String LOGIN_TO_V1 = PASSWORD_TO_V1;
+
+
+    
     private static final String BUILDPROJECT_ID = "BuildProject:1083";
     private static final String BUILDPROJECT_REFERENCE = "WorkerTest";
     private static final String STORY1 = "B-01007";
-
+    /**
+     * To run this test BuildProject must be created on V1 server.
+     * A reference of the BuildProject must be set to <b>WorkerTest</b>.
+     * BuildProject must be connected to a Project.
+     * The Project must contains Stories
+     */
     @Test
     @Ignore("This is integrational test. See WorkerTest description.")
     public void test() {
         final Date now = new Date();
         int random = new Random().nextInt();
-        final V1Config cfg = new V1Config("http://integsrv01/VersionOne", "admin", "admin");
+        final V1Config cfg = new V1Config(URL_TO_V1, LOGIN_TO_V1, PASSWORD_TO_V1);
         final Worker w = new V1Worker(cfg);
         final BuildInfoMock info = new BuildInfoMock();
         info.buildId = random++;
@@ -91,5 +98,33 @@ public class WorkerTest {
     private void checkWorkitemCollection(String storyName, Collection<PrimaryWorkitem> z) {
         Assert.assertEquals(1, z.size());
         Assert.assertEquals(storyName, z.iterator().next().getDisplayID());
+    }
+
+
+    private static final String ASSETDETAIL = "assetdetail.v1?oid=";
+    /**
+     * This is integration test
+     * to use this test need to:
+     *   1. Setup credentions for connection
+     *   2. Create story in the VersionOne 
+     *   3. Copy display ID of story and set it to displayId variable
+     *   4. Copy name of story to storyName variable
+     *   4. Copy token of story to storyId variable
+     */
+    @Test
+    @Ignore
+    public void testWorkitemData() {
+        final String displayId = "B-01012";
+        final String storyName = "WorkitemDataTest";
+        final String storyId = "Story:1234";
+
+        final V1Config cfg = new V1Config(URL_TO_V1, LOGIN_TO_V1, PASSWORD_TO_V1);
+        final Worker w = new V1Worker(cfg);
+
+        WorkitemData workitemData = w.getWorkitemData(displayId);
+
+        Assert.assertEquals(storyId, workitemData.getId());
+        Assert.assertEquals(storyName, workitemData.getName());
+        Assert.assertEquals(URL_TO_V1 + ASSETDETAIL + storyId, workitemData.getUrl());
     }
 }

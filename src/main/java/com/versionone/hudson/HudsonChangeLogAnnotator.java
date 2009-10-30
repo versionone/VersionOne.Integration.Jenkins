@@ -1,3 +1,4 @@
+/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.hudson;
 
 import hudson.MarkupText;
@@ -7,27 +8,28 @@ import hudson.model.AbstractBuild;
 import hudson.scm.ChangeLogAnnotator;
 import hudson.scm.ChangeLogSet.Entry;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.regex.Pattern;
 
-import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
 import com.versionone.integration.ciCommon.WorkitemData;
-import com.versionone.apiclient.Query;
-import com.versionone.om.Workitem;
 
 /**
  *
  */
+@Extension
 public class HudsonChangeLogAnnotator extends ChangeLogAnnotator {
 
-    private final V1Worker worker;
-    private final Pattern pattern;
+    private V1Worker worker;
+    private Pattern pattern;
 
-    public HudsonChangeLogAnnotator(V1Worker worker, Pattern pattern) {
+    /**
+     * Setter for processing data
+     * @param worker DataLayer for working with VersionOne
+     * @param pattern patter to find info about Workitems from the VersionOne
+     */
+    public void setData(V1Worker worker, Pattern pattern) {
         this.worker = worker;
-        this.pattern = pattern;
+        this.pattern = pattern;        
     }
 
 
@@ -36,7 +38,7 @@ public class HudsonChangeLogAnnotator extends ChangeLogAnnotator {
         for(SubText token : text.findTokens(pattern)) {
             WorkitemData workitemData = worker.getWorkitemData(token.group(0));
             
-            if(workitemData!=null) {
+            if(workitemData.hasValue()) {
                 String open = "window.open(\"" + workitemData.getUrl() + "\",\"V1Asset\", \"width=800,height=500,scrollbars=1,toolbar=0,directories=0,location=0\");return false;";
                 token.surroundWith(
                     String.format("<a href='%s' tooltip='%s' onclick='%s' target='Asset'>", workitemData.getUrl(), workitemData.getName(), open),

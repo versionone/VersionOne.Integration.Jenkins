@@ -10,4 +10,6 @@ public interface Worker {
     int NOTIFY_FAIL_NO_BUILDPROJECT = 3;
 
     int submitBuildRun(BuildInfo info);
+
+    WorkitemData getWorkitemData(String id);
 }

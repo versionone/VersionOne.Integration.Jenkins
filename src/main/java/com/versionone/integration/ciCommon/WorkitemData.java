@@ -35,4 +35,8 @@ public class WorkitemData {
     public String getUrl() {
         return url + ASSETDETAIL + getId();
     }
+
+    public boolean hasValue() {
+        return workitem != null;
+    }
 }

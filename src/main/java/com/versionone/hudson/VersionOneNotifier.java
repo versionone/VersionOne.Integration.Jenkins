@@ -10,9 +10,11 @@ import com.versionone.om.AuthenticationException;
 import com.versionone.om.V1Instance;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.scm.ChangeLogAnnotator;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Hudson;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
@@ -40,8 +42,15 @@ public class VersionOneNotifier extends Notifier {
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Username(), getDescriptor().getV1Password(), getDescriptor().getV1Pattern(), getDescriptor().getV1RefField(), false);
         V1Worker worker = new V1Worker(config);
-        new HudsonChangeLogAnnotator(worker, config.pattern).register();
+
+        for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
+            if (annot instanceof HudsonChangeLogAnnotator) {
+                ((HudsonChangeLogAnnotator)annot).setData(worker, config.pattern);
+            }
+        }
         BuildInfo buildInfo = new HudsonBuildInfo(build);
+
+
         /*
         listener.getLogger().println("hasChanges: " + buildInfo.hasChanges());
         for (VcsModification change : buildInfo.getChanges()) {
@@ -50,8 +59,8 @@ public class VersionOneNotifier extends Notifier {
             listener.getLogger().println("comment: " + change.getComment());
             listener.getLogger().println("user name: " + change.getUserName());
         }*/
-
         int result = worker.submitBuildRun(buildInfo);
+
         if (result == V1Worker.NOTIFY_SUCCESS) {
             listener.getLogger().println(MessagesRes.processSuccess());
         } else if (result == V1Worker.NOTIFY_FAIL_CONNECTION) {

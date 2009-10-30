@@ -1,3 +1,4 @@
+/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.hudson;
 
 import com.versionone.integration.ciCommon.BuildInfo;
