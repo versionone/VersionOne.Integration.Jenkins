@@ -1,3 +1,3 @@
 <div>
-	Integration with the VersionOne system. TODO: Add BuildRuns and ChangeSets in V1...
+    Notifier for VersionOne system. Adds information about builds and changes which initiate build to VersionOne.
 </div>
