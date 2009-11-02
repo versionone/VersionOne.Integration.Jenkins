@@ -51,16 +51,16 @@ public class VersionOneNotifier extends Notifier {
         BuildInfo buildInfo = new HudsonBuildInfo(build);
 
         switch (worker.submitBuildRun(buildInfo)) {
-            case V1Worker.NOTIFY_SUCCESS:
+            case SUCCESS:
                 listener.getLogger().println(MessagesRes.processSuccess());
                 break;
-            case V1Worker.NOTIFY_FAIL_CONNECTION:
+            case FAIL_CONNECTION:
                 listener.getLogger().println(MessagesRes.connectionIsNotCorrect());
                 break;
-            case V1Worker.NOTIFY_FAIL_DUPLICATE:
+            case FAIL_DUPLICATE:
                 listener.getLogger().println(MessagesRes.buildRunAlreadyExist());
                 break;
-            case V1Worker.NOTIFY_FAIL_NO_BUILDPROJECT:
+            case FAIL_NO_BUILDPROJECT:
                 listener.getLogger().println(MessagesRes.buildProjectNotFound());
                 break;
         }

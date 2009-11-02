@@ -3,13 +3,23 @@ package com.versionone.integration.ciCommon;
 
 public interface Worker {
 
-    //Statuses of notify
-    int NOTIFY_SUCCESS = 0;
-    int NOTIFY_FAIL_CONNECTION = 1;
-    int NOTIFY_FAIL_DUPLICATE = 2;
-    int NOTIFY_FAIL_NO_BUILDPROJECT = 3;
-
-    int submitBuildRun(BuildInfo info);
+    Result submitBuildRun(BuildInfo info);
 
     WorkitemData getWorkitemData(String id);
+
+    public static enum Result {
+        SUCCESS,
+        /**
+         * If there is no connection to VersionOne server.
+         */
+        FAIL_CONNECTION,
+        /**
+         * If there is no BuildProjects with appropriate reference.
+         */
+        FAIL_NO_BUILDPROJECT,
+        /**
+         * If BuildProject with such reference and name already exist.
+         */
+        FAIL_DUPLICATE
+    }
 }

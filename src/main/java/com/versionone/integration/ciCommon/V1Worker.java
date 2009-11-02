@@ -23,39 +23,37 @@ public class V1Worker implements Worker {
     /**
      * Adds to the VersionOne BuildRun and ChangesSet.
      */
-    public int submitBuildRun(final BuildInfo info) {
-        //cancel notification if connection is not valide
+    public Result submitBuildRun(final BuildInfo info) {
+        //cancel notification if connection is not valid
         if (!config.isConnectionValid()) {
-            return NOTIFY_FAIL_CONNECTION;
+            return Result.FAIL_CONNECTION;
         }
-
         final BuildProject buildProject = getBuildProject(info);
         if (buildProject == null) {
-            return NOTIFY_FAIL_NO_BUILDPROJECT;
+            return Result.FAIL_NO_BUILDPROJECT;
         }
-        if (!isNoBuildExist(buildProject, info)) {
-            return NOTIFY_FAIL_DUPLICATE;
+        if (isBuildExist(buildProject, info)) {
+            return Result.FAIL_DUPLICATE;
         }
         final BuildRun buildRun = createBuildRun(buildProject, info);
         if (info.hasChanges()) {
             setChangeSets(buildRun, info);
         }
-        return NOTIFY_SUCCESS;
+        return Result.SUCCESS;
     }
 
     private static String getBuildName(final BuildInfo info) {
         return info.getProjectName() + " - build." + info.getBuildName();
     }
 
-    private boolean isNoBuildExist(BuildProject buildProject, BuildInfo info) {
+    private boolean isBuildExist(BuildProject buildProject, BuildInfo info) {
         BuildRunFilter filter = new BuildRunFilter();
         filter.references.add(Long.toString(info.getBuildId()));
         filter.name.add(getBuildName(info));
         filter.buildProjects.add(buildProject);
 
         Collection<BuildRun> buildRuns = config.getV1Instance().get().buildRuns(filter);
-
-        return buildRuns == null || buildRuns.size() == 0;
+        return buildRuns != null && buildRuns.size() != 0;
     }
 
     /**
@@ -121,7 +119,7 @@ public class V1Worker implements Worker {
      * @return description string.
      */
     public static String getModificationDescription(Iterable<VcsModification> changes) {
-        //Create Set to filter changes uniquee by User and Comment
+        //Create Set to filter changes unique by User and Comment
         StringBuilder result = new StringBuilder(256);
         for (Iterator<VcsModification> it = changes.iterator(); it.hasNext();) {
             VcsModification mod = it.next();
@@ -254,7 +252,7 @@ public class V1Worker implements Worker {
      * @return short information about workitem
      */
     public WorkitemData getWorkitemData(String id) {
-        Workitem workitem = config.getV1Instance().get().workitemByDisplayID(id);        
+        Workitem workitem = config.getV1Instance().get().workitemByDisplayID(id);
 
         return new WorkitemData(workitem, config.url);
     }

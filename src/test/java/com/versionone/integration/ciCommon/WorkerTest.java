@@ -15,16 +15,16 @@ import java.util.Random;
 
 
 public class WorkerTest {
-    //connection credentions
+    //connection credentials
     private static final String URL_TO_V1 = "http://integsrv01/VersionOne/";
     private static final String PASSWORD_TO_V1 = "admin";
     private static final String LOGIN_TO_V1 = PASSWORD_TO_V1;
 
 
-    
     private static final String BUILDPROJECT_ID = "BuildProject:1083";
     private static final String BUILDPROJECT_REFERENCE = "WorkerTest";
     private static final String STORY1 = "B-01007";
+
     /**
      * To run this test BuildProject must be created on V1 server.
      * A reference of the BuildProject must be set to <b>WorkerTest</b>.
@@ -52,7 +52,7 @@ public class WorkerTest {
         id = "Id" + random;
         info.changes.put(id, new VcsModificationMock("User9", "Comment8", now, id));
 
-        Assert.assertEquals(Worker.NOTIFY_SUCCESS, w.submitBuildRun(info));
+        Assert.assertEquals(Worker.Result.SUCCESS, w.submitBuildRun(info));
 
         final V1Instance v1 = cfg.getV1Instance();
         final BuildProject x = v1.get().buildProjectByID(BUILDPROJECT_ID);
@@ -102,14 +102,15 @@ public class WorkerTest {
 
 
     private static final String ASSETDETAIL = "assetdetail.v1?oid=";
+
     /**
      * This is integration test
      * to use this test need to:
-     *   1. Setup credentions for connection
-     *   2. Create story in the VersionOne 
-     *   3. Copy display ID of story and set it to displayId variable
-     *   4. Copy name of story to storyName variable
-     *   4. Copy token of story to storyId variable
+     * 1. Setup credentions for connection
+     * 2. Create story in the VersionOne
+     * 3. Copy display ID of story and set it to displayId variable
+     * 4. Copy name of story to storyName variable
+     * 4. Copy token of story to storyId variable
      */
     @Test
     @Ignore
