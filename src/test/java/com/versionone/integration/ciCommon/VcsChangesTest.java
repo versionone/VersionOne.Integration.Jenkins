@@ -1,26 +1,24 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
-
 import com.versionone.hudson.VcsChanges;
-
+import hudson.model.User;
+import hudson.scm.SubversionChangeLogSet;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import hudson.scm.SubversionChangeLogSet;
-import hudson.model.User;
-
+import java.util.Arrays;
 
 public class VcsChangesTest {
+
     private Mockery mockery = new Mockery() {
         {
             setImposteriser(ClassImposteriser.INSTANCE);
         }
     };
-
 
     @Test
     public void testGetModificationDescription() {
@@ -34,7 +32,7 @@ public class VcsChangesTest {
         final SubversionChangeLogSet.LogEntry modification2 = mockery.mock(SubversionChangeLogSet.LogEntry.class, "changelist 2");
         final User user2 = mockery.mock(User.class, "user 2");
 
-        VcsChanges modifications = new VcsChanges(new Object[]{modification1, modification2});
+        VcsChanges modifications = new VcsChanges(Arrays.asList(modification1, modification2));
 
         mockery.checking(new Expectations() {
             {
@@ -74,7 +72,7 @@ public class VcsChangesTest {
         final SubversionChangeLogSet.LogEntry modification2 = mockery.mock(SubversionChangeLogSet.LogEntry.class, "changelist 2");
         final User user2 = mockery.mock(User.class, "user 2");
 
-        VcsChanges modifications = new VcsChanges(new Object[]{modification1, modification2});
+        VcsChanges modifications = new VcsChanges(Arrays.asList(modification1, modification2));
 
         mockery.checking(new Expectations() {
             {
@@ -108,6 +106,4 @@ public class VcsChangesTest {
         }
 
     }
-
-
 }

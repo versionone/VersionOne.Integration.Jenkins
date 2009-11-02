@@ -72,7 +72,7 @@ public class HudsonBuildInfo implements BuildInfo {
         if (!supportedVcs.isEmpty()) {
             return new VcsChanges(supportedVcs);
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     private List<SubversionChangeLogSet.LogEntry> getSuportedChangeSets(ChangeLogSet<ChangeLogSet.Entry> changeSet) {
