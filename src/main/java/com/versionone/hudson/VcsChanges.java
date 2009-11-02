@@ -2,86 +2,81 @@
 package com.versionone.hudson;
 
 import com.versionone.integration.ciCommon.VcsModification;
-import hudson.scm.ChangeLogSet;
 import hudson.scm.SubversionChangeLogSet;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.TimeZone;
-import java.text.SimpleDateFormat;
-import java.text.DateFormat;
-import java.text.ParseException;
 
 /**
- *
- * Store for Visual Control Source changes
- *
+ * Adapter of {@link SubversionChangeLogSet.LogEntry) iterable to {@link VcsModification) iterable.
  */
 public class VcsChanges implements Iterable<VcsModification> {
-    private final Object[] changeSet;
+    private final Iterable<SubversionChangeLogSet.LogEntry> changes;
 
-    public VcsChanges(Object[] changeSet) {
-        this.changeSet = changeSet.clone();
+    public VcsChanges(Iterable<SubversionChangeLogSet.LogEntry> changeSet) {
+        this.changes = changeSet;
     }
 
     public Iterator<VcsModification> iterator() {
-        return new VcsIterator(changeSet);
+        return new VcsIterator(changes.iterator());
     }
 
-    private static class VcsIterator implements Iterator<VcsModification>, VcsModification {
-        private int i = -1;
-        final Object[] items;
+    private static class VcsIterator implements Iterator<VcsModification> {
 
-        public VcsIterator(Object[] items) {
-            this.items = items;
+        private final Iterator<SubversionChangeLogSet.LogEntry> iterator;
+
+        public VcsIterator(Iterator<SubversionChangeLogSet.LogEntry> iterator) {
+            this.iterator = iterator;
         }
 
         public boolean hasNext() {
-            return items.length > i + 1 && items[i + 1] instanceof SubversionChangeLogSet.LogEntry;
+            return iterator.hasNext();
         }
 
         public VcsModification next() {
-            i++;
-            return this;
+            return new SvnModification(iterator.next());
         }
 
         public void remove() {
             throw new UnsupportedOperationException();
         }
+    }
 
-        //==========================================================
+    private static class SvnModification implements VcsModification {
+
+        private final SubversionChangeLogSet.LogEntry entry;
+
+        public SvnModification(SubversionChangeLogSet.LogEntry logEntry) {
+            entry = logEntry;
+        }
+
         public String getUserName() {
-            return ((ChangeLogSet.Entry)items[i]).getAuthor().getFullName();  //To change body of implemented methods use File | Settings | File Templates.
+            return entry.getAuthor().getFullName();
         }
 
         public String getComment() {
-            return ((ChangeLogSet.Entry)items[i]).getMsg();  //To change body of implemented methods use File | Settings | File Templates.
+            return entry.getMsg();
         }
 
+        /**
+         * @return date of commit or null if date cannot be parsed.
+         */
         public Date getDate() {
-            Date date = null;
-            DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss.S'Z'");
-            df.setTimeZone(TimeZone.getDefault());
-
-            // for additing CVS need to work with CVSChangeLogSet.CVSChangeLog
-            if (items[i] instanceof SubversionChangeLogSet.LogEntry) {
-                try {
-                    date = df.parse(((SubversionChangeLogSet.LogEntry)items[i]).getDate());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+            try {
+                final DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss.S'Z'");
+                df.setTimeZone(TimeZone.getDefault());
+                return df.parse(entry.getDate());
+            } catch (ParseException e) {
+                return null;
             }
-
-            return date;
         }
 
         public String getId() {
-            String revision = null;
-            // for additing CVS need to work with CVSChangeLogSet.CVSChangeLog
-            if (items[i] instanceof SubversionChangeLogSet.LogEntry) {
-                revision = String.valueOf(((SubversionChangeLogSet.LogEntry) items[i]).getRevision());
-            }
-            return revision;
+            return String.valueOf(entry.getRevision());
         }
     }
 }
