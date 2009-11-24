@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hudson</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+<td style="width:10%"/>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hudson
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Nov 24, 2009 by <font color="#0050B2">jerry</font>.
+                                    </div>
+
+				    <div>
+<ul>
+    <li><a href='#Hudson-Description'>Description</a></li>
+    <li><a href='#Hudson-SystemRequirements'>System Requirements</a></li>
+    <li><a href='#Hudson-Downloads'>Downloads</a></li>
+    <li><a href='#Hudson-Installation'>Installation</a></li>
+<ul>
+    <li><a href='#Hudson-EnsureConnectivity'>Ensure Connectivity</a></li>
+    <li><a href='#Hudson-ExtractFiles'>Extract Files</a></li>
+    <li><a href='#Hudson-Configure'>Configure</a></li>
+    <li><a href='#Hudson-Verifytheinstallation'>Verify the installation</a></li>
+</ul>
+    <li><a href='#Hudson-Configuration'>Configuration</a></li>
+<ul>
+    <li><a href='#Hudson-ConfigureVersionOne'>Configure VersionOne </a></li>
+    <li><a href='#Hudson-ConfigureHudson'>Configure Hudson </a></li>
+</ul>
+</ul></div>
+<h1><a name="Hudson-Description"></a>Description</h1>
+
+<p>The VersionOne Hudson integration creates a record of Hudson builds in VersionOne, so the development teams can associate stories and defects to a particular build. This visibility is useful when identifying problem builds or generating release notes.</p>
+
+<p>Once the VersionOne Plugin has been installed, team members include a VersionOne identifier , such as “S-01454” or "TK-01234", in the comments of their SCM commit . Every time a build executes the publisher creates a BuildRun asset in VersionOne with details of the build. The VersionOne BuildRun is visible on the 'Relationship' tab of the Story/Defect Details page.</p>
+
+<p>Using this integration you can better answer the following questions:</p>
+
+<ul>
+	<li>Defects
+	<ul>
+		<li>Which build the defect was reported against?</li>
+		<li>Which build contained the fix for the defect?</li>
+		<li>Which builds contain work for the defect?</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>For Stories (Backlog Item)
+	<ul>
+		<li>Which builds contain work for the story?</li>
+		<li>Which build contained the completed story?</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>For Build Runs
+	<ul>
+		<li>Which defects were fixed?</li>
+		<li>Which stories were completed?</li>
+		<li>Which defects were introduced?</li>
+		<li>When work for a story or defect was included?</li>
+		<li>Which Change-sets were included?</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>For a range of Build Runs
+	<ul>
+		<li>Which stories were completed?</li>
+		<li>Which defects were fixed?</li>
+		<li>Which defects were introduced?</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h1><a name="Hudson-SystemRequirements"></a>System Requirements</h1>
+
+<p>VersionOne: 8.1 or above</p>
+
+<p>Integration Server:</p>
+<ul>
+	<li>Operating System---Windows 2000, 2003</li>
+</ul>
+
+
+<p>Continous Integration Server:</p>
+<ul>
+	<li>Tested with Hudson version 1.335</li>
+</ul>
+
+
+<h1><a name="Hudson-Downloads"></a>Downloads</h1>
+
+<p>The latest version of V1Publisher is available at <a href="http://community.versionone.com/sdk/Documentation/Integrations.aspx">V1: Integration Downloads</a></p>
+
+<h1><a name="Hudson-Installation"></a>Installation</h1>
+
+<p>These instructions presume that <a href="http://hudson-ci.org/">Hudson</a> is already installed, configured, and working properly.</p>
+<ol>
+	<li><h2><a name="Hudson-EnsureConnectivity"></a>Ensure Connectivity</h2>
+<p>Verify that you can connect to your VersionOne instance from the machine hosting Hudson</p></li>
+	<li><h2><a name="Hudson-ExtractFiles"></a>Extract Files</h2>
+<p>Download VersionOne plugin from the link above and extract it into a folder of your choice. This can be a temporary location since we will copy some of these files during Hudson configuration.</p></li>
+	<li><h2><a name="Hudson-Configure"></a>Configure</h2>
+	<ol>
+		<li><a href="#Hudson-ConfigureV1">Configure VersionOne</a></li>
+		<li><a href="#Hudson-ConfigureHudson">Configure Hudson</a></li>
+	</ol>
+	</li>
+	<li><h2><a name="Hudson-Verifytheinstallation"></a>Verify the installation</h2>
+<p>Once configuration is complete use the following steps to verify that the build integration is working</p>
+	<ol>
+		<li>Navigate to your Hudson instance</li>
+		<li>Force a build on the project you configured</li>
+		<li>Wait for build to complete</li>
+		<li>Navigate to your VersionOne instance</li>
+		<li>Login</li>
+		<li>Select VersionOne project in 'My Projects' dropdown</li>
+		<li>Navigate to the Reports &#124; Reports Overview page</li>
+		<li>Select the "Build Run Quicklist" Report</li>
+	</ol>
+	</li>
+</ol>
+
+
+<h1><a name="Hudson-Configuration"></a>Configuration</h1>
+
+<h2><a name="Hudson-ConfigureVersionOne"></a>Configure VersionOne<a name="Hudson-ConfigureV1"></a> </h2>
+
+<ol>
+	<li>Log into the VersionOne application as admin</li>
+	<li>Navigate to the Admin &#124; Configuration &#124; System page.</li>
+	<li>Check the “Enable Build Integration” checkbox and click the Apply button.<br/>
+<span class="image-wrap" style=""><img src="attachments/5111829/5308424.jpg" border="0"/></span></li>
+	<li>Navigate to the Admin &#124; Projects &#124; Build Project page<br/>
+<span class="image-wrap" style=""><img src="attachments/5111829/5308423.jpg" border="0"/></span></li>
+	<li>Click Add to add a new Build Project</li>
+	<li>Specify the following
+	<ul>
+		<li>Name &#8211; this is how the Build Project will be known to VersionOne users</li>
+		<li>Reference &#8211; this is how the Build Project is known to Cruise Control</li>
+	</ul>
+	</li>
+	<li>Click Ok to save the new Build Project</li>
+	<li>Navigate to the Admin &#124; Projects &#124; Projects page</li>
+	<li>Click Edit on the row for the project you want associated with a Build Project</li>
+	<li>Using the “Build Projects” dropdown add the appropriate Build Project.<br/>
+<span class="image-wrap" style=""><img src="attachments/5111829/5308422.jpg" border="0"/></span></li>
+	<li>Click Ok to accept the changes</li>
+	<li>Logout</li>
+</ol>
+
+
+<h2><a name="Hudson-ConfigureHudson"></a>Configure Hudson<a name="Hudson-ConfigureHudson"></a></h2>
+
+<p>These instructions presume that you are logged into Hudson as an administrator.</p>
+<ol>
+	<li>On the Hudson Dashboard, Click "Manage Hudson"</li>
+	<li>Click "Manage Plugins"</li>
+	<li>Click Advanced</li>
+	<li>Under "Upload Plugin" browse to your download location and select the file versionone.hpi<br/>
+<span class="image-wrap" style=""><img src="attachments/5111829/5308420.png" border="0"/></span></li>
+	<li>Click Upload</li>
+	<li>Restart your Hudson instance in order to load the new plugin</li>
+	<li>On the Hudson Dashboard, Click "Manage Hudson"</li>
+	<li>Click Configure System<br/>
+There is a new VersionOne section at the end of this page</li>
+	<li>Provide your VersionOne connection parameters<br/>
+<span class="image-wrap" style=""><img src="attachments/5111829/5308419.png" border="0"/></span><br/>
+It is recommended that you do not change the "Reference Field" or "Comment RegEx" fields.  The "Reference Field" is the system name of the attribute to search when matching the ID in change comments with workitems in VersionOne.  The "Comment RegEx" is used to extract workitem identifiers from the change comments.</li>
+	<li>Test the connection</li>
+	<li>Save the settings</li>
+	<li>Choose the Job you wish to have published to VersionOne<br/>
+Remember that this job name must be configured in VersionOne</li>
+	<li>Click "Configure" to configure the workspace</li>
+	<li>In the "Post-build Actions" click the "VersionOne Notifier" checkbox<br/>
+<span class="image-wrap" style=""><img src="attachments/5111829/5308421.png" border="0"/></span></li>
+	<li>Click "Save"</li>
+</ol>
+
+
+                    			    </td>
+<td style="width:10%"/>
+		    </tr>
+	    </table>
+ 	    <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td align="left"><font color="grey">Document generated on Nov 24, 2009 15:34</font></td>
+		    </tr>
+	    </table> 
+    </body>
+</html>
