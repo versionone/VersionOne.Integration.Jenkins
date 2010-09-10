@@ -41,7 +41,7 @@ public class AppTest extends HudsonTestCase {
      */
     public static void assertElementPresentByName(final HtmlPage page, final String name) {
         try {
-            page.getHtmlElementsByName(name);
+            page.getElementsByName(name);
         } catch (final ElementNotFoundException e) {
             throw new AssertionError("The page does not contain an element with name '" + name + "'.");
         }

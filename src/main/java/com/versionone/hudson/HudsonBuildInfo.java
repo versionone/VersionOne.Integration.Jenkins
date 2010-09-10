@@ -3,16 +3,9 @@ package com.versionone.hudson;
 
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.VcsModification;
-import hudson.model.AbstractBuild;
-import hudson.model.Action;
-import hudson.model.Cause;
-import hudson.model.CauseAction;
-import hudson.model.Hudson;
-import hudson.model.Result;
+import hudson.model.*;
 import hudson.scm.ChangeLogSet;
-import hudson.scm.SubversionChangeLogSet;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -64,40 +57,22 @@ public class HudsonBuildInfo implements BuildInfo {
     }
 
     public boolean hasChanges() {
-        return !build.getChangeSet().isEmptySet() && isSupportedVcs();
+        return !build.getChangeSet().isEmptySet();
     }
 
     public Iterable<VcsModification> getChanges() {
-        final List<SubversionChangeLogSet.LogEntry> supportedVcs = getSuportedChangeSets(build.getChangeSet());
-        if (!supportedVcs.isEmpty()) {
-            return new VcsChanges(supportedVcs);
-        }
-        return Collections.emptyList();
-    }
+        List<VcsModification> supportedChanges = new LinkedList<VcsModification>();
 
-    private List<SubversionChangeLogSet.LogEntry> getSuportedChangeSets(ChangeLogSet<ChangeLogSet.Entry> changeSet) {
-        final List<SubversionChangeLogSet.LogEntry> supportedChanges;
-        supportedChanges = new LinkedList<SubversionChangeLogSet.LogEntry>();
-        for (ChangeLogSet.Entry change : changeSet) {
-            if (change instanceof SubversionChangeLogSet.LogEntry) {
-                supportedChanges.add((SubversionChangeLogSet.LogEntry) change);
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = build.getChangeSet();
+
+        for(ChangeLogSet.Entry entry : changeSet) {
+            if(VcsModificationWrapperFactory.getInstance().isSupported(entry)) {
+                VcsModification wrapper = VcsModificationWrapperFactory.getInstance().createWrapper(entry);
+                supportedChanges.add(wrapper);
             }
         }
+
         return supportedChanges;
-    }
-
-    /**
-     * @return true - if any commits were to SVN
-     *         false - if no one commit was found or all commits was made not to SVN
-     */
-    private boolean isSupportedVcs() {
-        for (ChangeLogSet.Entry change : (ChangeLogSet<ChangeLogSet.Entry>) build.getChangeSet()) {
-            if (change instanceof SubversionChangeLogSet.LogEntry) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

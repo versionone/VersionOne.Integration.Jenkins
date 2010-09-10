@@ -16,6 +16,7 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.scm.ChangeLogAnnotator;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
@@ -65,6 +66,10 @@ public class VersionOneNotifier extends Notifier {
                 break;
         }
         return true;
+    }
+
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.NONE;
     }
 
     public static final class Descriptor extends BuildStepDescriptor<Publisher> {
