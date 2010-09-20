@@ -60,4 +60,8 @@ public class MessagesRes {
     public static String buildProjectNotFound() {
         return holder.format("buildProjectNotFound");
     }
+
+    public static String workitemClosedCannotAttachData(String workitemId) {
+        return holder.format("workitemClosedCannotAttachData", workitemId);
+    }
 }

@@ -2,12 +2,14 @@
 package com.versionone.integration.ciCommon;
 
 import com.versionone.DB;
+import com.versionone.hudson.MessagesRes;
 import com.versionone.om.*;
 import com.versionone.om.filters.BuildProjectFilter;
 import com.versionone.om.filters.BuildRunFilter;
 import com.versionone.om.filters.ChangeSetFilter;
 import com.versionone.om.filters.WorkitemFilter;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,9 +17,11 @@ import java.util.regex.Pattern;
 public class V1Worker implements Worker {
 
     private final V1Config config;
+    private final PrintStream logger;
 
-    public V1Worker(V1Config config) {
+    public V1Worker(V1Config config, PrintStream logger) {
         this.config = config;
+        this.logger = logger;
     }
 
     /**
@@ -162,11 +166,16 @@ public class V1Worker implements Worker {
         }
     }
 
-    private static void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets,
+    private void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets,
                                               Set<PrimaryWorkitem> workitems) {
         for (ChangeSet changeSet : changeSets) {
             buildRun.getChangeSets().add(changeSet);
             for (PrimaryWorkitem workitem : workitems) {
+                if(workitem.isClosed()) {
+                    logger.println(MessagesRes.workitemClosedCannotAttachData(workitem.getDisplayID()));
+                    continue;
+                }
+
                 final Collection<BuildRun> completedIn = workitem.getCompletedIn();
                 final List<BuildRun> toRemove = new ArrayList<BuildRun>(completedIn.size());
 
