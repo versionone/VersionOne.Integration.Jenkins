@@ -20,28 +20,27 @@
             <groupId>com.versionone</groupId>
             <artifactId>apiclient</artifactId>
             <version>8.0-SNAPSHOT</version>
-			<scope>system</scope>
 		</dependency>
 
         <dependency>
             <groupId>com.versionone</groupId>
             <artifactId>objectmodel</artifactId>
             <version>8.0-SNAPSHOT</version>
-			<scope>system</scope>
 		</dependency>
 
         <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
             <artifactId>subversion</artifactId>
             <version>1.7</version>
-			<scope>compile</scope>
+            <scope>provided </scope>
 		</dependency>
 
         <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
             <artifactId>perforce</artifactId>
             <version>1.1.5</version>
-			<scope>compile</scope>
+            <scope>provided</scope>
+			<optional>true</optional>
         </dependency>
 
         <dependency>
