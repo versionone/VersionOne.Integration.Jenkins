@@ -20,19 +20,22 @@
             <groupId>com.versionone</groupId>
             <artifactId>apiclient</artifactId>
             <version>8.0-SNAPSHOT</version>
-        </dependency>
+			<scope>system</scope>
+		</dependency>
 
         <dependency>
             <groupId>com.versionone</groupId>
             <artifactId>objectmodel</artifactId>
             <version>8.0-SNAPSHOT</version>
-        </dependency>
+			<scope>system</scope>
+		</dependency>
 
         <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
             <artifactId>subversion</artifactId>
             <version>1.7</version>
-        </dependency>
+			<scope>compile</scope>
+		</dependency>
 
         <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
@@ -62,6 +65,12 @@
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+            	<groupId>org.jvnet.hudson.tools</groupId>
+            	<artifactId>maven-hpi-plugin</artifactId>
+            	<version>1.54</version>
+            	<configuration></configuration>
             </plugin>
         </plugins>
     </build>
