@@ -17,7 +17,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Nov 24, 2009 by <font color="#0050B2">jerry</font>.
+					    This page last changed on Oct 08, 2010 by <font color="#0050B2">jerry</font>.
                                     </div>
 
 				    <div>
@@ -36,6 +36,10 @@
 <ul>
     <li><a href='#Hudson-ConfigureVersionOne'>Configure VersionOne </a></li>
     <li><a href='#Hudson-ConfigureHudson'>Configure Hudson </a></li>
+</ul>
+    <li><a href='#Hudson-TechnicalDetails'>Technical Details</a></li>
+<ul>
+    <li><a href='#Hudson-AddingSupportforanothersourcecodemanagementsystem'>Adding Support for another source code management system</a></li>
 </ul>
 </ul></div>
 <h1><a name="Hudson-Description"></a>Description</h1>
@@ -91,6 +95,10 @@
 </ul>
 
 
+
+<p>The following sequence diagram illustrates the VersionOne Hudson publisher behavior.<br/>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 736x534" href='http://confluence/download/attachments/5111829/Hudson.png'><img src="attachments/thumbnails/5111829/8257547" border="0"/></a></span></p>
+
 <h1><a name="Hudson-SystemRequirements"></a>System Requirements</h1>
 
 <p>VersionOne: 8.1 or above</p>
@@ -101,9 +109,16 @@
 </ul>
 
 
-<p>Continous Integration Server:</p>
+<p>Continuous Integration Server:</p>
 <ul>
-	<li>Tested with Hudson version 1.335</li>
+	<li>Tested with Hudson version 1.336 - 1.339</li>
+</ul>
+
+
+<p>Supported Source Code Management:</p>
+<ul>
+	<li>Subversion - 1.17 or better</li>
+	<li>Perforce - 1.1.5 or better</li>
 </ul>
 
 
@@ -197,13 +212,27 @@ Remember that this job name must be configured in VersionOne</li>
 </ol>
 
 
+<h1><a name="Hudson-TechnicalDetails"></a>Technical Details</h1>
+
+<h2><a name="Hudson-AddingSupportforanothersourcecodemanagementsystem"></a>Adding Support for another source code management system</h2>
+<p>To add support for new VCS, the following actions are required.</p>
+<ol>
+	<li>Add plugin reference to pom.xml, make sure that this dependency could be successfully resolved.</li>
+	<li>Add a class wrapping native changeset type. SvnModification or PerforceModification are good examples on how to do it.<br/>
+New class must inherit VcsModification interface and provide parameterless public constructor.</li>
+	<li>Modify VcsModificationWrapperFactory class to support new changeset type.<br/>
+It is required to add line similar to classNameMappings.put("hudson.plugins.perforce.PerforceChangeLogEntry","com.versionone.hudson.PerforceModification"). String literals are mappings of native changeset log entry classes to our custom wrappers in format supported by Java Reflection, so that instances and class objects could be successfully created. Changesets will be processed as soon as user installs the corresponding plugin and restarts Hudson server. In fact, our plugin won’t start without its dependencies.</li>
+</ol>
+
+
+
                     			    </td>
 <td style="width:10%"/>
 		    </tr>
 	    </table>
  	    <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
-			    <td align="left"><font color="grey">Document generated on Nov 24, 2009 15:34</font></td>
+			    <td align="left"><font color="grey">Document generated on Oct 08, 2010 16:58</font></td>
 		    </tr>
 	    </table> 
     </body>
