@@ -18,6 +18,8 @@ public class VcsModificationWrapperFactory {
                               "com.versionone.hudson.SvnModification");
         classNameMappings.put("hudson.plugins.perforce.PerforceChangeLogEntry",
                               "com.versionone.hudson.PerforceModification");
+        classNameMappings.put("hudson.plugins.git.GitChangeSet",
+                              "com.versionone.hudson.GitModification");
 
         fillSupportedMappings();
     }
