@@ -8,6 +8,7 @@ import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
 import com.versionone.om.ApplicationUnavailableException;
 import com.versionone.om.AuthenticationException;
+import com.versionone.om.ProxySettings;
 import com.versionone.om.V1Instance;
 import hudson.Extension;
 import hudson.Launcher;
@@ -26,6 +27,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -41,7 +44,11 @@ public class VersionOneNotifier extends Notifier {
     }
 
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-        V1Config config = new V1Config(getDescriptor().getV1Path(), getDescriptor().getV1Username(), getDescriptor().getV1Password(), getDescriptor().getV1Pattern(), getDescriptor().getV1RefField(), false);
+        Descriptor descriptor = getDescriptor();
+        V1Config config = new V1Config(descriptor.getV1Path(), descriptor.getV1Username(), descriptor.getV1Password(),
+                descriptor.getV1Pattern(), descriptor.getV1RefField(), false,
+                descriptor.getV1UseProxy(), descriptor.getV1ProxyUrl(), descriptor.getV1ProxyUsername(), descriptor.getV1ProxyPassword());
+        config.setLogger(listener.getLogger());
         V1Worker worker = new V1Worker(config, listener.getLogger());
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
@@ -80,17 +87,25 @@ public class VersionOneNotifier extends Notifier {
         private static final String V1_REF_FIELD = "v1RefField";
         private static final String V1_PATTERN = "v1Pattern";
 
+        private static final String V1_USE_PROXY = "v1UseProxy";
+        private static final String V1_PROXY_URL = "v1ProxyUrl";
+        private static final String V1_PROXY_USERNAME = "v1ProxyUsername";
+        private static final String V1_PROXY_PASSWORD = "v1ProxyPassword";
+
         private String v1Path;
         private String v1Username;
         private String v1Password;
         private String v1RefField;
         private String v1Pattern;
+        private boolean v1UseProxy;
+        private String v1ProxyUrl;
+        private String v1ProxyUsername;
+        private String v1ProxyPassword;
 
         public Descriptor() {
             super(VersionOneNotifier.class);
             load();
         }
-
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
@@ -141,6 +156,26 @@ public class VersionOneNotifier extends Notifier {
         }
 
         /**
+         * Performs on-the-fly validation of the form field 'proxy URL'.
+         *
+         * @param value This parameter receives the value that the user has typed.
+         * @return Indicates the outcome of the validation. This is sent to the browser.
+         */
+        public FormValidation doCheckV1ProxyUrl(@QueryParameter String value) {
+            if (value.length() == 0) {
+                return FormValidation.ok("Proxy server will not be used");
+            }
+
+            try {
+                new URL(value);
+            } catch (MalformedURLException e) {
+                return FormValidation.error(MessagesRes.pathWrong());
+            }
+            
+            return FormValidation.ok();
+        }
+
+        /**
          * Verify connection and field
          *
          * @param req      request
@@ -149,19 +184,31 @@ public class VersionOneNotifier extends Notifier {
          * @param username user name to VersionOne
          * @param password password to VersionOne
          * @param refField field will be used to connect buildruns and changesets to story
-         * @return
+         * @return validation result.
          */
         public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
                                                @QueryParameter(V1_PATH) final String path,
                                                @QueryParameter(V1_USERNAME) final String username,
                                                @QueryParameter(V1_PASSWORD) final String password,
-                                               @QueryParameter(V1_REF_FIELD) final String refField) {
+                                               @QueryParameter(V1_REF_FIELD) final String refField,
+                                               @QueryParameter(V1_USE_PROXY) final boolean useProxy,
+                                               @QueryParameter(V1_PROXY_URL) final String proxyUrl,
+                                               @QueryParameter(V1_PROXY_USERNAME) final String proxyUsername,
+                                               @QueryParameter(V1_PROXY_PASSWORD) final String proxyPassword) {
             try {
-                final V1Instance v1 = new V1Instance(path, username, password);
+                ProxySettings proxySettings = null;
+
+                if(useProxy) {
+                    proxySettings = new ProxySettings(createUri(proxyUrl), proxyUsername, proxyPassword);
+                }
+
+                final V1Instance v1 = new V1Instance(path, username, password, proxySettings);
                 v1.validate();
                 final IMetaModel meta = v1.getApiClient().getMetaModel();
                 meta.getAssetType("PrimaryWorkitem").getAttributeDefinition(refField);
                 return FormValidation.ok(MessagesRes.connectionValid());
+            } catch(URISyntaxException e) {
+                return FormValidation.error(MessagesRes.connectionFailedProxyUrlMalformed());
             } catch (ApplicationUnavailableException e) {
                 return FormValidation.error(MessagesRes.connectionFailedPath());
             } catch (AuthenticationException e) {
@@ -171,12 +218,28 @@ public class VersionOneNotifier extends Notifier {
             }
         }
 
+        private URI createUri(String uriString) throws URISyntaxException {
+            return new URI(uriString);
+        }
+
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
             v1Path = o.getString(V1_PATH);
             v1Username = o.getString(V1_USERNAME);
             v1Password = o.getString(V1_PASSWORD);
             v1RefField = o.getString(V1_REF_FIELD);
             v1Pattern = o.getString(V1_PATTERN);
+
+            if(o.keySet().contains(V1_USE_PROXY)) {
+                JSONObject proxySettings = o.getJSONObject(V1_USE_PROXY);
+
+                v1ProxyUrl = proxySettings.get(V1_PROXY_URL).toString();
+                v1ProxyUsername = proxySettings.get(V1_PROXY_USERNAME).toString();
+                v1ProxyPassword = proxySettings.get(V1_PROXY_PASSWORD).toString();
+                v1UseProxy = true;
+            } else {
+                v1UseProxy = false;
+            }
+
             save();
             return true;
         }
@@ -199,6 +262,22 @@ public class VersionOneNotifier extends Notifier {
 
         public String getV1Pattern() {
             return v1Pattern;
+        }
+
+        public boolean getV1UseProxy() {
+            return v1UseProxy;
+        }
+
+        public String getV1ProxyUrl() {
+            return v1ProxyUrl;
+        }
+
+        public String getV1ProxyUsername() {
+            return v1ProxyUsername;
+        }
+
+        public String getV1ProxyPassword() {
+            return v1ProxyPassword;
         }
 
         /**

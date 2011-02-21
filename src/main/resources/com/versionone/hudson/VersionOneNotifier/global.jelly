@@ -35,7 +35,19 @@
 			<f:textbox default="[A-Z]{1,2}-[0-9]+"/>
 		</f:entry>
 
+        <f:optionalBlock title="${%UseProxy}" field="v1UseProxy">
+            <f:entry title="${%ProxyUrl}" field="v1ProxyUrl">
+                <f:textbox/>
+            </f:entry>
+            <f:entry title="${%ProxyUsername}" field="v1ProxyUsername">
+                <f:textbox/>
+            </f:entry>
+            <f:entry title="${%ProxyPassword}" field="v1ProxyPassword">
+                <f:textbox/>
+            </f:entry>
+        </f:optionalBlock>
+
 		<f:validateButton title="${%TestConnection}" progress="${%Testing}"
-						  method="testConnection" with="v1Path,v1Username,v1Password,v1RefField"/>
+		   method="testConnection" with="v1Path,v1Username,v1Password,v1RefField,v1UseProxy,v1ProxyUrl,v1ProxyUsername,v1ProxyPassword"/>
 	</f:section>
 </j:jelly>

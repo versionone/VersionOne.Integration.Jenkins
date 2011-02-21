@@ -33,6 +33,10 @@ public class MessagesRes {
         return holder.format("connectionFailedRefField", string);
     }
 
+    public static String connectionFailedProxyUrlMalformed() {
+        return holder.format("connectionFailedProxyUrlMalformed");
+    }
+
     public static String cannotBeEmpty() {
         return holder.format("cannotBeEmpty");
     }
