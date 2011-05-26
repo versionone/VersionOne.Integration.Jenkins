@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hudson</title>
+        <title>Hudson Plugin</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -13,36 +13,30 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hudson
+                            Hudson Plugin
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Oct 08, 2010 by <font color="#0050B2">jerry</font>.
+					    This page last changed on May 26, 2011 by <font color="#0050B2">jerry</font>.
                                     </div>
 
 				    <div>
 <ul>
-    <li><a href='#Hudson-Description'>Description</a></li>
-    <li><a href='#Hudson-SystemRequirements'>System Requirements</a></li>
-    <li><a href='#Hudson-Downloads'>Downloads</a></li>
-    <li><a href='#Hudson-Installation'>Installation</a></li>
+    <li><a href='#HudsonPlugin-Description'>Description</a></li>
+    <li><a href='#HudsonPlugin-SystemRequirements'>System Requirements</a></li>
+    <li><a href='#HudsonPlugin-Downloads'>Downloads</a></li>
+    <li><a href='#HudsonPlugin-Installation'>Installation</a></li>
+    <li><a href='#HudsonPlugin-Configuration'>Configuration</a></li>
 <ul>
-    <li><a href='#Hudson-EnsureConnectivity'>Ensure Connectivity</a></li>
-    <li><a href='#Hudson-ExtractFiles'>Extract Files</a></li>
-    <li><a href='#Hudson-Configure'>Configure</a></li>
-    <li><a href='#Hudson-Verifytheinstallation'>Verify the installation</a></li>
+    <li><a href='#HudsonPlugin-ConfigureVersionOne'>Configure VersionOne </a></li>
+    <li><a href='#HudsonPlugin-ConfigureHudson'>Configure Hudson </a></li>
 </ul>
-    <li><a href='#Hudson-Configuration'>Configuration</a></li>
+    <li><a href='#HudsonPlugin-TechnicalDetails'>Technical Details</a></li>
 <ul>
-    <li><a href='#Hudson-ConfigureVersionOne'>Configure VersionOne </a></li>
-    <li><a href='#Hudson-ConfigureHudson'>Configure Hudson </a></li>
-</ul>
-    <li><a href='#Hudson-TechnicalDetails'>Technical Details</a></li>
-<ul>
-    <li><a href='#Hudson-AddingSupportforanothersourcecodemanagementsystem'>Adding Support for another source code management system</a></li>
+    <li><a href='#HudsonPlugin-AddingSupportforanothersourcecodemanagementsystem'>Adding Support for another source code management system</a></li>
 </ul>
 </ul></div>
-<h1><a name="Hudson-Description"></a>Description</h1>
+<h1><a name="HudsonPlugin-Description"></a>Description</h1>
 
 <p>The VersionOne Hudson integration creates a record of Hudson builds in VersionOne, so the development teams can associate stories and defects to a particular build. This visibility is useful when identifying problem builds or generating release notes.</p>
 
@@ -99,9 +93,13 @@
 <p>The following sequence diagram illustrates the VersionOne Hudson publisher behavior.<br/>
 <span class="image-wrap" style=""><a class="confluence-thumbnail-link 736x534" href='http://confluence/download/attachments/5111829/Hudson.png'><img src="attachments/thumbnails/5111829/8257547" border="0"/></a></span></p>
 
-<h1><a name="Hudson-SystemRequirements"></a>System Requirements</h1>
+<h1><a name="HudsonPlugin-SystemRequirements"></a>System Requirements</h1>
 
-<p>VersionOne: 8.1 or above</p>
+<p>VersionOne: </p>
+<ul>
+	<li>8.1 or above, including Team Edition</li>
+</ul>
+
 
 <p>Integration Server:</p>
 <ul>
@@ -122,26 +120,26 @@
 </ul>
 
 
-<h1><a name="Hudson-Downloads"></a>Downloads</h1>
+<h1><a name="HudsonPlugin-Downloads"></a>Downloads</h1>
 
 <p>The latest version of V1Publisher is available at <a href="http://community.versionone.com/sdk/Documentation/Integrations.aspx">V1: Integration Downloads</a></p>
 
-<h1><a name="Hudson-Installation"></a>Installation</h1>
+<h1><a name="HudsonPlugin-Installation"></a>Installation</h1>
 
 <p>These instructions presume that <a href="http://hudson-ci.org/">Hudson</a> is already installed, configured, and working properly.</p>
 <ol>
-	<li><h2><a name="Hudson-EnsureConnectivity"></a>Ensure Connectivity</h2>
-<p>Verify that you can connect to your VersionOne instance from the machine hosting Hudson</p></li>
-	<li><h2><a name="Hudson-ExtractFiles"></a>Extract Files</h2>
-<p>Download VersionOne plugin from the link above and extract it into a folder of your choice. This can be a temporary location since we will copy some of these files during Hudson configuration.</p></li>
-	<li><h2><a name="Hudson-Configure"></a>Configure</h2>
+	<li>Ensure Connectivity<br/>
+Verify that you can connect to your VersionOne instance from the machine hosting Hudson</li>
+	<li>Extract Files<br/>
+Download VersionOne plugin from the link above and extract it into a folder of your choice. This can be a temporary location since we will copy some of these files during Hudson configuration.</li>
+	<li>Configure
 	<ol>
-		<li><a href="#Hudson-ConfigureV1">Configure VersionOne</a></li>
-		<li><a href="#Hudson-ConfigureHudson">Configure Hudson</a></li>
+		<li><a href="#HudsonPlugin-ConfigureV1">Configure VersionOne</a></li>
+		<li><a href="#HudsonPlugin-ConfigureHudson">Configure Hudson</a></li>
 	</ol>
 	</li>
-	<li><h2><a name="Hudson-Verifytheinstallation"></a>Verify the installation</h2>
-<p>Once configuration is complete use the following steps to verify that the build integration is working</p>
+	<li>Verify the installation<br/>
+Once configuration is complete use the following steps to verify that the build integration is working
 	<ol>
 		<li>Navigate to your Hudson instance</li>
 		<li>Force a build on the project you configured</li>
@@ -156,17 +154,17 @@
 </ol>
 
 
-<h1><a name="Hudson-Configuration"></a>Configuration</h1>
+<h1><a name="HudsonPlugin-Configuration"></a>Configuration</h1>
 
-<h2><a name="Hudson-ConfigureVersionOne"></a>Configure VersionOne<a name="Hudson-ConfigureV1"></a> </h2>
-
+<h2><a name="HudsonPlugin-ConfigureVersionOne"></a>Configure VersionOne<a name="HudsonPlugin-ConfigureV1"></a> </h2>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If you are using Team Edition, you need to manually create the Build Project.  Instructions for doing this are available on the <a href="http://community.versionone.com/KnowledgeBase/FAQs/Q11417.aspx">VersionOne Community Site</a>.</td></tr></table></div>
 <ol>
 	<li>Log into the VersionOne application as admin</li>
 	<li>Navigate to the Admin &#124; Configuration &#124; System page.</li>
 	<li>Check the “Enable Build Integration” checkbox and click the Apply button.<br/>
-<span class="image-wrap" style=""><img src="attachments/5111829/5308424.jpg" border="0"/></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1047x677" href='http://confluence/download/attachments/5111829/EnableBuildIntegration.jpg'><img src="attachments/thumbnails/5111829/5308424" border="0"/></a></span></li>
 	<li>Navigate to the Admin &#124; Projects &#124; Build Project page<br/>
-<span class="image-wrap" style=""><img src="attachments/5111829/5308423.jpg" border="0"/></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1680x674" href='http://confluence/download/attachments/5111829/BuildProjects.jpg'><img src="attachments/thumbnails/5111829/5308423" border="0"/></a></span></li>
 	<li>Click Add to add a new Build Project</li>
 	<li>Specify the following
 	<ul>
@@ -178,13 +176,13 @@
 	<li>Navigate to the Admin &#124; Projects &#124; Projects page</li>
 	<li>Click Edit on the row for the project you want associated with a Build Project</li>
 	<li>Using the “Build Projects” dropdown add the appropriate Build Project.<br/>
-<span class="image-wrap" style=""><img src="attachments/5111829/5308422.jpg" border="0"/></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 904x692" href='http://confluence/download/attachments/5111829/AssignBuildProjectToProject.jpg'><img src="attachments/thumbnails/5111829/5308422" border="0"/></a></span></li>
 	<li>Click Ok to accept the changes</li>
 	<li>Logout</li>
 </ol>
 
 
-<h2><a name="Hudson-ConfigureHudson"></a>Configure Hudson<a name="Hudson-ConfigureHudson"></a></h2>
+<h2><a name="HudsonPlugin-ConfigureHudson"></a>Configure Hudson<a name="HudsonPlugin-ConfigureHudson"></a></h2>
 
 <p>These instructions presume that you are logged into Hudson as an administrator.</p>
 <ol>
@@ -192,29 +190,31 @@
 	<li>Click "Manage Plugins"</li>
 	<li>Click Advanced</li>
 	<li>Under "Upload Plugin" browse to your download location and select the file versionone.hpi<br/>
-<span class="image-wrap" style=""><img src="attachments/5111829/5308420.png" border="0"/></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1012x594" href='http://confluence/download/attachments/5111829/HudsonPluginManager.png'><img src="attachments/thumbnails/5111829/5308420" border="0"/></a></span></li>
 	<li>Click Upload</li>
 	<li>Restart your Hudson instance in order to load the new plugin</li>
 	<li>On the Hudson Dashboard, Click "Manage Hudson"</li>
 	<li>Click Configure System<br/>
 There is a new VersionOne section at the end of this page</li>
 	<li>Provide your VersionOne connection parameters<br/>
-<span class="image-wrap" style=""><img src="attachments/5111829/5308419.png" border="0"/></span><br/>
-It is recommended that you do not change the "Reference Field" or "Comment RegEx" fields.  The "Reference Field" is the system name of the attribute to search when matching the ID in change comments with workitems in VersionOne.  The "Comment RegEx" is used to extract workitem identifiers from the change comments.</li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1023x245" href='http://confluence/download/attachments/5111829/ConfigureSystem.png'><img src="attachments/thumbnails/5111829/5308419" border="0"/></a></span><br/>
+If you connect to VersionOne through a proxy, check the "Use proxy server" checkbox and provide additional Proxy parameters<br/>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1028x354" href='http://confluence/download/attachments/5111829/ConfigureSystem-Proxy.png'><img src="attachments/thumbnails/5111829/11173914" border="0"/></a></span>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>It is recommended that you do not change the "Reference Field" or "Comment RegEx" fields.  The "Reference Field" is the system name of the attribute to search when matching the ID in change comments with workitems in VersionOne.  The "Comment RegEx" is used to extract workitem identifiers from the change comments.</td></tr></table></div></li>
 	<li>Test the connection</li>
 	<li>Save the settings</li>
 	<li>Choose the Job you wish to have published to VersionOne<br/>
 Remember that this job name must be configured in VersionOne</li>
 	<li>Click "Configure" to configure the workspace</li>
 	<li>In the "Post-build Actions" click the "VersionOne Notifier" checkbox<br/>
-<span class="image-wrap" style=""><img src="attachments/5111829/5308421.png" border="0"/></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1001x363" href='http://confluence/download/attachments/5111829/PostBuildActions.png'><img src="attachments/thumbnails/5111829/5308421" border="0"/></a></span></li>
 	<li>Click "Save"</li>
 </ol>
 
 
-<h1><a name="Hudson-TechnicalDetails"></a>Technical Details</h1>
+<h1><a name="HudsonPlugin-TechnicalDetails"></a>Technical Details</h1>
 
-<h2><a name="Hudson-AddingSupportforanothersourcecodemanagementsystem"></a>Adding Support for another source code management system</h2>
+<h2><a name="HudsonPlugin-AddingSupportforanothersourcecodemanagementsystem"></a>Adding Support for another source code management system</h2>
 <p>To add support for new VCS, the following actions are required.</p>
 <ol>
 	<li>Add plugin reference to pom.xml, make sure that this dependency could be successfully resolved.</li>
@@ -232,7 +232,7 @@ It is required to add line similar to classNameMappings.put("hudson.plugins.perf
 	    </table>
  	    <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
 		    <tr>
-			    <td align="left"><font color="grey">Document generated on Oct 08, 2010 16:58</font></td>
+			    <td align="left"><font color="grey">Document generated on May 26, 2011 16:38</font></td>
 		    </tr>
 	    </table> 
     </body>
