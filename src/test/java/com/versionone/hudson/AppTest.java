@@ -10,7 +10,7 @@ import hudson.tasks.Shell;
 import hudson.util.DescribableList;
 import org.apache.commons.io.FileUtils;
 import org.jvnet.hudson.test.HudsonTestCase;
-
+/*
 public class AppTest extends HudsonTestCase {
 
 /*  //TODO review and fix it
@@ -42,6 +42,7 @@ public class AppTest extends HudsonTestCase {
      * @param page the page to check
      * @param name the expected Name of an element in the page
      */
+/*
     public static void assertElementPresentByName(final HtmlPage page, final String name) {
         try {
             page.getElementsByName(name);
@@ -50,3 +51,4 @@ public class AppTest extends HudsonTestCase {
         }
     }
 }
+*/
