@@ -116,7 +116,7 @@ public class VersionOneNotifier extends Notifier {
         }
 
         public String getHelpFile() {
-            return "/plugin/hudson-notifier/help-projectSettings.html";
+            return "/plugin/versionone/help-projectSettings.html";
         }
 
         /**
