@@ -106,7 +106,7 @@ public class WorkerTest {
     /**
      * This is integration test
      * to use this test need to:
-     * 1. Setup credentions for connection
+     * 1. Setup credentials for connection
      * 2. Create story in the VersionOne
      * 3. Copy display ID of story and set it to displayId variable
      * 4. Copy name of story to storyName variable

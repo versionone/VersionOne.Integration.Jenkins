@@ -4,13 +4,14 @@ import hudson.plugins.git.GitChangeSet;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 import com.versionone.integration.ciCommon.VcsModification;
 
 public class GitModification implements VcsModification {
-
+    private DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 	private GitChangeSet _entry;
 	
 	public GitModification(GitChangeSet entry) {
@@ -22,12 +23,12 @@ public class GitModification implements VcsModification {
 	}
 
 	public Date getDate()  {
-		try {
-			return DateFormat.getDateInstance().parse(_entry.getDate());
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}		
-		return Calendar.getInstance().getTime();
+        try {
+            return fmt.parse(_entry.getDate());
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+            return Calendar.getInstance().getTime();
+        }
 	}
 
 	public String getId() {
