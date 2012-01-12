@@ -18,20 +18,13 @@ public class GitModificationTest {
             setImposteriser(ClassImposteriser.INSTANCE);
         }
     };
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH);
 
     @Test
-    public void getDate() throws ParseException {        
-        final GitChangeSet changeSet = mockery.mock(GitChangeSet.class);
+    public void getDate() throws ParseException {
         final String strDate = "1979-12-05 23:20:00 +0300";
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH);
 
-        GitModification modification = new GitModification(changeSet);
-        mockery.checking(new Expectations() {
-            {
-                allowing(changeSet).getDate();
-                will(returnValue(strDate));
-            }
-        });
+        GitModification modification = CreateGitModification(strDate);
 
         Date date = modification.getDate();
         Assert.assertEquals(dateFormat.parse(strDate), date);
@@ -39,18 +32,24 @@ public class GitModificationTest {
 
     @Test
     public void getDateIncorrectFormat() throws ParseException {
-        final GitChangeSet changeSet = mockery.mock(GitChangeSet.class);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH);
+        final String stringDate = "1979-12-05 23:20:00";
+        final String stringDateTimeTimeZone = "1979-12-05 23:20:00 +0300";
 
+        GitModification modification = CreateGitModification(stringDate);
+
+        Date date = modification.getDate();
+        Assert.assertFalse(dateFormat.parse(stringDateTimeTimeZone).equals(date));
+    }
+
+    private GitModification CreateGitModification(final String strDate) {
+        final GitChangeSet changeSet = mockery.mock(GitChangeSet.class);
         GitModification modification = new GitModification(changeSet);
         mockery.checking(new Expectations() {
             {
                 allowing(changeSet).getDate();
-                will(returnValue("1979-12-05 23:20:00"));
+                will(returnValue(strDate));
             }
         });
-
-        Date date = modification.getDate();
-        Assert.assertFalse(dateFormat.parse("1979-12-05 23:20:00 +0300").equals(date));
+        return modification;
     }
 }
