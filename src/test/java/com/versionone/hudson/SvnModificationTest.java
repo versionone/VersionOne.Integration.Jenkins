@@ -31,7 +31,7 @@ public class SvnModificationTest {
     }
 
     @Test
-    public void getDateIncorrectFormat() throws ParseException {
+    public void getDateWithoutMicrosecond() throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'", Locale.ENGLISH);
         final String strDateWithoutMicrosecond = "2012-01-12T08:43:41.359Z";
         SvnModification modification = CreateSvnModification(strDateWithoutMicrosecond);
