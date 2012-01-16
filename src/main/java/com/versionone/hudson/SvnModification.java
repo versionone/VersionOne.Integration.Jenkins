@@ -6,7 +6,9 @@ import hudson.scm.SubversionChangeLogSet;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 public class SvnModification implements VcsModification {
@@ -32,7 +34,7 @@ public class SvnModification implements VcsModification {
         String dateWithoutMicrosecond = removeMicrosecondFromDate(entry.getDate());
         try {
             final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
-            df.setTimeZone(TimeZone.getDefault());
+            df.setTimeZone(TimeZone.getTimeZone("GMT"));
             return df.parse(dateWithoutMicrosecond);
         } catch (ParseException e) {
             return null;

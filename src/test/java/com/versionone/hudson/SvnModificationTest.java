@@ -21,23 +21,24 @@ public class SvnModificationTest {
 
     @Test
     public void getDate() throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'", Locale.ENGLISH);
-        final String strDate = "2012-01-12T08:43:41.359375Z";
-        final String strDateWithoutMicrosecond = "2012-01-12T08:43:41.359Z";
-        SvnModification modification = CreateSvnModification(strDate);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+        final String gmtDate = "2012-01-12T08:43:41.359375Z";//SVN plugin returns date in GMT
+        final String localDateWithoutMicrosecond = "2012-01-12T11:43:41.359Z";
+        SvnModification modification = CreateSvnModification(gmtDate);
 
         Date date = modification.getDate();
-        Assert.assertEquals(dateFormat.parse(strDateWithoutMicrosecond), date);
+        Assert.assertEquals(dateFormat.parse(localDateWithoutMicrosecond), date);
     }
 
     @Test
     public void getDateWithoutMicrosecond() throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'", Locale.ENGLISH);
-        final String strDateWithoutMicrosecond = "2012-01-12T08:43:41.359Z";
-        SvnModification modification = CreateSvnModification(strDateWithoutMicrosecond);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+        final String gmtDate = "2012-01-12T08:43:41.359Z";//SVN plugin returns date in GMT
+        final String localDate = "2012-01-12T11:43:41.359Z";
+        SvnModification modification = CreateSvnModification(gmtDate);
 
         Date date = modification.getDate();
-        Assert.assertEquals(dateFormat.parse(strDateWithoutMicrosecond), date);
+        Assert.assertEquals(dateFormat.parse(localDate), date);
     }
 
     private SvnModification CreateSvnModification(final String strDate) {

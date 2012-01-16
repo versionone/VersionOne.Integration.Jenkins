@@ -40,7 +40,7 @@ public class HudsonChangeLogAnnotator extends ChangeLogAnnotator {
 
         for(SubText token : text.findTokens(pattern)) {
             WorkitemData workitemData = worker.getWorkitemData(token.group(0));
-            
+
             if(workitemData.hasValue()) {
                 String open = "window.open(\"" + workitemData.getUrl() + "\",\"V1Asset\", \"width=800,height=500,scrollbars=1,toolbar=0,directories=0,location=0\");return false;";
                 token.surroundWith(
