@@ -155,8 +155,11 @@ public class V1Worker implements Worker {
                     name.append(new DB.DateTime(change.getDate()));
                 }
                 name.append('\'');
-                ChangeSet changeSet = config.getV1Instance().create().changeSet(name.toString(), id);
-                changeSet.setDescription(change.getComment());
+                
+                Map<String, Object> attributes = new HashMap<String, Object>();
+                attributes.put("Description", change.getComment());
+                ChangeSet changeSet = config.getV1Instance().create().changeSet(name.toString(), id, attributes);
+
                 changeSetList = new ArrayList<ChangeSet>(1);
                 changeSetList.add(changeSet);
             }
