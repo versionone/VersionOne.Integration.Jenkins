@@ -1,0 +1,160 @@
+@CHARSET "UTF-8";
+/*
+ * help.css
+ * ~~~~~~~~~~~~~~~
+ *
+ * :copyright: Copyright 2011 VersionOne
+ * :license: Modified BSD, see LICENSE for details.
+ *
+ */
+
+/* VersionOne colors
+ * Pantone 216: #78082d
+ * orange: #cb632a
+ * yellow: #ebb229
+ * light gray: #b0bca8
+ * dark gray: #2c274
+ * medium blue: #00496b
+ */
+
+/* PAGE LAYOUT -------------------------------------------------------------- */
+
+body {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", Arial, Helvetica, sans-serif;
+}
+
+div.main {
+	width: 772px;
+	border-left: 22px solid #78082d;
+	padding: 2px 0px 2px 20px;
+}
+
+div.footer {
+	width: 772px;
+	font-size: 7pt;
+	color: #b0bca8;
+	text-align: right;
+	margin-top: .5em;
+}
+
+/* HEADINGS ----------------------------------------------------------------- */
+h1 {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    color: #00496b;
+}
+
+h2 {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    color: #00496b;
+}
+
+h3 {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    color: #00496b;
+}
+
+h4 {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    color: #00496b;
+}
+
+/* BODY --------------------------------------------------------------------- */
+
+p {
+	color: #797370;
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+
+/* LISTS -------------------------------------------------------------------- */
+
+dl {
+	color: #797370;
+	margin-top: 0px;
+	margin-bottom: 10px;
+	font-weight: bold;
+}
+
+dd {
+	color: #797370;
+	margin-top: 0px;
+	margin-bottom: 10px;
+	font-weight: normal;
+}
+
+ul, ol {
+	color: #797370;
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+
+
+/* LINKS -------------------------------------------------------------------- */
+
+/* Links get a pseudo-underline */
+a {
+    text-decoration: none;
+    padding-bottom: 0px;
+    border-bottom: 1px solid #ebb229;
+}
+
+/* Links get an underline-effect when hovered */
+a:hover {
+    text-decoration: none;
+    padding-bottom: 0px;
+    border-bottom: 1px solid #cb632a;
+}
+
+/* But thumbnails don't */
+a.thumbnail {
+    text-decoration: none;
+    border-bottom: none;
+}
+
+a.thumbnail:hover {
+    text-decoration: none;
+    border-bottom: none;
+}
+
+
+/* CODE --------------------------------------------------------------------- */
+
+cite, code {
+    font-family: 'Consolas', 'Deja Vu Sans Mono',
+                 'Bitstream Vera Sans Mono', monospace;
+    font-size: 0.95em;
+    letter-spacing: 0.01em;
+}
+
+hr {
+    border: 1px solid #78082d;
+    margin: 2em;
+}
+
+/* TABLE -------------------------------------------------------------------- */
+
+table {
+    border-collapse: collapse;
+    margin: 0 -0.5em 0 -0.5em;
+}
+
+table td, table th {
+    padding: 0.2em 0.5em 0.2em 0.5em;
+}
+
+/* INFO --------------------------------------------------------------------- */
+
+table.info {
+    background-color: #ebb229;
+   	color: #78082d;
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+
+table.info td {
+    border: none;
+}

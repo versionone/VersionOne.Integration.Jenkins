@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Hudson and Jenkins Plugin</title>
+<link rel="stylesheet" href="styles/help.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<div class="main">
+		<h1>Hudson and Jenkins Plugin</h1>
+		<h2>Introduction</h2>
+		<h2>Contents</h2>
+		<ul>
+			<li><a href='#HudsonandJenkinsPlugin-Description'>Description</a></li>
+			<li><a href='#HudsonandJenkinsPlugin-SystemRequirements'>System
+					Requirements</a></li>
+			<li><a href='#HudsonandJenkinsPlugin-Downloads'>Downloads</a></li>
+			<li><a href='#HudsonandJenkinsPlugin-Installation'>Installation</a></li>
+			<li><a href='#HudsonandJenkinsPlugin-Configuration'>Configuration</a>
+				<ul>
+					<li><a href='#HudsonandJenkinsPlugin-ConfigureVersionOne'>Configure
+							VersionOne </a></li>
+					<li><a
+						href='#HudsonandJenkinsPlugin-ConfigureHudson%2FJenkins'>Configure
+							Hudson/Jenkins </a></li>
+				</ul></li>
+			<li><a href='#HudsonandJenkinsPlugin-TechnicalDetails'>Technical
+					Details</a>
+				<ul>
+					<li><a
+						href='#HudsonandJenkinsPlugin-AddingSupportforanothersourcecodemanagementsystem'>Adding
+							Support for another source code management system</a></li>
+				</ul></li>
+		</ul>
+		<h2>
+			<a name="HudsonandJenkinsPlugin-Description"></a>Description
+		</h2>
+
+		<p>The VersionOne Hudson/Jenkins integration creates a record of
+			builds in VersionOne, so the development teams can associate stories
+			and defects to a particular build. This visibility is useful when
+			identifying problem builds or generating release notes.</p>
+
+		<p>Once the VersionOne Plugin has been installed, team members
+			include a VersionOne identifier, such as &quot;S-01454&quot; or
+			&quot;TK-01234&quot;, in the comments of their SCM commit. Every time
+			a build executes the publisher creates a BuildRun asset in VersionOne
+			with details of the build. The VersionOne BuildRun is visible on the
+			'Relationship' tab of the Story/Defect Details page.</p>
+
+		<p>Using this integration you can better answer the following
+			questions:</p>
+
+		<ul>
+			<li>Defects
+				<ul>
+					<li>Which build the defect was reported against?</li>
+					<li>Which build contained the fix for the defect?</li>
+					<li>Which builds contain work for the defect?</li>
+				</ul>
+			</li>
+		</ul>
+
+
+		<ul>
+			<li>For Stories (Backlog Item)
+				<ul>
+					<li>Which builds contain work for the story?</li>
+					<li>Which build contained the completed story?</li>
+				</ul>
+			</li>
+		</ul>
+
+
+		<ul>
+			<li>For Build Runs
+				<ul>
+					<li>Which defects were fixed?</li>
+					<li>Which stories were completed?</li>
+					<li>Which defects were introduced?</li>
+					<li>When work for a story or defect was included?</li>
+					<li>Which Change-sets were included?</li>
+				</ul>
+			</li>
+		</ul>
+
+
+		<ul>
+			<li>For a range of Build Runs
+				<ul>
+					<li>Which stories were completed?</li>
+					<li>Which defects were fixed?</li>
+					<li>Which defects were introduced?</li>
+				</ul>
+			</li>
+		</ul>
+
+
+
+		<p>
+			The following sequence diagram illustrates the VersionOne
+			Hudson/Jenkins publisher behavior.<br /> <a class="thumbnail"
+				href='images/sequencediagram.png'><img
+				src="images/thumbnails/sequencediagram"
+				style="border: 0px solid black" /></a></span>
+		</p>
+
+		<h2>
+			<a name="HudsonandJenkinsPlugin-SystemRequirements"></a>System
+			Requirements
+		</h2>
+
+		<p>VersionOne:</p>
+		<ul>
+			<li>8.1 or above, including Team Edition</li>
+		</ul>
+
+
+		<p>Integration Server Operating System:</p>
+		<ul>
+			<li>Windows 2000, 2003</li>
+		</ul>
+
+
+		<p>Continuous Integration Server:</p>
+		<ul>
+			<li>Tested with Hudson version 1.336 - 2.2</li>
+			<li>Tested with Jenkins version 1.336 - 1.433</li>
+		</ul>
+
+
+		<p>Supported Source Code Management:</p>
+		<ul>
+			<li>Subversion - 1.17 or better</li>
+			<li>Perforce - 1.1.5 or better</li>
+			<li>Git - 1.3.1 or better</li>
+		</ul>
+
+
+		<h2>
+			<a name="HudsonandJenkinsPlugin-Downloads"></a>Downloads
+		</h2>
+
+		<p>
+			The latest version of V1Publisher is available at <a
+				href="http://community.versionone.com/sdk/Documentation/Integrations.aspx">V1:
+				Integration Downloads</a>
+		</p>
+
+		<h2>
+			<a name="HudsonandJenkinsPlugin-Installation"></a>Installation
+		</h2>
+
+		<p>
+			These instructions presume that <a href="http://hudson-ci.org/">Hudson</a>
+			or <a href="http://jenkins-ci.org/">Jenkins</a> is already installed,
+			configured, and working properly.
+		</p>
+		<ol>
+			<li><b>Ensure Connectivity</b><br /> Verify that you can
+				connect to your VersionOne instance from the machine hosting Hudson
+				or Jenkins</li>
+			<li><b>Extract Files</b><br /> Download VersionOne plugin from
+				the link above and extract it into a folder of your choice. This can
+				be a temporary location since we will copy some of these files
+				during configuration.</li>
+			<li><b>Configure</b>
+				<ol>
+					<li><a href="#HudsonandJenkinsPlugin-ConfigureV1">Configure
+							VersionOne</a></li>
+					<li><a href="#HudsonandJenkinsPlugin-ConfigureHudson">Configure
+							Hudson/Jenkins</a></li>
+				</ol></li>
+			<li><b>Verify the installation</b><br /> Once configuration is
+				complete use the following steps to verify that the build
+				integration is working
+				<ol>
+					<li>Navigate to your Hudson/Jenkins instance</li>
+					<li>Force a build on the project you configured</li>
+					<li>Wait for build to complete</li>
+					<li>Navigate to your VersionOne instance</li>
+					<li>Login</li>
+					<li>Select VersionOne project in 'My Projects' dropdown</li>
+					<li>Navigate to the Reports &#124; Reports Overview page</li>
+					<li>Select the &quot;Build Run Quicklist&quot; Report</li>
+				</ol></li>
+		</ol>
+
+
+		<h2>
+			<a name="HudsonandJenkinsPlugin-Configuration"></a>Configuration
+		</h2>
+
+		<h3>
+			<a name="HudsonandJenkinsPlugin-ConfigureVersionOne"></a>Configure
+			VersionOne<a name="HudsonandJenkinsPlugin-ConfigureV1"></a>
+		</h3>
+		<table class='info'>
+			<colgroup>
+				<col width='24'>
+					<col>
+			</colgroup>
+			<tr>
+				<td valign='top'><img
+					src="images/icons/emoticons/information.gif" width="16" height="16"
+					align="absmiddle" alt="" border="0"></td>
+				<td>If you are using Team Edition, you need to manually create
+					the Build Project. Instructions for doing this are available on the
+					<a
+					href="http://community.versionone.com/KnowledgeBase/FAQs/Q11417.aspx">VersionOne
+						Community Site</a>.
+				</td>
+			</tr>
+		</table>
+		<ol>
+			<li>Log into the VersionOne application as admin</li>
+			<li>Navigate to the Admin &#124; Configuration &#124; System
+				page.</li>
+			<li>Check the &quot;Enable Build Integration&quot; checkbox and
+				click the Apply button.<br /> <span class="image-wrap" style=""><a
+					class="thumbnail" href='images/EnableBuildIntegration.jpg'><img
+						src="images/thumbnails/enablebuildintegration"
+						style="border: 0px solid black" /></a></span>
+			</li>
+			<li>Navigate to the Admin &#124; Projects &#124; Build Project
+				page<br /> <span class="image-wrap" style=""><a
+					class="thumbnail" href='images/BuildProjects.jpg'><img
+						src="images/thumbnails/buildprojects"
+						style="border: 0px solid black" /></a></span>
+			</li>
+			<li>Click Add to add a new Build Project</li>
+			<li>Specify the following
+				<ul>
+					<li>Name &#8211; this is how the Build Project will be known
+						to VersionOne users</li>
+					<li>Reference &#8211; this is how the Build Project is known
+						to Hudson/Jenkins</li>
+				</ul>
+			</li>
+			<li>Click Ok to save the new Build Project</li>
+			<li>Navigate to the Admin &#124; Projects &#124; Projects page</li>
+			<li>Click Edit on the row for the project you want associated
+				with a Build Project</li>
+			<li>Using the &quot;Build Project&quot; dropdown add the
+				appropriate Build Project.<br /> <span class="image-wrap" style=""><a
+					class="thumbnail" href='images/AssignBuildProjectToProject.jpg'><img
+						src="images/thumbnails/assignbuildprojecttoproject"
+						style="border: 0px solid black" /></a></span>
+			</li>
+			<li>Click Ok to accept the changes</li>
+			<li>Logout</li>
+		</ol>
+
+
+		<h3>
+			<a name="HudsonandJenkinsPlugin-ConfigureHudson%2FJenkins"></a>Configure
+			Hudson/Jenkins<a name="HudsonandJenkinsPlugin-ConfigureHudson"></a>
+		</h3>
+
+		<p>These instructions presume that you are logged into
+			Hudson/Jenkins as an administrator.</p>
+		<ol>
+			<li>On the Hudson/Jenkins Dashboard, Click &quot;Manage
+				Hudson&quot; (or Jenkins)</li>
+			<li>Click &quot;Manage Plugins&quot;</li>
+			<li>Click Advanced</li>
+			<li>Under &quot;Upload Plugin&quot; browse to your download
+				location and select the file versionone.hpi<br /> <span
+				class="image-wrap" style=""><a class="thumbnail"
+					href='images/HudsonPluginManager.png'><img
+						src="images/thumbnails/hudsonpluginmanager"
+						style="border: 0px solid black" /></a></span>
+			</li>
+			<li>Click Upload</li>
+			<li>Restart your Hudson/Jenkins instance in order to load the
+				new plugin</li>
+			<li>On the Hudson Dashboard, Click &quot;Manage Hudson&quot; (or
+				Jenkins)</li>
+			<li>Click Configure System<br /> There is a new VersionOne
+				section at the end of this page
+			</li>
+			<li>Provide your VersionOne connection parameters<br /> <span
+				class="image-wrap" style=""><a
+					class="thumbnail"
+					href='images/ConfigureSystem.png'><img
+						src="images/thumbnails/configuresystem"
+						style="border: 0px solid black" /></a></span><br /> If you connect to
+				VersionOne through a proxy, check the "Use proxy server" checkbox
+				and provide additional Proxy parameters<br /> <span
+				class="image-wrap" style=""><a
+					class="thumbnail"
+					href='images/ConfigureSystem-Proxy.png'><img
+						src="images/thumbnails/configuresystemproxy"
+						style="border: 0px solid black" /></a></span>
+				<table class='info'>
+					<colgroup>
+						<col width='24'>
+							<col>
+					</colgroup>
+					<tr>
+						<td valign='top'><img
+							src="images/icons/emoticons/information.gif" width="16"
+							height="16" align="absmiddle" alt="" border="0"></td>
+						<td>It is recommended that you do not change the
+							&quot;Reference Field&quot; or &quot;Comment RegEx&quot; fields.
+							The &quot;Reference Field&quot; is the system name of the
+							attribute to search when matching the ID in change comments with
+							workitems in VersionOne. The &quot;Comment RegEx&quot; is used to
+							extract workitem identifiers from the change comments.</td>
+					</tr>
+				</table>
+			</li>
+			<li>Test the connection</li>
+			<li>Save the settings</li>
+			<li>Choose the Job you wish to have published to VersionOne<br />
+				Remember that this job name must be configured in VersionOne
+			</li>
+			<li>Click &quot;Configure&quot; to configure the workspace</li>
+			<li>In the &quot;Post-build Actions&quot; click the
+				&quot;VersionOne Notifier&quot; checkbox<br /> <span
+				class="image-wrap" style=""><a
+					class="thumbnail"
+					href='images/PostBuildActions.png'><img
+						src="images/thumbnails/postbuildactions"
+						style="border: 0px solid black" /></a></span>
+			</li>
+			<li>Click &quot;Save&quot;</li>
+		</ol>
+
+
+		<h2>
+			<a name="HudsonandJenkinsPlugin-TechnicalDetails"></a>Technical
+			Details
+		</h2>
+
+		<h3>
+			<a
+				name="HudsonandJenkinsPlugin-AddingSupportforanothersourcecodemanagementsystem"></a>Adding
+			Support for another source code management system
+		</h3>
+		<p>To add support for new VCS, the following actions are required.</p>
+		<ol>
+			<li>Add plugin reference to pom.xml, make sure that this
+				dependency could be successfully resolved.</li>
+			<li>Add a class wrapping native changeset type. SvnModification
+				or PerforceModification are good examples on how to do it.<br />
+				New class must inherit VcsModification interface and provide
+				parameterless public constructor.
+			</li>
+			<li>Modify VcsModificationWrapperFactory class to support new
+				changeset type.<br /> It is required to add line similar to
+				classNameMappings.put(&quot;hudson.plugins.perforce.PerforceChangeLogEntry&quot;,&quot;com.versionone.hudson.PerforceModification&quot;).
+				String literals are mappings of native changeset log entry classes
+				to our custom wrappers in format supported by Java Reflection, so
+				that instances and class objects could be successfully created.
+				Changesets will be processed as soon as user installs the
+				corresponding plugin and restarts Hudson/Jenkins server. In fact,
+				our plugin won't start without its dependencies.
+			</li>
+		</ol>
+	</div>
+</body>
+</html>
