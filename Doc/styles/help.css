@@ -21,16 +21,16 @@
 
 body {
 	font-family: "Lucida Sans Unicode", "Lucida Grande", Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #454545;
 }
 
 div.main {
-	width: 772px;
 	border-left: 22px solid #78082d;
 	padding: 2px 0px 2px 20px;
 }
 
 div.footer {
-	width: 772px;
 	font-size: 7pt;
 	color: #b0bca8;
 	text-align: right;
@@ -39,25 +39,25 @@ div.footer {
 
 /* HEADINGS ----------------------------------------------------------------- */
 h1 {
-    margin-top: 10px;
+    margin-top: 16px;
     margin-bottom: 0px;
     color: #00496b;
 }
 
 h2 {
-    margin-top: 10px;
+    margin-top: 16px;
     margin-bottom: 0px;
     color: #00496b;
 }
 
 h3 {
-    margin-top: 10px;
+    margin-top: 16px;
     margin-bottom: 0px;
     color: #00496b;
 }
 
 h4 {
-    margin-top: 10px;
+    margin-top: 16px;
     margin-bottom: 0px;
     color: #00496b;
 }
@@ -65,7 +65,6 @@ h4 {
 /* BODY --------------------------------------------------------------------- */
 
 p {
-	color: #797370;
 	margin-top: 0px;
 	margin-bottom: 10px;
 }
@@ -73,21 +72,18 @@ p {
 /* LISTS -------------------------------------------------------------------- */
 
 dl {
-	color: #797370;
 	margin-top: 0px;
 	margin-bottom: 10px;
 	font-weight: bold;
 }
 
 dd {
-	color: #797370;
 	margin-top: 0px;
 	margin-bottom: 10px;
 	font-weight: normal;
 }
 
 ul, ol {
-	color: #797370;
 	margin-top: 0px;
 	margin-bottom: 10px;
 }
@@ -97,13 +93,16 @@ ul, ol {
 
 /* Links get a pseudo-underline */
 a {
+	color: #07496B;
     text-decoration: none;
     padding-bottom: 0px;
     border-bottom: 1px solid #ebb229;
 }
+/* Links: #07496B; or #1777A4 */
 
 /* Links get an underline-effect when hovered */
 a:hover {
+	color: #009FF2;
     text-decoration: none;
     padding-bottom: 0px;
     border-bottom: 1px solid #cb632a;
