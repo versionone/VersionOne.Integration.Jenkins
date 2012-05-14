@@ -83,11 +83,38 @@ dd {
 	font-weight: normal;
 }
 
-ul, ol {
-	margin-top: 0px;
-	margin-bottom: 10px;
+ul {
+	margin-top: 1em;
+	margin-bottom: 1em;
 }
 
+ul li {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+ol {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+ol li {
+	color: #212121;
+	font-weight: bold;
+	margin-top: 2em;
+	margin-bottom: 2em;
+}
+
+ol li * {
+	color: #454545;
+	font-weight: normal;
+}
+
+ol li ol li {
+	font-weight: normal;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
 
 /* LINKS -------------------------------------------------------------------- */
 
@@ -137,13 +164,37 @@ hr {
 /* TABLE -------------------------------------------------------------------- */
 
 table {
+	width: 100%;
+	text-align: left;
     border-collapse: collapse;
-    margin: 0 -0.5em 0 -0.5em;
+    border: 1px solid #ddd;
+    margin: 0 -0.5em 2em -0.5em;
 }
 
-table td, table th {
-    padding: 0.2em 0.5em 0.2em 0.5em;
+th {
+	font-size: 16px;
+	font-weight: normal;
+	padding: 8px;
+	background: #ddd;
+	border-top: 4px solid #78082d;
+	border-bottom: 1px solid #fff;
+	color: #00496b;
 }
+
+td {
+	padding: 8px;
+	background: #fff;
+	border-bottom: 1px solid #ddd;
+	color: #454545;
+	border-top: 1px solid transparent;
+}
+
+tr:hover td
+{
+	background: #eee;
+	color: #78082d;
+}
+
 
 /* INFO --------------------------------------------------------------------- */
 
@@ -155,5 +206,19 @@ table.info {
 }
 
 table.info td {
+    background-color: #ebb229;
+    color: #78082d;
+    padding: 0.2em 0.5em 0.2em 0.5em;
+    border-bottom: 0px solid #fff;
+	border-top: 0px solid #fff;
     border: none;
+}
+
+.info {
+    padding: 0.2em 0.5em 0.2em 30px;
+    background: #ebb229 url(../images/icons/emoticons/information.gif) no-repeat 5px 3px;
+   	color: #78082d;
+	margin-top: 0px;
+	margin-bottom: 10px;
+	
 }
