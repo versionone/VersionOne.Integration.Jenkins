@@ -100,10 +100,35 @@
 
 		<p>
 			The following sequence diagram illustrates the VersionOne
-			Hudson/Jenkins publisher behavior.<br /> <a class="thumbnail"
-				href='images/sequencediagram.png'><img
-				src="images/thumbnails/sequencediagram"
-				style="border: 0px solid black" /></a>
+			Hudson/Jenkins publisher behavior.<br />
+			<div class=wsd wsd_style="qsd">
+<pre>
+title Hudson/Jenkins Integration Sequence
+
+Hudson/Jenkins->Version Control: Any changes?
+activate Hudson/Jenkins
+activate Version Control
+Version Control-->Hudson/Jenkins: No
+deactivate Version Control
+deactivate Hudson/Jenkins
+
+Developer->Version Control: Commit change
+Hudson/Jenkins->Version Control: Any changes?
+activate Hudson/Jenkins
+activate Version Control
+Version Control-->Hudson/Jenkins: Yes
+deactivate Version Control
+Hudson/Jenkins->Hudson/Jenkins: Build
+activate Hudson/Jenkins
+Hudson/Jenkins->VersionOne: Create BuildRun
+Hudson/Jenkins->VersionOne: Create/Update ChangeSet
+Hudson/Jenkins->VersionOne: Relate BuildRun to Workitems
+deactivate Hudson/Jenkins
+deactivate Hudson/Jenkins
+</pre>
+			</div>
+			<script type="text/javascript"
+				src="http://www.websequencediagrams.com/service.js"></script>
 		</p>
 
 		<h2>
@@ -152,29 +177,28 @@
 			<a name="HudsonandJenkinsPlugin-Installation"></a>Installation
 		</h2>
 
-		<p>
-			These instructions presume that <a href="http://hudson-ci.org/">Hudson</a>
+		<p>These instructions presume that <a href="http://hudson-ci.org/">Hudson</a>
 			or <a href="http://jenkins-ci.org/">Jenkins</a> is already installed,
 			configured, and working properly.
 		</p>
 		<ol>
-			<li><b>Ensure Connectivity</b><br /> Verify that you can
+			<li>Ensure Connectivity <p>Verify that you can
 				connect to your VersionOne instance from the machine hosting Hudson
-				or Jenkins</li>
-			<li><b>Extract Files</b><br /> Download VersionOne plugin from
+				or Jenkins</p></li>
+			<li>Extract Files <p>Download VersionOne plugin from
 				the link above and extract it into a folder of your choice. This can
 				be a temporary location since we will copy some of these files
-				during configuration.</li>
-			<li><b>Configure</b>
+				during configuration.</p></li>
+			<li>Configure
 				<ol>
 					<li><a href="#HudsonandJenkinsPlugin-ConfigureV1">Configure
 							VersionOne</a></li>
 					<li><a href="#HudsonandJenkinsPlugin-ConfigureHudson">Configure
 							Hudson/Jenkins</a></li>
 				</ol></li>
-			<li><b>Verify the installation</b><br /> Once configuration is
+			<li>Verify the installation <p>Once configuration is
 				complete use the following steps to verify that the build
-				integration is working
+				integration is working</p>
 				<ol>
 					<li>Navigate to your Hudson/Jenkins instance</li>
 					<li>Force a build on the project you configured</li>
@@ -196,23 +220,11 @@
 			<a name="HudsonandJenkinsPlugin-ConfigureVersionOne"></a>Configure
 			VersionOne<a name="HudsonandJenkinsPlugin-ConfigureV1"></a>
 		</h3>
-		<table class='info'>
-			<colgroup>
-				<col width='24'>
-					<col>
-			</colgroup>
-			<tr>
-				<td valign='top'><img
-					src="images/icons/emoticons/information.gif" width="16" height="16"
-					align="absmiddle" alt="" border="0"></td>
-				<td>If you are using Team Edition, you need to manually create
+		<p class='info'>If you are using Team Edition, you need to manually create
 					the Build Project. Instructions for doing this are available on the
 					<a
 					href="http://community.versionone.com/KnowledgeBase/FAQs/Q11417.aspx">VersionOne
-						Community Site</a>.
-				</td>
-			</tr>
-		</table>
+						Community Site</a>.</p>
 		<ol>
 			<li>Log into the VersionOne application as admin</li>
 			<li>Navigate to the Admin &#124; Configuration &#124; System
@@ -277,44 +289,32 @@
 				new plugin</li>
 			<li>On the Hudson Dashboard, Click &quot;Manage Hudson&quot; (or
 				Jenkins)</li>
-			<li>Click Configure System<br /> There is a new VersionOne
-				section at the end of this page
+			<li>Click Configure System <p>There is a new VersionOne
+				section at the end of this page.</p>
 			</li>
-			<li>Provide your VersionOne connection parameters<br /> <span
-				class="image-wrap" style=""><a
+			<li>Provide your VersionOne connection parameters <p><a
 					class="thumbnail"
 					href='images/ConfigureSystem.png'><img
 						src="images/thumbnails/configuresystem"
-						style="border: 0px solid black" /></a></span><br /> If you connect to
+						style="border: 0px solid black" /></a></p>
+						<p>If you connect to
 				VersionOne through a proxy, check the "Use proxy server" checkbox
-				and provide additional Proxy parameters<br /> <span
-				class="image-wrap" style=""><a
+				and provide additional Proxy parameters<br /> <a
 					class="thumbnail"
 					href='images/ConfigureSystem-Proxy.png'><img
 						src="images/thumbnails/configuresystemproxy"
-						style="border: 0px solid black" /></a></span>
-				<table class='info'>
-					<colgroup>
-						<col width='24'>
-							<col>
-					</colgroup>
-					<tr>
-						<td valign='top'><img
-							src="images/icons/emoticons/information.gif" width="16"
-							height="16" align="absmiddle" alt="" border="0"></td>
-						<td>It is recommended that you do not change the
+						style="border: 0px solid black" /></a></p>
+				<p class='info'>It is recommended that you do not change the
 							&quot;Reference Field&quot; or &quot;Comment RegEx&quot; fields.
 							The &quot;Reference Field&quot; is the system name of the
 							attribute to search when matching the ID in change comments with
 							workitems in VersionOne. The &quot;Comment RegEx&quot; is used to
-							extract workitem identifiers from the change comments.</td>
-					</tr>
-				</table>
+							extract workitem identifiers from the change comments.</p>
 			</li>
 			<li>Test the connection</li>
 			<li>Save the settings</li>
-			<li>Choose the Job you wish to have published to VersionOne<br />
-				Remember that this job name must be configured in VersionOne
+			<li>Choose the Job you wish to have published to VersionOne
+				<p>Remember that this job name must be configured in VersionOne</p>
 			</li>
 			<li>Click &quot;Configure&quot; to configure the workspace</li>
 			<li>In the &quot;Post-build Actions&quot; click the
@@ -341,22 +341,20 @@
 		</h3>
 		<p>To add support for new VCS, the following actions are required.</p>
 		<ol>
-			<li>Add plugin reference to pom.xml, make sure that this
-				dependency could be successfully resolved.</li>
-			<li>Add a class wrapping native changeset type. SvnModification
-				or PerforceModification are good examples on how to do it.<br />
-				New class must inherit VcsModification interface and provide
-				parameterless public constructor.
+			<li>Add plugin reference to pom.xml. <p>Make sure that this
+				dependency could be successfully resolved.</p></li>
+			<li>Add a class wrapping native changeset type. <p>SvnModification
+				or PerforceModification are good examples on how to do it. New class must inherit VcsModification interface and provide parameterless public constructor.</p>
 			</li>
 			<li>Modify VcsModificationWrapperFactory class to support new
-				changeset type.<br /> It is required to add line similar to
-				classNameMappings.put(&quot;hudson.plugins.perforce.PerforceChangeLogEntry&quot;,&quot;com.versionone.hudson.PerforceModification&quot;).
+				changeset type. <p>It is required to add line similar to
+<code>classNameMappings.put(&quot;hudson.plugins.perforce.PerforceChangeLogEntry&quot;,&quot;com.versionone.hudson.PerforceModification&quot;)</code>.
 				String literals are mappings of native changeset log entry classes
 				to our custom wrappers in format supported by Java Reflection, so
 				that instances and class objects could be successfully created.
 				Changesets will be processed as soon as user installs the
 				corresponding plugin and restarts Hudson/Jenkins server. In fact,
-				our plugin won't start without its dependencies.
+				our plugin won't start without its dependencies.</p>
 			</li>
 		</ol>
 	</div>
