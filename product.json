@@ -2,7 +2,7 @@
     "id": "VersionOne.Integration.Jenkins",
     "titleSection": {
         "name": "VersionOne Integration for Jenkins",
-        "shortDescription": "link agile workitems to tangible, working software in the form of builds",
+        "shortDescription": "Link agile workitems to tangible, working software in the form of builds from Jenkins.",
         "pricing": "Free",
         "support": {
             "text": "VersionOne",
@@ -22,14 +22,29 @@
             "type": "documentation",
             "title": "Documentation",
             "href": "http://versionone.github.io/VersionOne.Integration.Jenkins/index.html"
-        }
+        },
+        {
+            "type": "documentation",
+            "title": "README",
+            "href": "https://github.com/versionone/VersionOne.Integration.Jenkins/blob/master/README.md"
+        },
+        {
+            "type": "source",
+            "title": "GitHub Project for Source Code and Issues",
+            "href": "https://github.com/versionone/VersionOne.Integration.Jenkins"
+        },
+        {
+            "type": "license",
+            "title": "Modified BSD (3 clause) License",
+            "href": "https://github.com/versionone/VersionOne.Integration.Jenkins/blob/master/LICENSE.md"
+        }        
     ],
     "updatesSection": {
         "updates": [
             {
                 "date": "2012-01-31T00:00:00.000Z",
                 "description": "Winter 2012",
-                "version": "85",
+                "version": "10.0.0.85",
                 "releaseNotes": "Fixed: Incorrect ChangeSet time for Git and Svn",
                 "qualityBand": "mature",
                 "downloadUrl": "http://platform.versionone.com.s3.amazonaws.com/downloads/VersionOneHudsonPublisher.10.0.zip"
