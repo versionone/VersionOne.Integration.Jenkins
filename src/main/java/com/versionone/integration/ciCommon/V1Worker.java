@@ -227,7 +227,7 @@ public class V1Worker implements Worker {
             if (workitem instanceof PrimaryWorkitem) {
                 result.add((PrimaryWorkitem) workitem);
             } else if (workitem instanceof SecondaryWorkitem) {
-                result.add(((SecondaryWorkitem) workitem).getParent());
+                result.add( (PrimaryWorkitem)((SecondaryWorkitem) workitem).getParent() );
             } else {
                 throw new RuntimeException("Found unexpected Workitem type: " + workitem.getClass());
             }
