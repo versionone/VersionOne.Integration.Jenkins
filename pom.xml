@@ -236,6 +236,13 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>plugin</artifactId>
+			<version>1.509.2</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
 			<groupId>com.versionone</groupId>
 			<artifactId>VersionOne.SDK.Java.ObjectModel</artifactId>
 			<version>12.1.0.150</version>
