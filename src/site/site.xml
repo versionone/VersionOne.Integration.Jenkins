@@ -10,6 +10,8 @@
       <item name="System Requirements" href="system_requirements.html"/>
       <item name="Installation" href="installation.html"/>
       <item name="Configuration" href="configuration.html"/>
+      <item name="Version Control" href="version_control.html"/>
+      <item name="Team Edition" href="team_edition.html"/>
     </menu>
     <menu ref="reports" />
   </body>
