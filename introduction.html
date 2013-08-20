@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>About</title>
+    <title></title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -44,8 +44,8 @@
                                 <h5>Overview</h5>
                   <ul>
                   <li class="none">
-                          <a href="introduction.html" title="Introduction">Introduction</a>
-            </li>
+            <strong>Introduction</strong>
+          </li>
                   <li class="none">
                           <a href="system_requirements.html" title="System Requirements">System Requirements</a>
             </li>
@@ -58,50 +58,9 @@
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
-                                                                                                                                                                                                                                                                                                      <li class="expanded">
+                                                                                                                                                                                                                                                                                            <li class="collapsed">
                           <a href="project-info.html" title="Project Information">Project Information</a>
-                    <ul>
-                      <li class="none">
-                          <a href="distribution-management.html" title="Distribution Management">Distribution Management</a>
-            </li>
-                      <li class="none">
-            <strong>About</strong>
-          </li>
-                      <li class="none">
-                          <a href="dependencies.html" title="Dependencies">Dependencies</a>
-            </li>
-                      <li class="none">
-                          <a href="issue-tracking.html" title="Issue Tracking">Issue Tracking</a>
-            </li>
-                      <li class="none">
-                          <a href="plugins.html" title="Project Plugins">Project Plugins</a>
-            </li>
-                      <li class="none">
-                          <a href="integration.html" title="Continuous Integration">Continuous Integration</a>
-            </li>
-                      <li class="none">
-                          <a href="license.html" title="Project License">Project License</a>
-            </li>
-                      <li class="none">
-                          <a href="dependency-management.html" title="Dependency Management">Dependency Management</a>
-            </li>
-                      <li class="none">
-                          <a href="mail-lists.html" title="Mailing Lists">Mailing Lists</a>
-            </li>
-                      <li class="none">
-                          <a href="team-list.html" title="Project Team">Project Team</a>
-            </li>
-                      <li class="none">
-                          <a href="source-repository.html" title="Source Repository">Source Repository</a>
-            </li>
-                      <li class="none">
-                          <a href="plugin-management.html" title="Plugin Management">Plugin Management</a>
-            </li>
-                      <li class="none">
-                          <a href="project-summary.html" title="Project Summary">Project Summary</a>
-            </li>
-              </ul>
-        </li>
+                  </li>
                                                                                       <li class="collapsed">
                           <a href="project-reports.html" title="Project Reports">Project Reports</a>
                   </li>
@@ -115,7 +74,28 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section"><h2>About VersionOne Notifier for Jenkins<a name="About_VersionOne_Notifier_for_Jenkins"></a></h2><a name="About_VersionOne_Notifier_for_Jenkins"></a><p>Link agile workitems to tangible, working software in the form of builds. This enables teams to measure progress in terms of working software and to identify problems sooner. This publisher creates a record of Jenkins builds in VersionOne, so the development teams can quickly view builds associated with a story or defect. This visibility is useful when identifying what build to use for verification or when generating release notes.</p></div>
+        <div class="section"><h2>Introduction<a name="Introduction"></a></h2><p>The VersionOne Integration for Jenkins creates a record of builds in VersionOne, so development teams can associate stories and defects to a particular build. This visibility is useful when identifying problem builds or generating release notes. Once the VersionOne Plugin has been installed, team members include a VersionOne identifier, such as <tt>S-01454</tt> or <tt>TK-01234</tt>, in the comments of their SCM commit. Every time a build executes the publisher creates a BuildRun asset in VersionOne with details of the build. The VersionOne BuildRun is visible in the Relationships for the associated Story/Defect Details page.</p><p>Using this integration you can better answer the following questions:</p><div class="section"><h3>Defects<a name="Defects"></a></h3>
+<ul>
+  <li>Which build the defect was reported against?</li>
+  <li>Which build contained the fix for the defect?</li>
+  <li>Which builds contain work for the defect?</li>
+</ul></div><div class="section"><h3>For Stories (Backlog Item)<a name="For_Stories_Backlog_Item"></a></h3>
+<ul>
+  <li>Which builds contain work for the story?</li>
+  <li>Which build contained the completed story?</li>
+</ul></div><div class="section"><h3>For Build Runs<a name="For_Build_Runs"></a></h3>
+<ul>
+  <li>Which defects were fixed?</li>
+  <li>Which stories were completed?</li>
+  <li>Which defects were introduced?</li>
+  <li>When work for a story or defect was included?</li>
+  <li>Which Change-sets were included?</li>
+</ul></div><div class="section"><h3>For a range of Build Runs<a name="For_a_range_of_Build_Runs"></a></h3>
+<ul>
+  <li>Which stories were completed?</li>
+  <li>Which defects were fixed?</li>
+  <li>Which defects were introduced?</li>
+</ul><p>The following sequence diagram illustrates how the VersionOne Integration for Jenkins interacts with Jenkins and VersionOne.</p><p><img src="images/Jenkins_Integration_Sequence.png" alt="Jenkins Integration Sequence Diagram" /></p></div></div>
       </div>
     </div>
     <div class="clear">

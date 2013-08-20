@@ -1,0 +1,22 @@
+title Jenkins Integration Sequence
+
+Jenkins->Version Control: Any changes?
+activate Jenkins
+activate Version Control
+Version Control-->Jenkins: No
+deactivate Version Control
+deactivate Jenkins
+
+Developer->Version Control: Commit change
+Jenkins->Version Control: Any changes?
+activate Jenkins
+activate Version Control
+Version Control-->Jenkins: Yes
+deactivate Version Control
+Jenkins->Jenkins: Build
+activate Jenkins
+Jenkins->VersionOne: Create BuildRun
+Jenkins->VersionOne: Create/Update ChangeSet
+Jenkins->VersionOne: Relate BuildRun to Workitems
+deactivate Jenkins
+deactivate Jenkins

@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>About</title>
+    <title></title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -58,50 +58,9 @@
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
-                                                                                                                                                                                                                                                                                                      <li class="expanded">
+                                                                                                                                                                                                                                                                                            <li class="collapsed">
                           <a href="project-info.html" title="Project Information">Project Information</a>
-                    <ul>
-                      <li class="none">
-                          <a href="distribution-management.html" title="Distribution Management">Distribution Management</a>
-            </li>
-                      <li class="none">
-            <strong>About</strong>
-          </li>
-                      <li class="none">
-                          <a href="dependencies.html" title="Dependencies">Dependencies</a>
-            </li>
-                      <li class="none">
-                          <a href="issue-tracking.html" title="Issue Tracking">Issue Tracking</a>
-            </li>
-                      <li class="none">
-                          <a href="plugins.html" title="Project Plugins">Project Plugins</a>
-            </li>
-                      <li class="none">
-                          <a href="integration.html" title="Continuous Integration">Continuous Integration</a>
-            </li>
-                      <li class="none">
-                          <a href="license.html" title="Project License">Project License</a>
-            </li>
-                      <li class="none">
-                          <a href="dependency-management.html" title="Dependency Management">Dependency Management</a>
-            </li>
-                      <li class="none">
-                          <a href="mail-lists.html" title="Mailing Lists">Mailing Lists</a>
-            </li>
-                      <li class="none">
-                          <a href="team-list.html" title="Project Team">Project Team</a>
-            </li>
-                      <li class="none">
-                          <a href="source-repository.html" title="Source Repository">Source Repository</a>
-            </li>
-                      <li class="none">
-                          <a href="plugin-management.html" title="Plugin Management">Plugin Management</a>
-            </li>
-                      <li class="none">
-                          <a href="project-summary.html" title="Project Summary">Project Summary</a>
-            </li>
-              </ul>
-        </li>
+                  </li>
                                                                                       <li class="collapsed">
                           <a href="project-reports.html" title="Project Reports">Project Reports</a>
                   </li>
@@ -115,7 +74,7 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section"><h2>About VersionOne Notifier for Jenkins<a name="About_VersionOne_Notifier_for_Jenkins"></a></h2><a name="About_VersionOne_Notifier_for_Jenkins"></a><p>Link agile workitems to tangible, working software in the form of builds. This enables teams to measure progress in terms of working software and to identify problems sooner. This publisher creates a record of Jenkins builds in VersionOne, so the development teams can quickly view builds associated with a story or defect. This visibility is useful when identifying what build to use for verification or when generating release notes.</p></div>
+        <div class="section"><h2>Adding Support for a new Version Control System<a name="Adding_Support_for_a_new_Version_Control_System"></a></h2><div class="section"><h3>1. Add plugin reference to pom.xml.<a name="a1._Add_plugin_reference_to_pom.xml."></a></h3><p>Make sure that this dependency could be successfully resolved.</p></div><div class="section"><h3>2. Add a class wrapping native changeset type.<a name="a2._Add_a_class_wrapping_native_changeset_type."></a></h3><p>SvnModification or PerforceModification are good examples on how to do it. New class must inherit VcsModification interface and provide parameterless public constructor.</p></div><div class="section"><h3>3. Modify VcsModificationWrapperFactory class to support new changeset type.<a name="a3._Modify_VcsModificationWrapperFactory_class_to_support_new_changeset_type."></a></h3><p>It is required to add line similar to <tt>classNameMappings.put(&quot;hudson.plugins.perforce.PerforceChangeLogEntry&quot;, &quot;com.versionone.hudson.PerforceModification&quot;)</tt>. String literals are mappings of native changeset log entry classes to our custom wrappers in format supported by Java Reflection, so that instances and class objects could be successfully created. Changesets will be processed as soon as user installs the corresponding plugin and restarts Jenkins server. In fact, our plugin wont start without its dependencies.</p></div></div>
       </div>
     </div>
     <div class="clear">
