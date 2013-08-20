@@ -85,13 +85,41 @@
   <li>Log into the VersionOne application as admin.</li>
   <li>Navigate to the Admin -&gt; Configuration -&gt; System page.</li>
   <li>Check the <tt>Enable Build Integration</tt> checkbox and click the <tt>Apply</tt> button.</li>
-</ol><p><img src="images/EnableBuildIntegration.jpg" alt="Enable Build Integration" /> 4. Navigate to the Admin -&gt; Projects -&gt; Build Project page</p><p><img src="images/BuildProjects.jpg" alt="Build Projects Page" /> 5. Click Add to add a new Build Project. Specify the following  * Name - this is how the Build Project will be known to VersionOne users  * Reference - this is how the Build Project is known to Jenkins 6. Click Ok to save the new Build Project. 7. Navigate to the Admin -&gt; Projects -&gt; Projects page. 8. Click Edit on the row for the project you want associated with a Build Project. 9. Using the <tt>Build Project</tt> dropdown add the appropriate Build Project.</p><p><img src="images/AssignBuildProjectToProject.jpg" alt="Add Build Project" /> 10. Click Ok to accept the changes. 11. Logout.</p></div><div class="section"><h3>Configure Jenkins<a name="Configure_Jenkins"></a></h3><p>These instructions assume that you are logged into Jenkins as an administrator.</p>
+</ol><p><img src="images/EnableBuildIntegration.jpg" alt="Enable Build Integration" /></p>
+<ol style="list-style-type: decimal">
+  <li>Navigate to the Admin -&gt; Projects -&gt; Build Project page</li>
+</ol><p><img src="images/BuildProjects.jpg" alt="Build Projects Page" /></p>
+<ol style="list-style-type: decimal">
+  <li>Click Add to add a new Build Project. Specify the following
+  <ul>
+    <li>Name - this is how the Build Project will be known to VersionOne users</li>
+    <li>Reference - this is how the Build Project is known to Jenkins</li>
+  </ul></li>
+  <li>Click Ok to save the new Build Project.</li>
+  <li>Navigate to the Admin -&gt; Projects -&gt; Projects page.</li>
+  <li>Click Edit on the row for the project you want associated with a Build Project.</li>
+  <li>Using the <tt>Build Project</tt> dropdown add the appropriate Build Project.</li>
+</ol><p><img src="images/AssignBuildProjectToProject.jpg" alt="Add Build Project" /></p>
+<ol style="list-style-type: decimal">
+  <li>Click Ok to accept the changes.</li>
+  <li>Logout.</li>
+</ol></div><div class="section"><h3>Configure Jenkins<a name="Configure_Jenkins"></a></h3><p>These instructions assume that you are logged into Jenkins as an administrator.</p>
 <ol style="list-style-type: decimal">
   <li>On the Jenkins Dashboard, Click <tt>Manage Jenkins</tt>.</li>
   <li>Click <tt>Manage Plugins</tt>.</li>
   <li>Click <tt>Advanced</tt>.</li>
   <li>Under <tt>Upload Plugin</tt> browse to your download location and select the file versionone.hpi</li>
-</ol><p><img src="images/HudsonPluginManager.png" alt="Jenkins Plugin Manager" /> 5. Click <tt>Upload</tt>. 6. Restart your Jenkins instance in order to load the new plugin. 7. On the Jenkins Dashboard, click <tt>Manage Jenkins</tt>. 8. Click <tt>Configure System</tt>. There is a new VersionOne section at the end of this page. 9. Provide your VersionOne connection parameters.</p><p><img src="images/ConfigureSystem.png" alt="Configure System" /> If you connect to VersionOne through a proxy, check the <tt>Use proxy server</tt> checkbox and provide additional Proxy parameters</p><p><img src="images/ConfigureSystem-Proxy.png" alt="Configure Proxy" /> It is recommended that you do not change the <tt>Reference Field</tt> or <tt>Comment RegEx</tt> fields. The <tt>Reference Field</tt> is the system name of the attribute to search when matching the ID in change comments with workitems in VersionOne. The <tt>Comment RegEx</tt> is used to extract workitem identifiers from the change comments. 10. Test the connection. 11. Save the settings. 12. Choose the Job you wish to have published to VersionOne. Remember that this job name must be configured in VersionOne. 13. Click <tt>Configure</tt> to configure the workspace. 14. In the <tt>Post-build Actions</tt> click the <tt>VersionOne Notifier</tt> checkbox.</p><p><img src="images/PostBuildActions.png" alt="Post Build Actions" /> 15. Click <tt>Save</tt>.</p></div></div>
+</ol><p><img src="images/HudsonPluginManager.png" alt="Jenkins Plugin Manager" /></p>
+<ol style="list-style-type: decimal">
+  <li>Click <tt>Upload</tt>.</li>
+  <li>Restart your Jenkins instance in order to load the new plugin.</li>
+  <li>On the Jenkins Dashboard, click <tt>Manage Jenkins</tt>.</li>
+  <li>Click <tt>Configure System</tt>. There is a new VersionOne section at the end of this page.</li>
+  <li>Provide your VersionOne connection parameters.</li>
+</ol><p><img src="images/ConfigureSystem.png" alt="Configure System" /></p><p>If you connect to VersionOne through a proxy, check the <tt>Use proxy server</tt> checkbox and provide additional Proxy parameters</p><p><img src="images/ConfigureSystem-Proxy.png" alt="Configure Proxy" /></p><p>It is recommended that you do not change the <tt>Reference Field</tt> or <tt>Comment RegEx</tt> fields. The <tt>Reference Field</tt> is the system name of the attribute to search when matching the ID in change comments with workitems in VersionOne. The <tt>Comment RegEx</tt> is used to extract workitem identifiers from the change comments. 10. Test the connection. 11. Save the settings. 12. Choose the Job you wish to have published to VersionOne. Remember that this job name must be configured in VersionOne. 13. Click <tt>Configure</tt> to configure the workspace. 14. In the <tt>Post-build Actions</tt> click the <tt>VersionOne Notifier</tt> checkbox.</p><p><img src="images/PostBuildActions.png" alt="Post Build Actions" /></p>
+<ol style="list-style-type: decimal">
+  <li>Click <tt>Save</tt>.</li>
+</ol></div></div>
       </div>
     </div>
     <div class="clear">
