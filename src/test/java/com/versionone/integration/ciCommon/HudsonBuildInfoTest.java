@@ -1,28 +1,29 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
+import hudson.model.Action;
+import hudson.model.Build;
+import hudson.model.FreeStyleBuild;
+import hudson.model.Cause;
+import hudson.model.CauseAction;
+import hudson.model.FreeStyleProject;
+import hudson.scm.CVSChangeLogSet;
+import hudson.scm.ChangeLogSet;
+import hudson.scm.SubversionChangeLogSet;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import hudson.model.Run;
-import hudson.model.FreeStyleProject;
-import hudson.model.FreeStyleBuild;
-import hudson.model.Action;
-import hudson.model.CauseAction;
-import hudson.model.Cause;
-import hudson.scm.ChangeLogSet;
-import hudson.scm.SubversionChangeLogSet;
-import hudson.scm.CVSChangeLogSet;
 import com.versionone.hudson.HudsonBuildInfo;
-
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Iterator;
 
 
 public class HudsonBuildInfoTest {
@@ -46,7 +47,7 @@ public class HudsonBuildInfoTest {
 
         final FreeStyleBuild build = mockery.mock(FreeStyleBuild.class, "build");
         final FreeStyleProject project = mockery.mock(FreeStyleProject.class, "project");
-        final Run lastBuild = mockery.mock(Run.class, "last build");
+        final Build lastBuild = mockery.mock(Build.class, "last build");
         final Action action = mockery.mock(CauseAction.class, "Action");
         final Cause.UserCause userCause = mockery.mock(Cause.UserCause.class, "cause UserCause");
         final ChangeLogSet changeLogSet = mockery.mock(ChangeLogSet.class, "ChangeLogSet");
