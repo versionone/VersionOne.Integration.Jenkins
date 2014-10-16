@@ -254,12 +254,12 @@
 			<version>12.1.0.150</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.jvnet.hudson.plugins</groupId>
-			<artifactId>subversion</artifactId>
-			<version>2.0.1</version>
-			<scope>compile</scope>
-		</dependency>
+	    <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>subversion</artifactId>
+            <version>2.0</version>
+             <scope>compile</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>org.jvnet.hudson.plugins</groupId>
