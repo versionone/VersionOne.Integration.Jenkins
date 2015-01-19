@@ -2,6 +2,9 @@
 .idea/
 versionone-jenkins-notifier.iml
 
+## Jenkins Run Files (mvn hpi:run) ##
+work
+
 ## Directories created by Ant build file
 build/
 db/
