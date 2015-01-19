@@ -1,3 +1,7 @@
+## IntelliJ Files ##
+.idea/
+versionone-jenkins-notifier.iml
+
 ## Directories created by Ant build file
 build/
 db/
