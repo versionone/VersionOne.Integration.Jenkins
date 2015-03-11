@@ -41,18 +41,26 @@ public class V1Worker implements Worker {
      */
     public Result submitBuildRun(final BuildInfo info) {
     	
-        // Cancel notification if connection is not valid.
+        //Validate connection to V1.
         if (!config.isConnectionValid()) {
             return Result.FAIL_CONNECTION;
         }
+        
+        //Find a matching BuildProject.
         final BuildProject buildProject = getBuildProject(info);
+        
+        //Validate that BuildProject exists.
         if (buildProject == null) {
             return Result.FAIL_NO_BUILDPROJECT;
         }
         if (isBuildExist(buildProject, info)) {
             return Result.FAIL_DUPLICATE;
         }
+        
+        //Create a BuildRun in the V1 BuildProject.
         final BuildRun buildRun = createBuildRun(buildProject, info);
+        
+        //If available, add ChangeSets.
         if (info.hasChanges()) {
             setChangeSets(buildRun, info);
         }
@@ -80,10 +88,11 @@ public class V1Worker implements Worker {
      * @return V1 representation of the project if match; otherwise - null.
      */
     private BuildProject getBuildProject(BuildInfo info) {
-        BuildProjectFilter filter = new BuildProjectFilter();
-
+        
+    	BuildProjectFilter filter = new BuildProjectFilter();
         filter.references.add(info.getProjectName());
         Collection<BuildProject> projects = config.getV1Instance().get().buildProjects(filter);
+
         if (projects.isEmpty()) {
             return null;
         }
@@ -93,7 +102,7 @@ public class V1Worker implements Worker {
 
     private static BuildRun createBuildRun(BuildProject buildProject, BuildInfo info) {
     	
-        // Generate the BuildRun instance to be saved to the recipient.
+        // Generate the BuildRun asset.
         BuildRun run = buildProject.createBuildRun(getBuildName(info), new DB.DateTime(info.getStartTime()));
 
         run.setElapsed((double) info.getElapsedTime());
@@ -104,9 +113,10 @@ public class V1Worker implements Worker {
         if (info.hasChanges()) {
             run.setDescription(getModificationDescription(info.getChanges()));
         }
+        
         run.save();
-
         run.createLink("Build Report", info.getUrl(), true);
+        
         return run;
     }
 
@@ -153,6 +163,7 @@ public class V1Worker implements Worker {
     }
 
     private void setChangeSets(BuildRun buildRun, BuildInfo info) {
+    	
         for (VcsModification change : info.getChanges()) {
         	
             // See if we have this ChangeSet in the system.
@@ -186,11 +197,18 @@ public class V1Worker implements Worker {
         }
     }
 
-    private void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets,
-                                              Set<PrimaryWorkitem> workitems) {
+    private void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets, Set<PrimaryWorkitem> workitems) {
+    	
+    	logger.println("Associating Workitems to BuildRuns...");
+    	
         for (ChangeSet changeSet : changeSets) {
+        	
+        	logger.println("Found " + changeSets.size() + " ChangeSets.");
             buildRun.getChangeSets().add(changeSet);
+            
             for (PrimaryWorkitem workitem : workitems) {
+            	
+            	logger.println("Found " + workitems.size() + " Workitems.");
                 if(workitem.isClosed()) {
                     logger.println(MessagesRes.workitemClosedCannotAttachData(workitem.getDisplayID()));
                     continue;
