@@ -1,4 +1,3 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.jenkins;
 
 import com.versionone.integration.ciCommon.BuildInfo;
@@ -77,7 +76,7 @@ public class JenkinsBuildInfo implements BuildInfo {
     /**
      * Return URL to the current build results.
      *
-     * @return url to the TeamCity with info about build
+     * @return url to the system with info about build
      */
     public String getUrl() {
         return Hudson.getInstance().getRootUrl() + build.getUrl();

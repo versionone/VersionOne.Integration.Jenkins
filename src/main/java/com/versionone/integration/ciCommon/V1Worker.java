@@ -1,18 +1,30 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.versionone.DB;
 import com.versionone.jenkins.MessagesRes;
-import com.versionone.om.*;
+import com.versionone.om.BuildProject;
+import com.versionone.om.BuildRun;
+import com.versionone.om.ChangeSet;
+import com.versionone.om.PrimaryWorkitem;
+import com.versionone.om.SecondaryWorkitem;
+import com.versionone.om.Workitem;
 import com.versionone.om.filters.BuildProjectFilter;
 import com.versionone.om.filters.BuildRunFilter;
 import com.versionone.om.filters.ChangeSetFilter;
 import com.versionone.om.filters.WorkitemFilter;
-
-import java.io.PrintStream;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class V1Worker implements Worker {
 
@@ -28,7 +40,8 @@ public class V1Worker implements Worker {
      * Adds to the VersionOne BuildRun and ChangesSet.
      */
     public Result submitBuildRun(final BuildInfo info) {
-        //cancel notification if connection is not valid
+    	
+        // Cancel notification if connection is not valid.
         if (!config.isConnectionValid()) {
             return Result.FAIL_CONNECTION;
         }
@@ -79,7 +92,8 @@ public class V1Worker implements Worker {
 
 
     private static BuildRun createBuildRun(BuildProject buildProject, BuildInfo info) {
-        // Generate the BuildRun instance to be saved to the recipient
+    	
+        // Generate the BuildRun instance to be saved to the recipient.
         BuildRun run = buildProject.createBuildRun(getBuildName(info), new DB.DateTime(info.getStartTime()));
 
         run.setElapsed((double) info.getElapsedTime());
@@ -123,7 +137,8 @@ public class V1Worker implements Worker {
      * @return description string.
      */
     public static String getModificationDescription(Iterable<VcsModification> changes) {
-        //Create Set to filter changes unique by User and Comment
+    	
+        // Create Set to filter changes unique by User and Comment.
         StringBuilder result = new StringBuilder(256);
         for (Iterator<VcsModification> it = changes.iterator(); it.hasNext();) {
             VcsModification mod = it.next();
@@ -139,6 +154,7 @@ public class V1Worker implements Worker {
 
     private void setChangeSets(BuildRun buildRun, BuildInfo info) {
         for (VcsModification change : info.getChanges()) {
+        	
             // See if we have this ChangeSet in the system.
             ChangeSetFilter filter = new ChangeSetFilter();
             String id = change.getId();
@@ -146,6 +162,7 @@ public class V1Worker implements Worker {
             filter.reference.add(id);
             Collection<ChangeSet> changeSetList = config.getV1Instance().get().changeSets(filter);
             if (changeSetList.isEmpty()) {
+            	
                 // We don't have one yet. Create one.
                 StringBuilder name = new StringBuilder();
                 name.append('\'');
