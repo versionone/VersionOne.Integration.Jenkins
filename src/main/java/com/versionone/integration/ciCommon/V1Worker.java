@@ -102,7 +102,7 @@ public class V1Worker implements Worker {
 
     private static BuildRun createBuildRun(BuildProject buildProject, BuildInfo info) {
     	
-        // Generate the BuildRun asset.
+        //Generate the BuildRun asset.
         BuildRun run = buildProject.createBuildRun(getBuildName(info), new DB.DateTime(info.getStartTime()));
 
         run.setElapsed((double) info.getElapsedTime());
@@ -148,7 +148,7 @@ public class V1Worker implements Worker {
      */
     public static String getModificationDescription(Iterable<VcsModification> changes) {
     	
-        // Create Set to filter changes unique by User and Comment.
+        //Create Set to filter changes unique by User and Comment.
         StringBuilder result = new StringBuilder(256);
         for (Iterator<VcsModification> it = changes.iterator(); it.hasNext();) {
             VcsModification mod = it.next();
@@ -166,7 +166,7 @@ public class V1Worker implements Worker {
     	
         for (VcsModification change : info.getChanges()) {
         	
-            // See if we have this ChangeSet in the system.
+            //See if we have this ChangeSet in the system.
             ChangeSetFilter filter = new ChangeSetFilter();
             String id = change.getId();
 
@@ -174,7 +174,7 @@ public class V1Worker implements Worker {
             Collection<ChangeSet> changeSetList = config.getV1Instance().get().changeSets(filter);
             if (changeSetList.isEmpty()) {
             	
-                // We don't have one yet. Create one.
+                //We don't have one yet. Create one.
                 StringBuilder name = new StringBuilder();
                 name.append('\'');
                 name.append(change.getUserName());

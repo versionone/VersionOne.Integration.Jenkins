@@ -32,7 +32,7 @@ public class VcsModificationWrapperFactory {
                 Class wrapperClass = Class.forName(entry.getValue());
                 mappings.put(logEntryClass, wrapperClass);
             } catch(ClassNotFoundException e) {
-                // do nothing, it is unsupported VCS changeset type
+                // do nothing, it is an unsupported VCS changeset type
             }
         }
     }
