@@ -22,7 +22,6 @@ public class HudsonBuildInfo implements BuildInfo {
         elapsedTime = now.getTime().getTime() - build.getTimestamp().getTime().getTime();
     }
 
-    @SuppressWarnings({"ConstantConditions"})
     public String getProjectName() {
         return build.getProject().getName();
     }
