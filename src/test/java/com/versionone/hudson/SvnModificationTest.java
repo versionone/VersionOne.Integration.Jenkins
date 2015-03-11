@@ -1,17 +1,19 @@
 package com.versionone.hudson;
 
 import hudson.scm.SubversionChangeLogSet;
-import junit.framework.Assert;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.lib.legacy.ClassImposteriser;
-import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import junit.framework.Assert;
+
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.Test;
 
 public class SvnModificationTest {
     private Mockery mockery = new Mockery() {

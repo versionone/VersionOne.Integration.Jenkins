@@ -1,15 +1,5 @@
 package com.versionone.hudson;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import hudson.model.Descriptor;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.tasks.Publisher;
-import hudson.tasks.Shell;
-import hudson.util.DescribableList;
-import org.apache.commons.io.FileUtils;
-import org.jvnet.hudson.test.HudsonTestCase;
 /*
 public class AppTest extends HudsonTestCase {
 

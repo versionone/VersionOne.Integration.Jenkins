@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>1.510</version><!-- which version of Jenkins is this plugin built against? -->
 		<version>1.602</version>
 	</parent>
 
 	<groupId>com.versionone</groupId>
 	<artifactId>versionone-jenkins-notifier</artifactId>
 	<version>10.0.1-SNAPSHOT</version>
+	<version>10.0.2-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 
 	<name>VersionOne Notifier for Jenkins</name>
@@ -51,11 +51,14 @@
 	</properties>
 
 	<repositories>
+		<!--
 		<repository>
 			<id>BUILDSERVER1</id>
 			<name>BUILDSERVER1-releases</name>
 			<url>http://buildserver1:8081/artifactory/libs-release-local</url>
 		</repository>
+		-->
+		
 		<repository>
 			<id>repo.jenkins-ci.org</id>
 			<url>http://repo.jenkins-ci.org/public/</url>
@@ -262,6 +265,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>plugin</artifactId>
+			<version>1.602</version>
+			<type>pom</type>
+		</dependency>
 
 		<dependency>
 			<groupId>com.versionone</groupId>

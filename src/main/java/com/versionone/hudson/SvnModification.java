@@ -1,15 +1,14 @@
 package com.versionone.hudson;
 
-import com.versionone.integration.ciCommon.VcsModification;
 import hudson.scm.SubversionChangeLogSet;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
+import com.versionone.integration.ciCommon.VcsModification;
 
 public class SvnModification implements VcsModification {
 
