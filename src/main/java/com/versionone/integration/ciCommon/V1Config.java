@@ -1,15 +1,18 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
-import com.versionone.apiclient.IMetaModel;
-import com.versionone.apiclient.MetaException;
-import com.versionone.om.*;
-
 import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
+
+import com.versionone.apiclient.IMetaModel;
+import com.versionone.apiclient.MetaException;
+import com.versionone.om.ApplicationUnavailableException;
+import com.versionone.om.AuthenticationException;
+import com.versionone.om.ProxySettings;
+import com.versionone.om.SDKException;
+import com.versionone.om.V1Instance;
 
 public final class V1Config {
 

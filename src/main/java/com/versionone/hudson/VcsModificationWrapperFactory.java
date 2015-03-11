@@ -1,11 +1,12 @@
 package com.versionone.hudson;
 
-import com.versionone.integration.ciCommon.VcsModification;
 import hudson.scm.ChangeLogSet;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.versionone.integration.ciCommon.VcsModification;
 
 public class VcsModificationWrapperFactory {
     private static VcsModificationWrapperFactory instance;
