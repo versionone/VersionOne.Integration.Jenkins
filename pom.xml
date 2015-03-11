@@ -11,7 +11,7 @@
 
 	<groupId>com.versionone</groupId>
 	<artifactId>versionone-jenkins-notifier</artifactId>
-	<version>10.0.1</version>
+	<version>10.0.1-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 
 	<name>VersionOne Notifier for Jenkins</name>
@@ -152,6 +152,14 @@
 					</execution>
 				</executions>
 			</plugin>
+            <!-- See Comment #2 (this is an alternative which is not a good practice!)
+            <plugin>
+                <groupId>org.jenkins-ci.tools</groupId>
+                <artifactId>maven-hpi-plugin</artifactId>
+                <configuration>
+                    <disabledTestInjection>true</disabledTestInjection>
+                </configuration>
+            </plugin>-->
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -239,17 +247,32 @@
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.jenkins-ci.plugins</groupId>
-			<artifactId>plugin</artifactId>
-			<version>1.509.2</version>
-			<type>pom</type>
-		</dependency>
+
+        <!-- (Comment #1) Overriding the transitive dependency coming from com.versionone:VersionOne.SDK.Java.ObjectModel -->
+        <dependency>
+            <groupId>com.versionone</groupId>
+            <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
+            <version>13.0.2</version>
+            <exclusions>
+                <!-- (Comment #2) exclude because Jenkins injected tests are failing otherwise -->
+                <exclusion>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
 		<dependency>
 			<groupId>com.versionone</groupId>
 			<artifactId>VersionOne.SDK.Java.ObjectModel</artifactId>
 			<version>12.1.0.150</version>
+            <exclusions>
+                <!-- See Comment #1 -->
+                <exclusion>
+                    <groupId>com.versionone</groupId>
+                    <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 
 	    <dependency>
