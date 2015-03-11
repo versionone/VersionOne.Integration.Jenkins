@@ -2,7 +2,7 @@
 package com.versionone.integration.ciCommon;
 
 import com.versionone.DB;
-import com.versionone.hudson.MessagesRes;
+import com.versionone.jenkins.MessagesRes;
 import com.versionone.om.*;
 import com.versionone.om.filters.BuildProjectFilter;
 import com.versionone.om.filters.BuildRunFilter;

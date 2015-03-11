@@ -14,6 +14,8 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Test;
 
+import com.versionone.jenkins.GitModification;
+
 public class GitModificationTest {
     private Mockery mockery = new Mockery() {
         {

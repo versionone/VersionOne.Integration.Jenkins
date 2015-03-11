@@ -1,5 +1,5 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
 
 import org.jvnet.localizer.Localizable;

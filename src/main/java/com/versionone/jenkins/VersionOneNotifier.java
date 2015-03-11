@@ -1,5 +1,5 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
 import hudson.Extension;
 import hudson.Launcher;
@@ -55,11 +55,11 @@ public class VersionOneNotifier extends Notifier {
         V1Worker worker = new V1Worker(config, listener.getLogger());
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
-            if (annot instanceof HudsonChangeLogAnnotator) {
-                ((HudsonChangeLogAnnotator) annot).setData(worker, config.pattern);
+            if (annot instanceof JenkinsChangeLogAnnotator) {
+                ((JenkinsChangeLogAnnotator) annot).setData(worker, config.pattern);
             }
         }
-        BuildInfo buildInfo = new HudsonBuildInfo(build);
+        BuildInfo buildInfo = new JenkinsBuildInfo(build);
 
         switch (worker.submitBuildRun(buildInfo)) {
             case SUCCESS:

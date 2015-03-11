@@ -1,4 +1,4 @@
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
 import com.versionone.integration.ciCommon.VcsModification;
 import hudson.plugins.perforce.PerforceChangeLogEntry;

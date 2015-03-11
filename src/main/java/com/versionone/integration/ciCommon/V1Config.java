@@ -1,4 +1,3 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
 import java.io.PrintStream;
@@ -73,6 +72,7 @@ public final class V1Config {
     public V1Config(String url, String userName, String password, String pattern,
                     String referenceField, Boolean fullyQualifiedBuildName,
                     boolean useProxy, String proxyUrl, String proxyUsername, String proxyPassword) {
+    	
         this.url = url;
         this.userName = userName;
         this.password = password;
@@ -87,7 +87,7 @@ public final class V1Config {
     }
 
     /**
-     * Set logger so we could use it to populate messages to Hudson
+     * Set logger so we could use it to populate messages to Jenkins
      * @param logger Logger to be used.
      */
     public void setLogger(PrintStream logger) {

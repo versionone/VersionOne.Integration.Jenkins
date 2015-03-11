@@ -1,4 +1,4 @@
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
 import hudson.plugins.git.GitChangeSet;
 

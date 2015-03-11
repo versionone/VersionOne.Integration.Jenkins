@@ -15,6 +15,8 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Test;
 
+import com.versionone.jenkins.SvnModification;
+
 public class SvnModificationTest {
     private Mockery mockery = new Mockery() {
         {

@@ -1,5 +1,5 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
 import hudson.MarkupText;
 import hudson.Extension;
@@ -17,7 +17,7 @@ import com.versionone.integration.ciCommon.WorkitemData;
  *
  */
 @Extension
-public class HudsonChangeLogAnnotator extends ChangeLogAnnotator {
+public class JenkinsChangeLogAnnotator extends ChangeLogAnnotator {
 
     private V1Worker worker;
     private Pattern pattern;

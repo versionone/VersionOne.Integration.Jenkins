@@ -1,5 +1,5 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.VcsModification;
@@ -11,12 +11,12 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
-public class HudsonBuildInfo implements BuildInfo {
+public class JenkinsBuildInfo implements BuildInfo {
 
     private final AbstractBuild build;
     private final long elapsedTime;
 
-    public HudsonBuildInfo(AbstractBuild build) {
+    public JenkinsBuildInfo(AbstractBuild build) {
         this.build = build;
         GregorianCalendar now = new GregorianCalendar();
         elapsedTime = now.getTime().getTime() - build.getTimestamp().getTime().getTime();
