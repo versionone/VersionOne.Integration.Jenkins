@@ -113,7 +113,7 @@ public class HudsonBuildInfoTest {
         }}
         );
         
-        BuildInfo info = new JenkinsBuildInfo(build);
+        BuildInfo info = new JenkinsBuildInfo(build, System.out);
         Iterable<VcsModification> supportedVcsChange = info.getChanges();
         int i = 0;
         for (VcsModification mod : supportedVcsChange) {

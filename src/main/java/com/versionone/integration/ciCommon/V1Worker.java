@@ -43,25 +43,33 @@ public class V1Worker implements Worker {
     	
         //Validate connection to V1.
         if (!config.isConnectionValid()) {
+        	logger.println("VersionOne: Connection to VersionOne failed");
             return Result.FAIL_CONNECTION;
         }
+        logger.println("VersionOne: Connection to VersionOne succeeded");
         
         //Find a matching BuildProject.
         final BuildProject buildProject = getBuildProject(info);
         
         //Validate that BuildProject exists.
         if (buildProject == null) {
+        	logger.println("VersionOne: No matching BuildProject found in VersionOne");
             return Result.FAIL_NO_BUILDPROJECT;
         }
+        
+        //Validate that the BuildRun does not already exist.
         if (isBuildExist(buildProject, info)) {
+        	logger.println("VersionOne: BuildRun already exists in VersionOne");
             return Result.FAIL_DUPLICATE;
         }
         
         //Create a BuildRun in the V1 BuildProject.
         final BuildRun buildRun = createBuildRun(buildProject, info);
+        logger.println("VersionOne: Created BuildRun " + buildRun.getName());
         
         //If available, add ChangeSets.
         if (info.hasChanges()) {
+        	logger.println("VersionOne: Found changesets to process");
             setChangeSets(buildRun, info);
         }
         return Result.SUCCESS;
@@ -166,12 +174,14 @@ public class V1Worker implements Worker {
     	
         for (VcsModification change : info.getChanges()) {
         	
+        	logger.println("VersionOne: Processing changeset: " + change.getId());
+        	
             //See if we have this ChangeSet in the system.
             ChangeSetFilter filter = new ChangeSetFilter();
             String id = change.getId();
-
             filter.reference.add(id);
             Collection<ChangeSet> changeSetList = config.getV1Instance().get().changeSets(filter);
+            
             if (changeSetList.isEmpty()) {
             	
                 //We don't have one yet. Create one.
@@ -187,30 +197,30 @@ public class V1Worker implements Worker {
                 Map<String, Object> attributes = new HashMap<String, Object>();
                 attributes.put("Description", change.getComment());
                 ChangeSet changeSet = config.getV1Instance().create().changeSet(name.toString(), id, attributes);
+                logger.println("VersionOne: Created changeset: " + changeSet.getName());
 
                 changeSetList = new ArrayList<ChangeSet>(1);
                 changeSetList.add(changeSet);
             }
 
             Set<PrimaryWorkitem> workitems = determineWorkitems(change.getComment());
+            
+            logger.println("VersionOne: Associating " + changeSetList.size() + " changesets and " + workitems.size() + " workitems to buildrun");
             associateWithBuildRun(buildRun, changeSetList, workitems);
         }
     }
 
     private void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets, Set<PrimaryWorkitem> workitems) {
     	
-    	logger.println("Associating Workitems to BuildRuns...");
-    	
         for (ChangeSet changeSet : changeSets) {
         	
-        	logger.println("Found " + changeSets.size() + " ChangeSets.");
             buildRun.getChangeSets().add(changeSet);
+            logger.println("VersionOne: Added changeset " + changeSet.getName());
             
             for (PrimaryWorkitem workitem : workitems) {
             	
-            	logger.println("Found " + workitems.size() + " Workitems.");
-                if(workitem.isClosed()) {
-                    logger.println(MessagesRes.workitemClosedCannotAttachData(workitem.getDisplayID()));
+                if (workitem.isClosed()) {
+                    logger.println("VersionOne: " + MessagesRes.workitemClosedCannotAttachData(workitem.getDisplayID()));
                     continue;
                 }
 
@@ -218,6 +228,7 @@ public class V1Worker implements Worker {
                 final List<BuildRun> toRemove = new ArrayList<BuildRun>(completedIn.size());
 
                 changeSet.getPrimaryWorkitems().add(workitem);
+                logger.println("VersionOne: Added workitem " + workitem.getDisplayID() + " to changset");
 
                 for (BuildRun otherRun : completedIn) {
                     if (otherRun.getBuildProject().equals(buildRun.getBuildProject())) {
@@ -230,12 +241,17 @@ public class V1Worker implements Worker {
                 }
 
                 completedIn.add(buildRun);
+                logger.println("VersionOne: Added workitem " + workitem.getDisplayID() + " to buildrun");
             }
         }
     }
 
     private Set<PrimaryWorkitem> determineWorkitems(String comment) {
+    	
+    	logger.println("VersionOne: Processing changeset comment: " + comment + " with pattern " + config.pattern.toString());
         List<String> ids = getWorkitemsIds(comment, config.pattern);
+        
+        logger.println("VersionOne: Found " + ids.size() + " workitems to process");
         Set<PrimaryWorkitem> result = new HashSet<PrimaryWorkitem>(ids.size());
 
         for (String id : ids) {
@@ -252,12 +268,14 @@ public class V1Worker implements Worker {
      * @return A collection of matching PrimaryWorkitems.
      */
     private List<PrimaryWorkitem> getPrimaryWorkitemsByReference(String reference) {
+    	
         List<PrimaryWorkitem> result = new ArrayList<PrimaryWorkitem>();
 
         WorkitemFilter filter = new WorkitemFilter();
         filter.find.setSearchString(reference);
         filter.find.fields.add(config.referenceField);
         Collection<Workitem> workitems = config.getV1Instance().get().workitems(filter);
+        
         for (Workitem workitem : workitems) {
             if (workitem instanceof PrimaryWorkitem) {
                 result.add((PrimaryWorkitem) workitem);
@@ -274,12 +292,12 @@ public class V1Worker implements Worker {
     /**
      * Return list of workitems got from the comment string.
      *
-     * @param comment         string with some text with ids of tasks which cut using pattern set in the
-     *                        referenceexpression attribute.
+     * @param comment string with some text with ids of tasks which cut using pattern set in the reference expression attribute.
      * @param v1PatternCommit regular expression for comment parse and getting data from it.
-     * @return list of cut ids.
+     * @return list of ids.
      */
     public static List<String> getWorkitemsIds(String comment, Pattern v1PatternCommit) {
+    	
         final List<String> result = new LinkedList<String>();
 
         if (v1PatternCommit != null) {

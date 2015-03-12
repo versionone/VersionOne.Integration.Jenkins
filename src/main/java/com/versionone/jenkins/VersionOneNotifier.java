@@ -45,12 +45,22 @@ public class VersionOneNotifier extends Notifier {
         return DESCRIPTOR;
     }
 
+    /*
+     * Entry point for Jenkins to call the integration.
+     * 
+     * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
+     */
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+    	
+    	listener.getLogger().println("VersionOne: Integration initialized");
         Descriptor descriptor = getDescriptor();
+        
         V1Config config = new V1Config(descriptor.getV1Path(), descriptor.getV1Username(), descriptor.getV1Password(),
                 descriptor.getV1Pattern(), descriptor.getV1RefField(), false,
                 descriptor.getV1UseProxy(), descriptor.getV1ProxyUrl(), descriptor.getV1ProxyUsername(), descriptor.getV1ProxyPassword());
+        
         config.setLogger(listener.getLogger());
+        
         V1Worker worker = new V1Worker(config, listener.getLogger());
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
@@ -58,7 +68,9 @@ public class VersionOneNotifier extends Notifier {
                 ((JenkinsChangeLogAnnotator) annot).setData(worker, config.pattern);
             }
         }
-        BuildInfo buildInfo = new JenkinsBuildInfo(build);
+        
+        BuildInfo buildInfo = new JenkinsBuildInfo(build, listener.getLogger());
+        listener.getLogger().println("VersionOne: Processing build " + buildInfo.getBuildId() + ":" + buildInfo.getBuildName());
 
         switch (worker.submitBuildRun(buildInfo)) {
             case SUCCESS:

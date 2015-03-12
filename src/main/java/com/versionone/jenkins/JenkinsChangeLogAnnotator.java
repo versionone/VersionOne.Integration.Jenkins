@@ -1,8 +1,7 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.jenkins;
 
-import hudson.MarkupText;
 import hudson.Extension;
+import hudson.MarkupText;
 import hudson.MarkupText.SubText;
 import hudson.model.AbstractBuild;
 import hudson.scm.ChangeLogAnnotator;
