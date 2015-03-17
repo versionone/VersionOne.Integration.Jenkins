@@ -1,6 +1,8 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
+import hudson.scm.ChangeLogSet;
+
 import java.util.Date;
 
 public class VcsModificationMock implements VcsModification {
@@ -31,5 +33,9 @@ public class VcsModificationMock implements VcsModification {
 
     public String getId() {
         return id;
+    }
+
+    public ChangeLogSet.Entry getEntry() {
+        return null;
     }
 }

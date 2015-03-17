@@ -38,7 +38,7 @@ public class WorkerTest {
 		int random = new Random().nextInt();
 		final V1Config cfg = new V1Config(URL_TO_V1, LOGIN_TO_V1,
 				PASSWORD_TO_V1);
-		final Worker w = new V1Worker(cfg, System.out);
+		final Worker w = new V1Worker(cfg, System.out, null);
 		final BuildInfoMock info = new BuildInfoMock();
 		info.buildId = random++;
 		info.buildName = String.valueOf(random++);
@@ -131,7 +131,7 @@ public class WorkerTest {
 
 		final V1Config cfg = new V1Config(URL_TO_V1, LOGIN_TO_V1,
 				PASSWORD_TO_V1);
-		final Worker w = new V1Worker(cfg, System.out);
+		final Worker w = new V1Worker(cfg, System.out, null);
 
 		WorkitemData workitemData = w.getWorkitemData(displayId);
 

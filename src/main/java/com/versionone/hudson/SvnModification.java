@@ -1,14 +1,13 @@
 package com.versionone.hudson;
 
 import com.versionone.integration.ciCommon.VcsModification;
+import hudson.scm.ChangeLogSet;
 import hudson.scm.SubversionChangeLogSet;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 public class SvnModification implements VcsModification {
@@ -53,4 +52,9 @@ public class SvnModification implements VcsModification {
     public String getId() {
         return String.valueOf(entry.getRevision());
     }
+
+    public ChangeLogSet.Entry getEntry() {
+        return entry;
+    }
+
 }

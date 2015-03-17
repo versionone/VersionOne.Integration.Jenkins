@@ -8,20 +8,31 @@ import com.versionone.om.filters.BuildProjectFilter;
 import com.versionone.om.filters.BuildRunFilter;
 import com.versionone.om.filters.ChangeSetFilter;
 import com.versionone.om.filters.WorkitemFilter;
+import hudson.scm.ChangeLogSet;
+import hudson.scm.RepositoryBrowser;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class V1Worker implements Worker {
 
+    private static final Logger LOGGER = Logger.getLogger(V1Worker.class.getName());
+
     private final V1Config config;
     private final PrintStream logger;
+    private final RepositoryBrowser repoBrowser;
 
-    public V1Worker(V1Config config, PrintStream logger) {
+    public V1Worker(V1Config config, PrintStream logger, RepositoryBrowser repoBrowser) {
         this.config = config;
         this.logger = logger;
+        this.repoBrowser = repoBrowser;
     }
 
     /**
@@ -157,7 +168,8 @@ public class V1Worker implements Worker {
                 name.append('\'');
                 
                 Map<String, Object> attributes = new HashMap<String, Object>();
-                attributes.put("Description", change.getComment());
+
+                attributes.put("Description", getComment(change));
                 ChangeSet changeSet = config.getV1Instance().create().changeSet(name.toString(), id, attributes);
 
                 changeSetList = new ArrayList<ChangeSet>(1);
@@ -167,6 +179,34 @@ public class V1Worker implements Worker {
             Set<PrimaryWorkitem> workitems = determineWorkitems(change.getComment());
             associateWithBuildRun(buildRun, changeSetList, workitems);
         }
+    }
+
+    private String getComment(VcsModification change) {
+        StringBuilder comment = new StringBuilder();
+        comment.append(change.getComment());
+
+        ChangeLogSet.Entry entry = change.getEntry();
+        if (repoBrowser != null && entry != null) {
+            URL url = null;
+            try {
+                url = repoBrowser.getChangeSetLink(entry);
+            } catch (IOException e) {
+                LOGGER.warning("Failed to calculate SCM repository browser link " + e.getMessage());
+            }
+            if (url != null && StringUtils.isNotBlank(url.toExternalForm())) {
+                comment.append(" (").append("<a href=\"").append(url.toExternalForm()).append("\">");
+                comment.append(repoBrowser.getDescriptor().getDisplayName()).append("</a>").append(")");
+            }
+            if (CollectionUtils.isNotEmpty(entry.getAffectedFiles())) {
+                comment.append("<br><ul>");
+                for (ChangeLogSet.AffectedFile affectedFile : entry.getAffectedFiles()) {
+                    comment.append("<li>").append(affectedFile.getPath()).append("</li>");
+                }
+                comment.append("</ul>");
+            }
+        }
+
+        return comment.toString();
     }
 
     private void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets,
