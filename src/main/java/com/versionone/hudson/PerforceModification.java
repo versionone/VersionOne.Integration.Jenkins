@@ -2,6 +2,7 @@ package com.versionone.hudson;
 
 import com.versionone.integration.ciCommon.VcsModification;
 import hudson.plugins.perforce.PerforceChangeLogEntry;
+import hudson.scm.ChangeLogSet;
 
 import java.util.Date;
 
@@ -29,5 +30,9 @@ public class PerforceModification implements VcsModification {
 
     public String getId() {
         return entry.getChangeNumber();
+    }
+
+    public ChangeLogSet.Entry getEntry() {
+        return entry;
     }
 }

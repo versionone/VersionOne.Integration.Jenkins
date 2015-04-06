@@ -27,4 +27,8 @@ public class UnknownModification implements VcsModification {
     public String getId() {
         return null;
     }
+
+    public ChangeLogSet.Entry getEntry() {
+        return null;
+    }
 }

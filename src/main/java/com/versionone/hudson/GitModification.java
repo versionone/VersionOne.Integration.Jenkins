@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import com.versionone.integration.ciCommon.VcsModification;
+import hudson.scm.ChangeLogSet;
 
 public class GitModification implements VcsModification {
     private DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
@@ -38,5 +39,9 @@ public class GitModification implements VcsModification {
 	public String getUserName() {
 		return _entry.getAuthorName();
 	}
+
+    public ChangeLogSet.Entry getEntry() {
+        return _entry;
+    }
 
 }

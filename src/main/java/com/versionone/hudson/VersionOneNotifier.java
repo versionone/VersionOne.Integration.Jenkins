@@ -16,6 +16,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.scm.ChangeLogAnnotator;
+import hudson.scm.RepositoryBrowser;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -49,7 +50,7 @@ public class VersionOneNotifier extends Notifier {
                 descriptor.getV1Pattern(), descriptor.getV1RefField(), false,
                 descriptor.getV1UseProxy(), descriptor.getV1ProxyUrl(), descriptor.getV1ProxyUsername(), descriptor.getV1ProxyPassword());
         config.setLogger(listener.getLogger());
-        V1Worker worker = new V1Worker(config, listener.getLogger());
+        V1Worker worker = new V1Worker(config, listener.getLogger(), getRepositoryBrowser(build));
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
             if (annot instanceof HudsonChangeLogAnnotator) {
@@ -77,6 +78,13 @@ public class VersionOneNotifier extends Notifier {
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
+    }
+
+    private RepositoryBrowser<?> getRepositoryBrowser(AbstractBuild<?, ?> build) {
+        if (build.getProject().getScm() != null) {
+            return build.getProject().getScm().getEffectiveBrowser();
+        }
+        return null;
     }
 
     public static final class Descriptor extends BuildStepDescriptor<Publisher> {
