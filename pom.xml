@@ -165,10 +165,10 @@
                 </configuration>
             </plugin>-->
 		</plugins>
-		<pluginManagement>
+		<!-- <pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
+				This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself.
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -247,7 +247,7 @@
 					</executions>
 				</plugin>
 			</plugins>
-		</pluginManagement>
+		</pluginManagement> -->
 	</build>
 
 	<dependencies>
@@ -256,7 +256,8 @@
         <dependency>
             <groupId>com.versionone</groupId>
             <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
-            <version>13.0.2</version>
+            <!-- <version>13.0.2</version> -->
+            <version>15.2.0</version>
             <exclusions>
                 <!-- (Comment #2) exclude because Jenkins injected tests are failing otherwise -->
                 <exclusion>
@@ -272,19 +273,19 @@
 			<type>pom</type>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.versionone</groupId>
 			<artifactId>VersionOne.SDK.Java.ObjectModel</artifactId>
 			<version>12.1.0.150</version>
             <exclusions>
-                <!-- See Comment #1 -->
+                See Comment #1
                 <exclusion>
                     <groupId>com.versionone</groupId>
                     <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
                 </exclusion>
             </exclusions>
 		</dependency>
-
+ -->
 	    <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>subversion</artifactId>

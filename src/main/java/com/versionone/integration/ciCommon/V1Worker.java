@@ -14,59 +14,74 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.versionone.DB;
+
 import com.versionone.jenkins.MessagesRes;
-import com.versionone.om.BuildProject;
-import com.versionone.om.BuildRun;
-import com.versionone.om.ChangeSet;
-import com.versionone.om.PrimaryWorkitem;
-import com.versionone.om.SecondaryWorkitem;
-import com.versionone.om.Workitem;
-import com.versionone.om.filters.BuildProjectFilter;
-import com.versionone.om.filters.BuildRunFilter;
-import com.versionone.om.filters.ChangeSetFilter;
-import com.versionone.om.filters.WorkitemFilter;
+import com.versionone.apiclient.exceptions.APIException;
+import com.versionone.apiclient.exceptions.ConnectionException;
+import com.versionone.apiclient.exceptions.OidException;
+import com.versionone.apiclient.exceptions.V1Exception;
+import com.versionone.apiclient.filters.FilterTerm;
+import com.versionone.apiclient.filters.IFilterTerm;
+import com.versionone.apiclient.interfaces.IAssetType;
+import com.versionone.apiclient.interfaces.IServices;
+import com.versionone.apiclient.services.QueryResult;
+import com.versionone.hudson.MessagesRes;
+import com.versionone.apiclient.*;
+
+import java.net.MalformedURLException;
+import java.util.*;
 
 public class V1Worker implements Worker {
 
     private final V1Config config;
     private final PrintStream logger;
+    private final V1Connector connector;
+    private final IServices services;
 
-    public V1Worker(V1Config config, PrintStream logger) {
+    public V1Worker(V1Config config, PrintStream logger) throws V1Exception, MalformedURLException {
         this.config = config;
         this.logger = logger;
+
+        connector  = V1Connector
+                .withInstanceUrl(config.url)
+                .withUserAgentHeader("Jenkins Integration", "1.0")
+                .withUsernameAndPassword(config.userName,config.password)
+                .build();
+
+        services = new Services(connector);
     }
 
     /**
      * Adds to the VersionOne BuildRun and ChangesSet.
      */
     public Result submitBuildRun(final BuildInfo info) {
-    	
         //Validate connection to V1.
-        if (!config.isConnectionValid()) {
-        	logger.println("VersionOne: Connection to VersionOne failed");
-            return Result.FAIL_CONNECTION;
-        }
-        logger.println("VersionOne: Connection to VersionOne succeeded");
-        
+        // if (!config.isConnectionValid()) {
+        // 	logger.println("VersionOne: Connection to VersionOne failed");
+        //     return Result.FAIL_CONNECTION;
+        // }
+        // logger.println("VersionOne: Connection to VersionOne succeeded");
+
         //Find a matching BuildProject.
+
         final BuildProject buildProject = getBuildProject(info);
-        
+
         //Validate that BuildProject exists.
         if (buildProject == null) {
         	logger.println("VersionOne: No matching BuildProject found in VersionOne");
             return Result.FAIL_NO_BUILDPROJECT;
         }
-        
+
         //Validate that the BuildRun does not already exist.
         if (isBuildExist(buildProject, info)) {
         	logger.println("VersionOne: BuildRun already exists in VersionOne");
             return Result.FAIL_DUPLICATE;
         }
-        
+
         //Create a BuildRun in the V1 BuildProject.
         final BuildRun buildRun = createBuildRun(buildProject, info);
         logger.println("VersionOne: Created BuildRun " + buildRun.getName());
-        
+
         //If available, add ChangeSets.
         if (info.hasChanges()) {
         	logger.println("VersionOne: Found changesets to process");
@@ -95,21 +110,25 @@ public class V1Worker implements Worker {
      * @param info information about build run
      * @return V1 representation of the project if match; otherwise - null.
      */
-    private BuildProject getBuildProject(BuildInfo info) {
-        
-    	BuildProjectFilter filter = new BuildProjectFilter();
-        filter.references.add(info.getProjectName());
-        Collection<BuildProject> projects = config.getV1Instance().get().buildProjects(filter);
 
-        if (projects.isEmpty()) {
+    private Asset getBuildProject(BuildInfo info) throws ConnectionException, APIException, OidException {
+        IAssetType buildProject = services.getMeta().getAssetType("BuildProject");
+        Query query = new Query(buildProject);
+        FilterTerm filter = new FilterTerm(buildProject.getAttributeDefinition("Reference"));
+        filter.equal(info.getProjectName());
+
+        query.setFilter(filter);
+        QueryResult result = services.retrieve(query);
+
+        if (result.getAssets().length == 0) {
             return null;
         }
-        return projects.iterator().next();
+        return result.getAssets()[0];
     }
 
 
     private static BuildRun createBuildRun(BuildProject buildProject, BuildInfo info) {
-    	
+
         //Generate the BuildRun asset.
         BuildRun run = buildProject.createBuildRun(getBuildName(info), new DB.DateTime(info.getStartTime()));
 
@@ -121,10 +140,10 @@ public class V1Worker implements Worker {
         if (info.hasChanges()) {
             run.setDescription(getModificationDescription(info.getChanges()));
         }
-        
+
         run.save();
         run.createLink("Build Report", info.getUrl(), true);
-        
+
         return run;
     }
 
@@ -155,7 +174,7 @@ public class V1Worker implements Worker {
      * @return description string.
      */
     public static String getModificationDescription(Iterable<VcsModification> changes) {
-    	
+
         //Create Set to filter changes unique by User and Comment.
         StringBuilder result = new StringBuilder(256);
         for (Iterator<VcsModification> it = changes.iterator(); it.hasNext();) {
@@ -171,19 +190,19 @@ public class V1Worker implements Worker {
     }
 
     private void setChangeSets(BuildRun buildRun, BuildInfo info) {
-    	
+
         for (VcsModification change : info.getChanges()) {
-        	
+
         	logger.println("VersionOne: Processing changeset: " + change.getId());
-        	
+
             //See if we have this ChangeSet in the system.
             ChangeSetFilter filter = new ChangeSetFilter();
             String id = change.getId();
             filter.reference.add(id);
             Collection<ChangeSet> changeSetList = config.getV1Instance().get().changeSets(filter);
-            
+
             if (changeSetList.isEmpty()) {
-            	
+
                 //We don't have one yet. Create one.
                 StringBuilder name = new StringBuilder();
                 name.append('\'');
@@ -193,7 +212,7 @@ public class V1Worker implements Worker {
                     name.append(new DB.DateTime(change.getDate()));
                 }
                 name.append('\'');
-                
+
                 Map<String, Object> attributes = new HashMap<String, Object>();
                 attributes.put("Description", change.getComment());
                 ChangeSet changeSet = config.getV1Instance().create().changeSet(name.toString(), id, attributes);
@@ -204,21 +223,21 @@ public class V1Worker implements Worker {
             }
 
             Set<PrimaryWorkitem> workitems = determineWorkitems(change.getComment());
-            
+
             logger.println("VersionOne: Associating " + changeSetList.size() + " changesets and " + workitems.size() + " workitems to buildrun");
             associateWithBuildRun(buildRun, changeSetList, workitems);
         }
     }
 
     private void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets, Set<PrimaryWorkitem> workitems) {
-    	
+
         for (ChangeSet changeSet : changeSets) {
-        	
+
             buildRun.getChangeSets().add(changeSet);
             logger.println("VersionOne: Added changeset " + changeSet.getName());
-            
+
             for (PrimaryWorkitem workitem : workitems) {
-            	
+
                 if (workitem.isClosed()) {
                     logger.println("VersionOne: " + MessagesRes.workitemClosedCannotAttachData(workitem.getDisplayID()));
                     continue;
@@ -247,10 +266,10 @@ public class V1Worker implements Worker {
     }
 
     private Set<PrimaryWorkitem> determineWorkitems(String comment) {
-    	
+
     	logger.println("VersionOne: Processing changeset comment: " + comment + " with pattern " + config.pattern.toString());
         List<String> ids = getWorkitemsIds(comment, config.pattern);
-        
+
         logger.println("VersionOne: Found " + ids.size() + " workitems to process");
         Set<PrimaryWorkitem> result = new HashSet<PrimaryWorkitem>(ids.size());
 
@@ -268,14 +287,12 @@ public class V1Worker implements Worker {
      * @return A collection of matching PrimaryWorkitems.
      */
     private List<PrimaryWorkitem> getPrimaryWorkitemsByReference(String reference) {
-    	
-        List<PrimaryWorkitem> result = new ArrayList<PrimaryWorkitem>();
-
+        List<Asset> result = new ArrayList<Asset>();
         WorkitemFilter filter = new WorkitemFilter();
         filter.find.setSearchString(reference);
         filter.find.fields.add(config.referenceField);
         Collection<Workitem> workitems = config.getV1Instance().get().workitems(filter);
-        
+
         for (Workitem workitem : workitems) {
             if (workitem instanceof PrimaryWorkitem) {
                 result.add((PrimaryWorkitem) workitem);
@@ -297,7 +314,7 @@ public class V1Worker implements Worker {
      * @return list of ids.
      */
     public static List<String> getWorkitemsIds(String comment, Pattern v1PatternCommit) {
-    	
+
         final List<String> result = new LinkedList<String>();
 
         if (v1PatternCommit != null) {

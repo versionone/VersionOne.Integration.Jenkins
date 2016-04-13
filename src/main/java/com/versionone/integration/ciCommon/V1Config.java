@@ -1,5 +1,10 @@
 package com.versionone.integration.ciCommon;
 
+import com.versionone.apiclient.ProxyProvider;
+import com.versionone.apiclient.Services;
+import com.versionone.apiclient.V1Connector;
+import com.versionone.apiclient.interfaces.IMetaModel;
+import com.versionone.apiclient.exceptions.*;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,8 +32,7 @@ public final class V1Config {
     public final String proxyUsername;
     public final String proxyPassword;
 
-    private V1Instance v1Instance;
-
+    private Services services;
     private PrintStream logger;
 
     public V1Config() {
@@ -72,7 +76,7 @@ public final class V1Config {
     public V1Config(String url, String userName, String password, String pattern,
                     String referenceField, Boolean fullyQualifiedBuildName,
                     boolean useProxy, String proxyUrl, String proxyUsername, String proxyPassword) {
-    	
+
         this.url = url;
         this.userName = userName;
         this.password = password;
@@ -95,36 +99,20 @@ public final class V1Config {
     }
 
     /**
-     * Validate connection to the VersionOne server
-     *
-     * @return true if all settings is correct and connection to V1 is valid, false - otherwise
-     */
-    public boolean isConnectionValid() {
-        try {
-            checkConnectionValid();
-            return true;
-        } catch (SDKException e) {
-            return false;
-        }
-    }
-
-    public void checkConnectionValid() throws AuthenticationException, ApplicationUnavailableException {
-        getV1Instance().validate();
-    }
-
-    /**
      * Get instance of connection to VersionOne with settings from this class.
      *
      * @return connection to VersionOne
+     * @throws V1Exception
+     * @throws MalformedURLException
      */
-    public V1Instance getV1Instance() {
-        if (v1Instance == null) {
-            ProxySettings proxySettings = null;
+    public Services getV1Instance() throws MalformedURLException, V1Exception {
+        if (services == null) {
+        	ProxyProvider proxyProvider = null;
 
             if(useProxy) {
                 try {
                     URI proxyURI = new URI(proxyUrl);
-                    proxySettings = new ProxySettings(proxyURI, proxyUsername, proxyPassword);
+                    proxyProvider = new ProxyProvider(proxyURI, proxyUsername, proxyPassword);
                 } catch(URISyntaxException e) {
                     if(logger != null) {
                         logger.printf("Invalid proxy server URI %1$, skipping proxy connection.", proxyUrl);
@@ -134,10 +122,16 @@ public final class V1Config {
 
             String passwordToApply = userName != null? password : null;
 
-            v1Instance = new V1Instance(url, userName, passwordToApply, proxySettings);
-            v1Instance.validate();
+            V1Connector connector = V1Connector
+                	.withInstanceUrl(url)
+                	.withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
+                	.withUsernameAndPassword(userName, password)
+                	.withProxy(proxyProvider)
+                	.build();
+
+            services = new Services(connector);
         }
-        return v1Instance;
+        return services;
     }
 
     @Override
@@ -158,12 +152,8 @@ public final class V1Config {
      * @return true if reference field is valid, otherwise - false
      */
     public boolean isReferenceFieldValid() {
-        try {
-            final IMetaModel meta = getV1Instance().getApiClient().getMetaModel();
+            final IMetaModel meta = services.getMeta();
             meta.getAssetType("PrimaryWorkitem").getAttributeDefinition(referenceField);
             return true;
-        } catch (MetaException e) {
-            return false;
-        }
     }
 }

@@ -1,5 +1,13 @@
 package com.versionone.jenkins;
 
+import com.versionone.apiclient.ProxyProvider;
+import com.versionone.apiclient.Services;
+import com.versionone.apiclient.V1Connector;
+import com.versionone.apiclient.interfaces.*;
+import com.versionone.apiclient.exceptions.*;
+import com.versionone.integration.ciCommon.BuildInfo;
+import com.versionone.integration.ciCommon.V1Config;
+import com.versionone.integration.ciCommon.V1Worker;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.BuildListener;
@@ -47,20 +55,20 @@ public class VersionOneNotifier extends Notifier {
 
     /*
      * Entry point for Jenkins to call the integration.
-     * 
+     *
      * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
      */
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-    	
+
     	listener.getLogger().println("VersionOne: Integration initialized");
         Descriptor descriptor = getDescriptor();
-        
+
         V1Config config = new V1Config(descriptor.getV1Path(), descriptor.getV1Username(), descriptor.getV1Password(),
                 descriptor.getV1Pattern(), descriptor.getV1RefField(), false,
                 descriptor.getV1UseProxy(), descriptor.getV1ProxyUrl(), descriptor.getV1ProxyUsername(), descriptor.getV1ProxyPassword());
-        
+
         config.setLogger(listener.getLogger());
-        
+
         V1Worker worker = new V1Worker(config, listener.getLogger());
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
@@ -68,7 +76,7 @@ public class VersionOneNotifier extends Notifier {
                 ((JenkinsChangeLogAnnotator) annot).setData(worker, config.pattern);
             }
         }
-        
+
         BuildInfo buildInfo = new JenkinsBuildInfo(build, listener.getLogger());
         listener.getLogger().println("VersionOne: Processing build " + buildInfo.getBuildId() + ":" + buildInfo.getBuildName());
 
@@ -185,7 +193,7 @@ public class VersionOneNotifier extends Notifier {
             } catch (MalformedURLException e) {
                 return FormValidation.error(MessagesRes.pathWrong());
             }
-            
+
             return FormValidation.ok();
         }
 
@@ -210,24 +218,33 @@ public class VersionOneNotifier extends Notifier {
                                                @QueryParameter(V1_PROXY_USERNAME) final String proxyUsername,
                                                @QueryParameter(V1_PROXY_PASSWORD) final String proxyPassword) {
             try {
-                ProxySettings proxySettings = null;
+                ProxyProvider proxyProvider = null;
 
                 if(useProxy) {
-                    proxySettings = new ProxySettings(createUri(proxyUrl), proxyUsername, proxyPassword);
+                	proxyProvider = new ProxyProvider(createUri(proxyUrl), proxyUsername, proxyPassword);
+
                 }
 
-                final V1Instance v1 = new V1Instance(path, username, password, proxySettings);
-                v1.validate();
-                final IMetaModel meta = v1.getApiClient().getMetaModel();
+                V1Connector connector = V1Connector
+                	.withInstanceUrl(path)
+                	.withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
+                	.withUsernameAndPassword(username, password)
+                	.withProxy(proxyProvider)
+                	.build();
+
+
+                Services services = new Services(connector);
+                IMetaModel meta = services.getMeta();
+
                 meta.getAssetType("PrimaryWorkitem").getAttributeDefinition(refField);
                 return FormValidation.ok(MessagesRes.connectionValid());
             } catch(URISyntaxException e) {
                 return FormValidation.error(MessagesRes.connectionFailedProxyUrlMalformed());
-            } catch (ApplicationUnavailableException e) {
+            } catch (MalformedURLException e) {
                 return FormValidation.error(MessagesRes.connectionFailedPath());
-            } catch (AuthenticationException e) {
-                return FormValidation.error(MessagesRes.connectionFailedUsername());
             } catch (MetaException e) {
+                return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
+            } catch (V1Exception e) {
                 return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
             }
         }
