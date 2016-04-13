@@ -6,17 +6,10 @@ import com.versionone.apiclient.V1Connector;
 import com.versionone.apiclient.interfaces.IMetaModel;
 import com.versionone.apiclient.exceptions.*;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
-
-import com.versionone.apiclient.IMetaModel;
-import com.versionone.apiclient.MetaException;
-import com.versionone.om.ApplicationUnavailableException;
-import com.versionone.om.AuthenticationException;
-import com.versionone.om.ProxySettings;
-import com.versionone.om.SDKException;
-import com.versionone.om.V1Instance;
 
 public final class V1Config {
 
@@ -103,9 +96,8 @@ public final class V1Config {
      *
      * @return connection to VersionOne
      * @throws V1Exception
-     * @throws MalformedURLException
      */
-    public Services getV1Instance() throws MalformedURLException, V1Exception {
+    public Services getV1Instance() throws V1Exception, MalformedURLException {
         if (services == null) {
         	ProxyProvider proxyProvider = null;
 

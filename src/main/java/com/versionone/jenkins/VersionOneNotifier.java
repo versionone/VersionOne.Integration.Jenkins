@@ -33,15 +33,11 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import com.versionone.apiclient.IMetaModel;
-import com.versionone.apiclient.MetaException;
+import com.versionone.apiclient.*;
+
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
-import com.versionone.om.ApplicationUnavailableException;
-import com.versionone.om.AuthenticationException;
-import com.versionone.om.ProxySettings;
-import com.versionone.om.V1Instance;
 
 public class VersionOneNotifier extends Notifier {
 

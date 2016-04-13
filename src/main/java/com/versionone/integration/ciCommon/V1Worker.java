@@ -2,34 +2,31 @@ package com.versionone.integration.ciCommon;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.versionone.DB;
 
+import com.versionone.apiclient.filters.AndFilterTerm;
+import com.versionone.apiclient.filters.GroupFilterTerm;
 import com.versionone.jenkins.MessagesRes;
 import com.versionone.apiclient.exceptions.APIException;
 import com.versionone.apiclient.exceptions.ConnectionException;
 import com.versionone.apiclient.exceptions.OidException;
 import com.versionone.apiclient.exceptions.V1Exception;
 import com.versionone.apiclient.filters.FilterTerm;
-import com.versionone.apiclient.filters.IFilterTerm;
 import com.versionone.apiclient.interfaces.IAssetType;
 import com.versionone.apiclient.interfaces.IServices;
 import com.versionone.apiclient.services.QueryResult;
-import com.versionone.hudson.MessagesRes;
 import com.versionone.apiclient.*;
 
 import java.net.MalformedURLException;
-import java.util.*;
+
 
 public class V1Worker implements Worker {
 
@@ -64,7 +61,7 @@ public class V1Worker implements Worker {
 
         //Find a matching BuildProject.
 
-        final BuildProject buildProject = getBuildProject(info);
+        final Asset buildProject = getBuildProject(info);
 
         //Validate that BuildProject exists.
         if (buildProject == null) {
@@ -94,14 +91,27 @@ public class V1Worker implements Worker {
         return info.getProjectName() + " - build." + info.getBuildName();
     }
 
-    private boolean isBuildExist(BuildProject buildProject, BuildInfo info) {
-        BuildRunFilter filter = new BuildRunFilter();
-        filter.references.add(Long.toString(info.getBuildId()));
-        filter.name.add(getBuildName(info));
-        filter.buildProjects.add(buildProject);
+    private boolean isBuildExist(Asset buildProject, BuildInfo info) throws ConnectionException, APIException, OidException {
 
-        Collection<BuildRun> buildRuns = config.getV1Instance().get().buildRuns(filter);
-        return buildRuns != null && buildRuns.size() != 0;
+        IAssetType buildProjectAssetType = buildProject.getAssetType();
+        Query query = new Query(buildProjectAssetType);
+
+        FilterTerm filterReference = new FilterTerm(buildProjectAssetType.getAttributeDefinition("Reference"));
+        filterReference.equal(Long.toString(info.getBuildId()));
+
+        FilterTerm filterName = new FilterTerm(buildProjectAssetType.getAttributeDefinition("Name"));
+        filterName.equal(getBuildName(info));
+
+        //Scopes?
+        FilterTerm filterBuildProjects = new FilterTerm(buildProjectAssetType.getAttributeDefinition("BuildProjects"));
+        filterBuildProjects.equal(getBuildName(info));
+
+        GroupFilterTerm groupFilter = new AndFilterTerm(filterReference, filterName, filterBuildProjects);
+        query.setFilter(groupFilter);
+
+        QueryResult result = services.retrieve(query);
+
+        return result.getAssets() != null && result.getAssets().length != 0;
     }
 
     /**
