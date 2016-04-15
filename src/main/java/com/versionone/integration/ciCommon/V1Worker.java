@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import com.versionone.DB;
 
+import com.versionone.Oid;
 import com.versionone.apiclient.filters.AndFilterTerm;
 import com.versionone.apiclient.filters.GroupFilterTerm;
 import com.versionone.apiclient.interfaces.IAttributeDefinition;
@@ -255,29 +256,37 @@ public class V1Worker implements Worker {
                 changeSetList.add(changeSet);
             }
 
-            Set<PrimaryWorkitem> workitems = determineWorkitems(change.getComment());
+            Set<Asset> workitems = determineWorkitems(change.getComment());
 
             logger.println("VersionOne: Associating " + changeSetList.size() + " changesets and " + workitems.size() + " workitems to buildrun");
             associateWithBuildRun(buildRun, changeSetList, workitems);
         }
     }
 
-    private void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets, Set<PrimaryWorkitem> workitems) {
+    private void associateWithBuildRun(Asset buildRun, Collection<Asset> changeSets, Set<Asset> workitems) throws APIException {
 
-        for (ChangeSet changeSet : changeSets) {
+        IAttributeDefinition buildRunChangeSetsAttrDef = buildRun.getAssetType().getAttributeDefinition("ChangeSets");
+        //List<Object> buildRunChangeSets = Arrays.asList(buildRun.getAttribute(buildRunChangeSetsAttrDef).getValues());
+        for (Asset changeSet : changeSets) {
+            IAttributeDefinition changeSetNameAttrDef = changeSet.getAssetType().getAttributeDefinition("Name");
 
-            buildRun.getChangeSets().add(changeSet);
-            logger.println("VersionOne: Added changeset " + changeSet.getName());
+            buildRun.addAttributeValue(buildRunChangeSetsAttrDef, changeSet.getOid());
 
-            for (PrimaryWorkitem workitem : workitems) {
+            logger.println("VersionOne: Added changeset " + changeSet.getAttribute(changeSetNameAttrDef).getValue());
 
-                if (workitem.isClosed()) {
-                    logger.println("VersionOne: " + MessagesRes.workitemClosedCannotAttachData(workitem.getDisplayID()));
+            for (Asset workitem : workitems) {
+                IAttributeDefinition workItemIsClosedAttrDef = workitem.getAssetType().getAttributeDefinition("IsClosed");
+                IAttributeDefinition workItemIsClosedAttrDef = workitem.getAssetType().getAttributeDefinition("IsClosed");
+
+                if (Boolean.parseBoolean(workitem.getAttribute(workItemIsClosedAttrDef).getValue().toString())) {
+                    logger.println("VersionOne: " + MessagesRes.workitemClosedCannotAttachData(workitem.getOid().toString()));
                     continue;
                 }
 
-                final Collection<BuildRun> completedIn = workitem.getCompletedIn();
-                final List<BuildRun> toRemove = new ArrayList<BuildRun>(completedIn.size());
+                //final Collection<BuildRun> completedIn = workitem.getCompletedIn();
+                //final List<BuildRun> toRemove = new ArrayList<BuildRun>(completedIn.size());
+
+                List<Object> completedIn =
 
                 changeSet.getPrimaryWorkitems().add(workitem);
                 logger.println("VersionOne: Added workitem " + workitem.getDisplayID() + " to changset");
@@ -298,7 +307,7 @@ public class V1Worker implements Worker {
         }
     }
 
-    private Set<Asset> determineWorkitems(String comment) {
+    private Set<Asset> determineWorkitems(String comment) throws V1Exception, MalformedURLException {
 
         logger.println("VersionOne: Processing changeset comment: " + comment + " with pattern " + config.pattern.toString());
         List<String> ids = getWorkitemsIds(comment, config.pattern);
@@ -324,6 +333,10 @@ public class V1Worker implements Worker {
         IServices services = config.getV1Instance();
 
         IAssetType workItemType = services.getAssetType("Workitem");
+        IAssetType primaryWorkItemType = services.getAssetType("PrimaryWorkitem");
+
+        IAttributeDefinition primaryWorkItemParentAttrDef = primaryWorkItemType.getAttributeDefinition("Parent");
+
         Query query = new Query(workItemType);
 
         FilterTerm filter = new FilterTerm(workItemType.getAttributeDefinition(config.referenceField));
@@ -331,14 +344,19 @@ public class V1Worker implements Worker {
         query.setFilter(filter);
 
         QueryResult queryResult = services.retrieve(query);
+
         for (Asset workitem : queryResult.getAssets()) {
-            if (workitem instanceof PrimaryWorkitem) {
-                result.add((PrimaryWorkitem) workitem);
-            } else if (workitem instanceof SecondaryWorkitem) {
-                result.add((PrimaryWorkitem) ((SecondaryWorkitem) workitem).getParent());
+            if (workitem.getAssetType().getBase().getToken().equals("PrimaryWorkitem")) {
+                result.add(workitem);
+            } else if (workitem.getAssetType().getBase().getToken().equals("Workitem")) {
+                Query query2 = new Query(services.getOid(workitem.getAttribute(primaryWorkItemParentAttrDef).getValue().toString()));
+                QueryResult queryResult2 = services.retrieve(query2);
+
+                result.add(queryResult2.getAssets()[0]);
             } else {
-                throw new RuntimeException("Found unexpected Workitem type: " + workitem.getClass());
+                throw new RuntimeException("Found unexpected Workitem type: " + workitem.getAssetType().getBase().getToken());
             }
+            result.add(workitem);
         }
 
         return result;
