@@ -1,12 +1,7 @@
 package com.versionone.integration.ciCommon;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +9,7 @@ import com.versionone.DB;
 
 import com.versionone.apiclient.filters.AndFilterTerm;
 import com.versionone.apiclient.filters.GroupFilterTerm;
+import com.versionone.apiclient.interfaces.IAttributeDefinition;
 import com.versionone.jenkins.MessagesRes;
 import com.versionone.apiclient.exceptions.APIException;
 import com.versionone.apiclient.exceptions.ConnectionException;
@@ -32,26 +28,16 @@ public class V1Worker implements Worker {
 
     private final V1Config config;
     private final PrintStream logger;
-    private final V1Connector connector;
-    private final IServices services;
 
     public V1Worker(V1Config config, PrintStream logger) throws V1Exception, MalformedURLException {
         this.config = config;
         this.logger = logger;
-
-        connector  = V1Connector
-                .withInstanceUrl(config.url)
-                .withUserAgentHeader("Jenkins Integration", "1.0")
-                .withUsernameAndPassword(config.userName,config.password)
-                .build();
-
-        services = new Services(connector);
     }
 
     /**
      * Adds to the VersionOne BuildRun and ChangesSet.
      */
-    public Result submitBuildRun(final BuildInfo info) {
+    public Result submitBuildRun(final BuildInfo info) throws V1Exception {
         //Validate connection to V1.
         // if (!config.isConnectionValid()) {
         // 	logger.println("VersionOne: Connection to VersionOne failed");
@@ -65,23 +51,23 @@ public class V1Worker implements Worker {
 
         //Validate that BuildProject exists.
         if (buildProject == null) {
-        	logger.println("VersionOne: No matching BuildProject found in VersionOne");
+            logger.println("VersionOne: No matching BuildProject found in VersionOne");
             return Result.FAIL_NO_BUILDPROJECT;
         }
 
         //Validate that the BuildRun does not already exist.
         if (isBuildExist(buildProject, info)) {
-        	logger.println("VersionOne: BuildRun already exists in VersionOne");
+            logger.println("VersionOne: BuildRun already exists in VersionOne");
             return Result.FAIL_DUPLICATE;
         }
 
         //Create a BuildRun in the V1 BuildProject.
-        final BuildRun buildRun = createBuildRun(buildProject, info);
+        final Asset buildRun = createBuildRun(buildProject, info);
         logger.println("VersionOne: Created BuildRun " + buildRun.getName());
 
         //If available, add ChangeSets.
         if (info.hasChanges()) {
-        	logger.println("VersionOne: Found changesets to process");
+            logger.println("VersionOne: Found changesets to process");
             setChangeSets(buildRun, info);
         }
         return Result.SUCCESS;
@@ -91,7 +77,7 @@ public class V1Worker implements Worker {
         return info.getProjectName() + " - build." + info.getBuildName();
     }
 
-    private boolean isBuildExist(Asset buildProject, BuildInfo info) throws ConnectionException, APIException, OidException {
+    private boolean isBuildExist(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
 
         IAssetType buildProjectAssetType = buildProject.getAssetType();
         Query query = new Query(buildProjectAssetType);
@@ -109,7 +95,7 @@ public class V1Worker implements Worker {
         GroupFilterTerm groupFilter = new AndFilterTerm(filterReference, filterName, filterBuildProjects);
         query.setFilter(groupFilter);
 
-        QueryResult result = services.retrieve(query);
+        QueryResult result = config.getV1Instance().retrieve(query);
 
         return result.getAssets() != null && result.getAssets().length != 0;
     }
@@ -121,7 +107,8 @@ public class V1Worker implements Worker {
      * @return V1 representation of the project if match; otherwise - null.
      */
 
-    private Asset getBuildProject(BuildInfo info) throws ConnectionException, APIException, OidException {
+    private Asset getBuildProject(BuildInfo info) throws V1Exception, MalformedURLException {
+        IServices services = config.getV1Instance();
         IAssetType buildProject = services.getMeta().getAssetType("BuildProject");
         Query query = new Query(buildProject);
         FilterTerm filter = new FilterTerm(buildProject.getAttributeDefinition("Reference"));
@@ -137,24 +124,48 @@ public class V1Worker implements Worker {
     }
 
 
-    private static BuildRun createBuildRun(BuildProject buildProject, BuildInfo info) {
+    private Asset createBuildRun(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
 
+        IServices services = config.getV1Instance();
         //Generate the BuildRun asset.
-        BuildRun run = buildProject.createBuildRun(getBuildName(info), new DB.DateTime(info.getStartTime()));
+        IAssetType buildRunType = services.getAssetType("BuildRun");
+        IAttributeDefinition buildRunNameAttrDef = buildRunType.getAttributeDefinition("Name");
+        IAttributeDefinition buildRunDateAttrDef = buildRunType.getAttributeDefinition("Date");
+        IAttributeDefinition buildRunElapsedAttrDef = buildRunType.getAttributeDefinition("Elapsed");
+        IAttributeDefinition buildRunReferenceAttrDef = buildRunType.getAttributeDefinition("Reference");
+        IAttributeDefinition buildRunSourceAttrDef = buildRunType.getAttributeDefinition("Source");
+        IAttributeDefinition buildRunStatusAttrDef = buildRunType.getAttributeDefinition("Status");
 
-        run.setElapsed((double) info.getElapsedTime());
-        run.setReference(Long.toString(info.getBuildId()));
-        run.getSource().setCurrentValue(getSourceName(info.isForced()));
-        run.getStatus().setCurrentValue(getStatusName(info.isSuccessful()));
+        Asset buildRun = services.createNew(buildRunType, buildProject.getOid());
+        buildRun.setAttributeValue(buildRunNameAttrDef, getBuildName(info));
+        buildRun.setAttributeValue(buildRunDateAttrDef, new DB.DateTime(info.getStartTime()));
+        buildRun.setAttributeValue(buildRunElapsedAttrDef, (double) info.getElapsedTime());
+        buildRun.setAttributeValue(buildRunReferenceAttrDef, Long.toString(info.getBuildId()));
+        buildRun.setAttributeValue(buildRunSourceAttrDef, getSourceName(info.isForced()));
+        buildRun.setAttributeValue(buildRunStatusAttrDef, getStatusName(info.isSuccessful()));
 
         if (info.hasChanges()) {
-            run.setDescription(getModificationDescription(info.getChanges()));
+            IAttributeDefinition descriptionAttrDef = buildRunType.getAttributeDefinition("Description");
+            buildRun.setAttributeValue(descriptionAttrDef, getModificationDescription(info.getChanges()));
         }
 
-        run.save();
-        run.createLink("Build Report", info.getUrl(), true);
+        services.save(buildRun);
 
-        return run;
+        IAssetType linkType = services.getAssetType("Link");
+        IAttributeDefinition linkAssetAttrDef = linkType.getAttributeDefinition("Asset");
+        IAttributeDefinition linkNameAttrDef = linkType.getAttributeDefinition("Name");
+        IAttributeDefinition linkUrlAttrDef = linkType.getAttributeDefinition("URL");
+        IAttributeDefinition linkOnMenuAttrDef = linkType.getAttributeDefinition("OnMenu");
+
+        Asset link = services.createNew(linkType, null);
+        link.setAttributeValue(linkAssetAttrDef, buildRun.getOid());
+        link.setAttributeValue(linkNameAttrDef, "Build Report");
+        link.setAttributeValue(linkUrlAttrDef, info.getUrl());
+        link.setAttributeValue(linkOnMenuAttrDef, true);
+
+        services.save(link);
+
+        return buildRun;
     }
 
     /**
@@ -187,7 +198,7 @@ public class V1Worker implements Worker {
 
         //Create Set to filter changes unique by User and Comment.
         StringBuilder result = new StringBuilder(256);
-        for (Iterator<VcsModification> it = changes.iterator(); it.hasNext();) {
+        for (Iterator<VcsModification> it = changes.iterator(); it.hasNext(); ) {
             VcsModification mod = it.next();
             result.append(mod.getUserName());
             result.append(": ");
@@ -199,19 +210,23 @@ public class V1Worker implements Worker {
         return result.toString();
     }
 
-    private void setChangeSets(BuildRun buildRun, BuildInfo info) {
-
+    private void setChangeSets(Asset buildRun, BuildInfo info) throws V1Exception, MalformedURLException {
+        IServices services = config.getV1Instance();
         for (VcsModification change : info.getChanges()) {
 
-        	logger.println("VersionOne: Processing changeset: " + change.getId());
+            logger.println("VersionOne: Processing changeset: " + change.getId());
 
             //See if we have this ChangeSet in the system.
-            ChangeSetFilter filter = new ChangeSetFilter();
-            String id = change.getId();
-            filter.reference.add(id);
-            Collection<ChangeSet> changeSetList = config.getV1Instance().get().changeSets(filter);
+            IAssetType changeSetType = services.getAssetType("ChangeSet");
+            Query query = new Query(changeSetType);
+            FilterTerm filter = new FilterTerm(changeSetType.getAttributeDefinition("Reference"));
+            filter.equal(change.getId());
+            query.setFilter(filter);
 
-            if (changeSetList.isEmpty()) {
+            QueryResult result = services.retrieve(query);
+            Collection<Asset> changeSetList = null;
+
+            if (result.getAssets().length == 0) {
 
                 //We don't have one yet. Create one.
                 StringBuilder name = new StringBuilder();
@@ -223,12 +238,20 @@ public class V1Worker implements Worker {
                 }
                 name.append('\'');
 
-                Map<String, Object> attributes = new HashMap<String, Object>();
-                attributes.put("Description", change.getComment());
-                ChangeSet changeSet = config.getV1Instance().create().changeSet(name.toString(), id, attributes);
-                logger.println("VersionOne: Created changeset: " + changeSet.getName());
+                IAttributeDefinition changeSetNameAttrDef = changeSetType.getAttributeDefinition("Name");
+                IAttributeDefinition changeSetReferenceAttrDef = changeSetType.getAttributeDefinition("Reference");
+                IAttributeDefinition changeSetDescriptionAttrDef = changeSetType.getAttributeDefinition("Description");
 
-                changeSetList = new ArrayList<ChangeSet>(1);
+                Asset changeSet = services.createNew(changeSetType, null);
+                changeSet.setAttributeValue(changeSetNameAttrDef, name.toString());
+                changeSet.setAttributeValue(changeSetReferenceAttrDef, change.getId());
+                changeSet.setAttributeValue(changeSetDescriptionAttrDef, change.getComment());
+
+                services.save(changeSet);
+
+                logger.println("VersionOne: Created changeset: " + changeSet.getAttribute(changeSetNameAttrDef).getValue());
+
+                changeSetList = new ArrayList<Asset>(1);
                 changeSetList.add(changeSet);
             }
 
@@ -275,13 +298,13 @@ public class V1Worker implements Worker {
         }
     }
 
-    private Set<PrimaryWorkitem> determineWorkitems(String comment) {
+    private Set<Asset> determineWorkitems(String comment) {
 
-    	logger.println("VersionOne: Processing changeset comment: " + comment + " with pattern " + config.pattern.toString());
+        logger.println("VersionOne: Processing changeset comment: " + comment + " with pattern " + config.pattern.toString());
         List<String> ids = getWorkitemsIds(comment, config.pattern);
 
         logger.println("VersionOne: Found " + ids.size() + " workitems to process");
-        Set<PrimaryWorkitem> result = new HashSet<PrimaryWorkitem>(ids.size());
+        Set<Asset> result = new HashSet<Asset>(ids.size());
 
         for (String id : ids) {
             result.addAll(getPrimaryWorkitemsByReference(id));
@@ -296,18 +319,23 @@ public class V1Worker implements Worker {
      * @param reference The identifier in the check-in comment.
      * @return A collection of matching PrimaryWorkitems.
      */
-    private List<PrimaryWorkitem> getPrimaryWorkitemsByReference(String reference) {
+    private List<Asset> getPrimaryWorkitemsByReference(String reference) throws V1Exception, MalformedURLException {
         List<Asset> result = new ArrayList<Asset>();
-        WorkitemFilter filter = new WorkitemFilter();
-        filter.find.setSearchString(reference);
-        filter.find.fields.add(config.referenceField);
-        Collection<Workitem> workitems = config.getV1Instance().get().workitems(filter);
+        IServices services = config.getV1Instance();
 
-        for (Workitem workitem : workitems) {
+        IAssetType workItemType = services.getAssetType("Workitem");
+        Query query = new Query(workItemType);
+
+        FilterTerm filter = new FilterTerm(workItemType.getAttributeDefinition(config.referenceField));
+        filter.equal(reference);
+        query.setFilter(filter);
+
+        QueryResult queryResult = services.retrieve(query);
+        for (Asset workitem : queryResult.getAssets()) {
             if (workitem instanceof PrimaryWorkitem) {
                 result.add((PrimaryWorkitem) workitem);
             } else if (workitem instanceof SecondaryWorkitem) {
-                result.add( (PrimaryWorkitem)((SecondaryWorkitem) workitem).getParent() );
+                result.add((PrimaryWorkitem) ((SecondaryWorkitem) workitem).getParent());
             } else {
                 throw new RuntimeException("Found unexpected Workitem type: " + workitem.getClass());
             }
@@ -319,7 +347,7 @@ public class V1Worker implements Worker {
     /**
      * Return list of workitems got from the comment string.
      *
-     * @param comment string with some text with ids of tasks which cut using pattern set in the reference expression attribute.
+     * @param comment         string with some text with ids of tasks which cut using pattern set in the reference expression attribute.
      * @param v1PatternCommit regular expression for comment parse and getting data from it.
      * @return list of ids.
      */

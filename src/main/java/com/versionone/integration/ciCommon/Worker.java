@@ -1,8 +1,13 @@
 package com.versionone.integration.ciCommon;
 
+import com.versionone.apiclient.exceptions.APIException;
+import com.versionone.apiclient.exceptions.ConnectionException;
+import com.versionone.apiclient.exceptions.OidException;
+import com.versionone.apiclient.exceptions.V1Exception;
+
 public interface Worker {
 
-    Result submitBuildRun(BuildInfo info);
+    Result submitBuildRun(BuildInfo info) throws V1Exception;
 
     WorkitemData getWorkitemData(String id);
 
