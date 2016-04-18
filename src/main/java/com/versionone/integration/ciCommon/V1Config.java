@@ -97,7 +97,7 @@ public final class V1Config {
      * @return connection to VersionOne
      * @throws V1Exception
      */
-    public Services getV1Instance() throws V1Exception, MalformedURLException {
+    public Services getV1Services() throws V1Exception, MalformedURLException {
         if (services == null) {
         	ProxyProvider proxyProvider = null;
 

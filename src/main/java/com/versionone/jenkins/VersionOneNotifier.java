@@ -65,7 +65,14 @@ public class VersionOneNotifier extends Notifier {
 
         config.setLogger(listener.getLogger());
 
-        V1Worker worker = new V1Worker(config, listener.getLogger());
+        V1Worker worker = null;
+        try {
+            worker = new V1Worker(config, listener.getLogger());
+        } catch (V1Exception e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
             if (annot instanceof JenkinsChangeLogAnnotator) {
@@ -76,19 +83,25 @@ public class VersionOneNotifier extends Notifier {
         BuildInfo buildInfo = new JenkinsBuildInfo(build, listener.getLogger());
         listener.getLogger().println("VersionOne: Processing build " + buildInfo.getBuildId() + ":" + buildInfo.getBuildName());
 
-        switch (worker.submitBuildRun(buildInfo)) {
-            case SUCCESS:
-                listener.getLogger().println(MessagesRes.processSuccess());
-                break;
-            case FAIL_CONNECTION:
-                listener.getLogger().println(MessagesRes.connectionIsNotCorrect());
-                break;
-            case FAIL_DUPLICATE:
-                listener.getLogger().println(MessagesRes.buildRunAlreadyExist());
-                break;
-            case FAIL_NO_BUILDPROJECT:
-                listener.getLogger().println(MessagesRes.buildProjectNotFound());
-                break;
+        try {
+            switch (worker.submitBuildRun(buildInfo)) {
+                case SUCCESS:
+                    listener.getLogger().println(MessagesRes.processSuccess());
+                    break;
+                case FAIL_CONNECTION:
+                    listener.getLogger().println(MessagesRes.connectionIsNotCorrect());
+                    break;
+                case FAIL_DUPLICATE:
+                    listener.getLogger().println(MessagesRes.buildRunAlreadyExist());
+                    break;
+                case FAIL_NO_BUILDPROJECT:
+                    listener.getLogger().println(MessagesRes.buildProjectNotFound());
+                    break;
+            }
+        } catch (V1Exception e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
         return true;
     }

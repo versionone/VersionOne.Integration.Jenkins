@@ -7,13 +7,9 @@ import java.util.regex.Pattern;
 
 import com.versionone.DB;
 
-import com.versionone.Oid;
 import com.versionone.apiclient.filters.*;
 import com.versionone.apiclient.interfaces.IAttributeDefinition;
 import com.versionone.jenkins.MessagesRes;
-import com.versionone.apiclient.exceptions.APIException;
-import com.versionone.apiclient.exceptions.ConnectionException;
-import com.versionone.apiclient.exceptions.OidException;
 import com.versionone.apiclient.exceptions.V1Exception;
 import com.versionone.apiclient.interfaces.IAssetType;
 import com.versionone.apiclient.interfaces.IServices;
@@ -36,7 +32,7 @@ public class V1Worker implements Worker {
     /**
      * Adds to the VersionOne BuildRun and ChangesSet.
      */
-    public Result submitBuildRun(final BuildInfo info) throws V1Exception {
+    public Result submitBuildRun(final BuildInfo info) throws V1Exception, MalformedURLException {
         //Validate connection to V1.
         // if (!config.isConnectionValid()) {
         // 	logger.println("VersionOne: Connection to VersionOne failed");
@@ -62,7 +58,8 @@ public class V1Worker implements Worker {
 
         //Create a BuildRun in the V1 BuildProject.
         final Asset buildRun = createBuildRun(buildProject, info);
-        logger.println("VersionOne: Created BuildRun " + buildRun.getName());
+        IAttributeDefinition buildRunNameAttrDef = buildRun.getAssetType().getAttributeDefinition("Name");
+        logger.println("VersionOne: Created BuildRun " + buildRun.getAttribute(buildRunNameAttrDef));
 
         //If available, add ChangeSets.
         if (info.hasChanges()) {
@@ -94,7 +91,7 @@ public class V1Worker implements Worker {
         GroupFilterTerm groupFilter = new AndFilterTerm(filterReference, filterName, filterBuildProjects);
         query.setFilter(groupFilter);
 
-        QueryResult result = config.getV1Instance().retrieve(query);
+        QueryResult result = config.getV1Services().retrieve(query);
 
         return result.getAssets() != null && result.getAssets().length != 0;
     }
@@ -107,7 +104,7 @@ public class V1Worker implements Worker {
      */
 
     private Asset getBuildProject(BuildInfo info) throws V1Exception, MalformedURLException {
-        IServices services = config.getV1Instance();
+        IServices services = config.getV1Services();
         IAssetType buildProject = services.getMeta().getAssetType("BuildProject");
         Query query = new Query(buildProject);
         FilterTerm filter = new FilterTerm(buildProject.getAttributeDefinition("Reference"));
@@ -125,7 +122,7 @@ public class V1Worker implements Worker {
 
     private Asset createBuildRun(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
 
-        IServices services = config.getV1Instance();
+        IServices services = config.getV1Services();
         //Generate the BuildRun asset.
         IAssetType buildRunType = services.getAssetType("BuildRun");
         IAttributeDefinition buildRunNameAttrDef = buildRunType.getAttributeDefinition("Name");
@@ -210,7 +207,7 @@ public class V1Worker implements Worker {
     }
 
     private void setChangeSets(Asset buildRun, BuildInfo info) throws V1Exception, MalformedURLException {
-        IServices services = config.getV1Instance();
+        IServices services = config.getV1Services();
         for (VcsModification change : info.getChanges()) {
 
             logger.println("VersionOne: Processing changeset: " + change.getId());
@@ -262,7 +259,7 @@ public class V1Worker implements Worker {
     }
 
     private void associateWithBuildRun(Asset buildRun, Collection<Asset> changeSets, Set<Asset> workitems) throws V1Exception, MalformedURLException {
-        IServices services = config.getV1Instance();
+        IServices services = config.getV1Services();
         IAttributeDefinition buildRunChangeSetsAttrDef = buildRun.getAssetType().getAttributeDefinition("ChangeSets");
         //List<Object> buildRunChangeSets = Arrays.asList(buildRun.getAttribute(buildRunChangeSetsAttrDef).getValues());
         for (Asset changeSet : changeSets) {
@@ -339,7 +336,7 @@ public class V1Worker implements Worker {
      */
     private List<Asset> getPrimaryWorkitemsByReference(String reference) throws V1Exception, MalformedURLException {
         List<Asset> result = new ArrayList<Asset>();
-        IServices services = config.getV1Instance();
+        IServices services = config.getV1Services();
 
         IAssetType workItemType = services.getAssetType("Workitem");
         IAssetType primaryWorkItemType = services.getAssetType("PrimaryWorkitem");
@@ -398,9 +395,22 @@ public class V1Worker implements Worker {
      * @param id idsplay id of workitem
      * @return short information about workitem
      */
-    public WorkitemData getWorkitemData(String id) {
-        Workitem workitem = config.getV1Instance().get().workitemByDisplayID(id);
+    public WorkitemData getWorkitemData(String id) throws V1Exception, MalformedURLException {
+        IServices services = config.getV1Services();
+        IAssetType workitemAssetType = services.getAssetType("Workitem");
+        IAttributeDefinition workitemNameAttrDef = workitemAssetType.getAttributeDefinition("Name");
+        IAttributeDefinition workitemNumberAttrDef = workitemAssetType.getAttributeDefinition("Number");
 
-        return new WorkitemData(workitem, config.url);
+        Query query = new Query(workitemAssetType);
+        query.getSelection().add(workitemNameAttrDef);
+        FilterTerm filter = new FilterTerm(workitemNumberAttrDef);
+        filter.equal(id);
+
+        QueryResult queryResult = services.retrieve(query);
+
+        Asset workitem = queryResult.getAssets()[0];
+        return new WorkitemData(workitem.getOid().toString(),
+                workitem.getAttribute(workitemNameAttrDef).getValue().toString(),
+                config.url);
     }
 }

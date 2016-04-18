@@ -5,11 +5,13 @@ import com.versionone.apiclient.exceptions.ConnectionException;
 import com.versionone.apiclient.exceptions.OidException;
 import com.versionone.apiclient.exceptions.V1Exception;
 
+import java.net.MalformedURLException;
+
 public interface Worker {
 
-    Result submitBuildRun(BuildInfo info) throws V1Exception;
+    Result submitBuildRun(BuildInfo info) throws V1Exception, MalformedURLException;
 
-    WorkitemData getWorkitemData(String id);
+    WorkitemData getWorkitemData(String id) throws V1Exception, MalformedURLException;
 
     public static enum Result {
         SUCCESS,
