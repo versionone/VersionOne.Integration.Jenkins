@@ -8,15 +8,13 @@ import java.util.regex.Pattern;
 import com.versionone.DB;
 
 import com.versionone.Oid;
-import com.versionone.apiclient.filters.AndFilterTerm;
-import com.versionone.apiclient.filters.GroupFilterTerm;
+import com.versionone.apiclient.filters.*;
 import com.versionone.apiclient.interfaces.IAttributeDefinition;
 import com.versionone.jenkins.MessagesRes;
 import com.versionone.apiclient.exceptions.APIException;
 import com.versionone.apiclient.exceptions.ConnectionException;
 import com.versionone.apiclient.exceptions.OidException;
 import com.versionone.apiclient.exceptions.V1Exception;
-import com.versionone.apiclient.filters.FilterTerm;
 import com.versionone.apiclient.interfaces.IAssetType;
 import com.versionone.apiclient.interfaces.IServices;
 import com.versionone.apiclient.services.QueryResult;
@@ -263,12 +261,13 @@ public class V1Worker implements Worker {
         }
     }
 
-    private void associateWithBuildRun(Asset buildRun, Collection<Asset> changeSets, Set<Asset> workitems) throws APIException {
-
+    private void associateWithBuildRun(Asset buildRun, Collection<Asset> changeSets, Set<Asset> workitems) throws V1Exception, MalformedURLException {
+        IServices services = config.getV1Instance();
         IAttributeDefinition buildRunChangeSetsAttrDef = buildRun.getAssetType().getAttributeDefinition("ChangeSets");
         //List<Object> buildRunChangeSets = Arrays.asList(buildRun.getAttribute(buildRunChangeSetsAttrDef).getValues());
         for (Asset changeSet : changeSets) {
             IAttributeDefinition changeSetNameAttrDef = changeSet.getAssetType().getAttributeDefinition("Name");
+            IAttributeDefinition changeSetPrimaryWorkitemsAttrDef = changeSet.getAssetType().getAttributeDefinition("PrimaryWorkitems ");
 
             buildRun.addAttributeValue(buildRunChangeSetsAttrDef, changeSet.getOid());
 
@@ -276,33 +275,43 @@ public class V1Worker implements Worker {
 
             for (Asset workitem : workitems) {
                 IAttributeDefinition workItemIsClosedAttrDef = workitem.getAssetType().getAttributeDefinition("IsClosed");
-                IAttributeDefinition workItemIsClosedAttrDef = workitem.getAssetType().getAttributeDefinition("IsClosed");
+                IAttributeDefinition workItemCompletedInBuildRunsAttrDef = workitem.getAssetType().getAttributeDefinition("CompletedInBuildRuns");
 
                 if (Boolean.parseBoolean(workitem.getAttribute(workItemIsClosedAttrDef).getValue().toString())) {
                     logger.println("VersionOne: " + MessagesRes.workitemClosedCannotAttachData(workitem.getOid().toString()));
                     continue;
                 }
 
-                //final Collection<BuildRun> completedIn = workitem.getCompletedIn();
-                //final List<BuildRun> toRemove = new ArrayList<BuildRun>(completedIn.size());
+                changeSet.addAttributeValue(changeSetPrimaryWorkitemsAttrDef, workitem.getOid());
+                services.save(changeSet);
+                logger.println("VersionOne: Added workitem " + workitem.getOid() + " to changset");
 
-                List<Object> completedIn =
+                Query query = new Query(buildRun.getAssetType());
+                IAttributeDefinition buildRunBuildProjectAttrDef = buildRun.getAssetType().getAttributeDefinition("BuildProject");
+                query.getSelection().add(buildRunBuildProjectAttrDef);
+                List<IFilterTerm> filterTerms = new ArrayList<IFilterTerm>();
 
-                changeSet.getPrimaryWorkitems().add(workitem);
-                logger.println("VersionOne: Added workitem " + workitem.getDisplayID() + " to changset");
+                for (Object buildRunOid : workitem.getAttribute(workItemCompletedInBuildRunsAttrDef).getValues()) {
+                    FilterTerm filter = new FilterTerm(buildRun.getAssetType().getAttributeDefinition("ID"));
+                    filter.equal(buildRunOid);
+                    filterTerms.add(filter);
+                }
 
-                for (BuildRun otherRun : completedIn) {
-                    if (otherRun.getBuildProject().equals(buildRun.getBuildProject())) {
-                        toRemove.add(otherRun);
+                query.setFilter(new OrFilterTerm(filterTerms.toArray(new IFilterTerm[filterTerms.size()])));
+                QueryResult queryResult = services.retrieve(query);
+
+                for (Asset otherRun : queryResult.getAssets()) {
+                    Object buildRunBuildProject = buildRun.getAttribute(buildRunBuildProjectAttrDef).getValue();
+                    if (otherRun.getAttribute(buildRunBuildProjectAttrDef).getValue().equals(buildRunBuildProject)) {
+                        workitem.removeAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRunBuildProject);
                     }
+
                 }
 
-                for (BuildRun buildRunDel : toRemove) {
-                    completedIn.remove(buildRunDel);
-                }
 
-                completedIn.add(buildRun);
-                logger.println("VersionOne: Added workitem " + workitem.getDisplayID() + " to buildrun");
+                workitem.addAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
+                services.save(workitem);
+                logger.println("VersionOne: Added workitem " + workitem.getOid() + " to buildrun");
             }
         }
     }
