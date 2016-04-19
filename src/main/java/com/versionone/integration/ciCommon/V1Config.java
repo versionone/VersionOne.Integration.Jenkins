@@ -99,12 +99,17 @@ public final class V1Config {
      */
     public Services getV1Services() throws V1Exception, MalformedURLException {
         if (services == null) {
-        	ProxyProvider proxyProvider = null;
+
+            V1Connector.IsetProxyOrEndPointOrConnector connectorBuilder = V1Connector
+                    .withInstanceUrl(url)
+                    .withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
+                    .withUsernameAndPassword(userName, password);
 
             if(useProxy) {
                 try {
                     URI proxyURI = new URI(proxyUrl);
-                    proxyProvider = new ProxyProvider(proxyURI, proxyUsername, proxyPassword);
+                    ProxyProvider proxyProvider = new ProxyProvider(proxyURI, proxyUsername, proxyPassword);
+                    connectorBuilder.withProxy(proxyProvider);
                 } catch(URISyntaxException e) {
                     if(logger != null) {
                         logger.printf("Invalid proxy server URI %1$, skipping proxy connection.", proxyUrl);
@@ -112,15 +117,7 @@ public final class V1Config {
                 }
             }
 
-            String passwordToApply = userName != null? password : null;
-
-            V1Connector connector = V1Connector
-                	.withInstanceUrl(url)
-                	.withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
-                	.withUsernameAndPassword(userName, password)
-                	.withProxy(proxyProvider)
-                	.build();
-
+            V1Connector connector = connectorBuilder.build();
             services = new Services(connector);
         }
         return services;

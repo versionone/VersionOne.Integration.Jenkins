@@ -20,6 +20,7 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,12 +34,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import com.versionone.apiclient.*;
-
-import com.versionone.integration.ciCommon.BuildInfo;
-import com.versionone.integration.ciCommon.V1Config;
-import com.versionone.integration.ciCommon.V1Worker;
-
 public class VersionOneNotifier extends Notifier {
 
     @Extension
@@ -49,25 +44,33 @@ public class VersionOneNotifier extends Notifier {
         return DESCRIPTOR;
     }
 
+    private PrintStream logger;
+
     /*
      * Entry point for Jenkins to call the integration.
      *
      * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
      */
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+        logger = listener.getLogger();
 
-    	listener.getLogger().println("VersionOne: Integration initialized");
+        logger.println("VersionOne: Integration initialized");
         Descriptor descriptor = getDescriptor();
 
+        logger.println("About to configure with:");
+        logger.printf("Path: %s. \n",descriptor.getV1Path());
+        logger.printf("Username: %s. \n",descriptor.getV1Username());
+        logger.printf("Pattern: %s. \n",descriptor.getV1Pattern());
+        logger.printf("RefField: %s. \n",descriptor.getV1RefField());
         V1Config config = new V1Config(descriptor.getV1Path(), descriptor.getV1Username(), descriptor.getV1Password(),
                 descriptor.getV1Pattern(), descriptor.getV1RefField(), false,
                 descriptor.getV1UseProxy(), descriptor.getV1ProxyUrl(), descriptor.getV1ProxyUsername(), descriptor.getV1ProxyPassword());
 
-        config.setLogger(listener.getLogger());
+        config.setLogger(logger);
 
         V1Worker worker = null;
         try {
-            worker = new V1Worker(config, listener.getLogger());
+            worker = new V1Worker(config, logger);
         } catch (V1Exception e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -80,22 +83,22 @@ public class VersionOneNotifier extends Notifier {
             }
         }
 
-        BuildInfo buildInfo = new JenkinsBuildInfo(build, listener.getLogger());
-        listener.getLogger().println("VersionOne: Processing build " + buildInfo.getBuildId() + ":" + buildInfo.getBuildName());
+        BuildInfo buildInfo = new JenkinsBuildInfo(build, logger);
+        logger.println("VersionOne: Processing build " + buildInfo.getBuildId() + ":" + buildInfo.getBuildName());
 
         try {
             switch (worker.submitBuildRun(buildInfo)) {
                 case SUCCESS:
-                    listener.getLogger().println(MessagesRes.processSuccess());
+                    logger.println(MessagesRes.processSuccess());
                     break;
                 case FAIL_CONNECTION:
-                    listener.getLogger().println(MessagesRes.connectionIsNotCorrect());
+                    logger.println(MessagesRes.connectionIsNotCorrect());
                     break;
                 case FAIL_DUPLICATE:
-                    listener.getLogger().println(MessagesRes.buildRunAlreadyExist());
+                    logger.println(MessagesRes.buildRunAlreadyExist());
                     break;
                 case FAIL_NO_BUILDPROJECT:
-                    listener.getLogger().println(MessagesRes.buildProjectNotFound());
+                    logger.println(MessagesRes.buildProjectNotFound());
                     break;
             }
         } catch (V1Exception e) {
