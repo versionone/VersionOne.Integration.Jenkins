@@ -74,21 +74,19 @@ public class V1Worker implements Worker {
     }
 
     private boolean isBuildExist(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
+        IServices services = config.getV1Services();
+        IAssetType buildRunAssetType = services.getAssetType("BuildRun");
 
-        IAssetType buildProjectAssetType = buildProject.getAssetType();
-        Query query = new Query(buildProjectAssetType);
+        Query query = new Query(buildRunAssetType);
 
-        FilterTerm filterReference = new FilterTerm(buildProjectAssetType.getAttributeDefinition("Reference"));
+        FilterTerm filterReference = new FilterTerm(buildRunAssetType.getAttributeDefinition("Reference"));
         filterReference.equal(Long.toString(info.getBuildId()));
-
-        FilterTerm filterName = new FilterTerm(buildProjectAssetType.getAttributeDefinition("Name"));
+        FilterTerm filterName = new FilterTerm(buildRunAssetType.getAttributeDefinition("Name"));
         filterName.equal(getBuildName(info));
+        FilterTerm filterBuildProject = new FilterTerm(buildRunAssetType.getAttributeDefinition("BuildProject"));
+        filterBuildProject.equal(buildProject.getOid());
 
-        //Scopes?
-        FilterTerm filterBuildProjects = new FilterTerm(buildProjectAssetType.getAttributeDefinition("BuildProjects"));
-        filterBuildProjects.equal(getBuildName(info));
-
-        GroupFilterTerm groupFilter = new AndFilterTerm(filterReference, filterName, filterBuildProjects);
+        GroupFilterTerm groupFilter = new AndFilterTerm(filterReference, filterName, filterBuildProject);
         query.setFilter(groupFilter);
 
         QueryResult result = config.getV1Services().retrieve(query);

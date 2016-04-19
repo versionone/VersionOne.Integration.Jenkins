@@ -71,10 +71,8 @@ public class VersionOneNotifier extends Notifier {
         V1Worker worker = null;
         try {
             worker = new V1Worker(config, logger);
-        } catch (V1Exception e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace(logger);
         }
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
@@ -101,10 +99,8 @@ public class VersionOneNotifier extends Notifier {
                     logger.println(MessagesRes.buildProjectNotFound());
                     break;
             }
-        } catch (V1Exception e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace(logger);
         }
         return true;
     }
