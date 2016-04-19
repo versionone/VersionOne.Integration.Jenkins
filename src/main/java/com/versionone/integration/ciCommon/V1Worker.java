@@ -7,6 +7,9 @@ import java.util.regex.Pattern;
 
 import com.versionone.DB;
 
+import com.versionone.apiclient.exceptions.APIException;
+import com.versionone.apiclient.exceptions.ConnectionException;
+import com.versionone.apiclient.exceptions.OidException;
 import com.versionone.apiclient.filters.*;
 import com.versionone.apiclient.interfaces.IAttributeDefinition;
 import com.versionone.jenkins.MessagesRes;
@@ -23,10 +26,12 @@ public class V1Worker implements Worker {
 
     private final V1Config config;
     private final PrintStream logger;
+    private final IServices services;
 
     public V1Worker(V1Config config, PrintStream logger) throws V1Exception, MalformedURLException {
         this.config = config;
         this.logger = logger;
+        services = config.getV1Services();
     }
 
     /**
@@ -74,7 +79,6 @@ public class V1Worker implements Worker {
     }
 
     private boolean isBuildExist(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
-        IServices services = config.getV1Services();
         IAssetType buildRunAssetType = services.getAssetType("BuildRun");
 
         Query query = new Query(buildRunAssetType);
@@ -102,7 +106,6 @@ public class V1Worker implements Worker {
      */
 
     private Asset getBuildProject(BuildInfo info) throws V1Exception, MalformedURLException {
-        IServices services = config.getV1Services();
         IAssetType buildProject = services.getMeta().getAssetType("BuildProject");
         Query query = new Query(buildProject);
         FilterTerm filter = new FilterTerm(buildProject.getAttributeDefinition("Reference"));
@@ -119,8 +122,6 @@ public class V1Worker implements Worker {
 
 
     private Asset createBuildRun(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
-
-        IServices services = config.getV1Services();
         //Generate the BuildRun asset.
         IAssetType buildRunType = services.getAssetType("BuildRun");
         IAttributeDefinition buildRunNameAttrDef = buildRunType.getAttributeDefinition("Name");
@@ -135,8 +136,9 @@ public class V1Worker implements Worker {
         buildRun.setAttributeValue(buildRunDateAttrDef, new DB.DateTime(info.getStartTime()));
         buildRun.setAttributeValue(buildRunElapsedAttrDef, (double) info.getElapsedTime());
         buildRun.setAttributeValue(buildRunReferenceAttrDef, Long.toString(info.getBuildId()));
-        buildRun.setAttributeValue(buildRunSourceAttrDef, getSourceName(info.isForced()));
-        buildRun.setAttributeValue(buildRunStatusAttrDef, getStatusName(info.isSuccessful()));
+
+        buildRun.setAttributeValue(buildRunSourceAttrDef, getSourceOID(info.isForced()));
+        buildRun.setAttributeValue(buildRunStatusAttrDef, getStatusOID(info.isSuccessful()));
 
         if (info.hasChanges()) {
             IAttributeDefinition descriptionAttrDef = buildRunType.getAttributeDefinition("Description");
@@ -162,24 +164,28 @@ public class V1Worker implements Worker {
         return buildRun;
     }
 
-    /**
-     * Returns the V1 BuildRun source name.
-     *
-     * @param isForced true - if build was forced.
-     * @return V1 source name, "trigger" or "forced".
-     */
-    private static String getSourceName(boolean isForced) {
-        return isForced ? "forced" : "trigger";
+    private String getSourceOID (boolean isForced) throws ConnectionException, APIException, OidException {
+        IAssetType buildSourceAssetType = services.getAssetType("BuildSource");
+        Query query = new Query(buildSourceAssetType);
+
+        FilterTerm nameFilter = new FilterTerm(buildSourceAssetType.getAttributeDefinition("Name"));
+        nameFilter.equal(isForced ? "Forced" : "Trigger");
+
+        query.setFilter(nameFilter);
+        QueryResult result = services.retrieve(query);
+        return result.getAssets()[0].getOid().toString();
     }
 
-    /**
-     * Returns the V1 BuildRun status name.
-     *
-     * @param isSuccessful true - if build is successful.
-     * @return V1 source name, "trigger" or "forced".
-     */
-    private static String getStatusName(boolean isSuccessful) {
-        return isSuccessful ? "passed" : "failed";
+    private String getStatusOID(boolean isSuccessful) throws ConnectionException, APIException, OidException {
+        IAssetType buildSourceAssetType = services.getAssetType("BuildStatus");
+        Query query = new Query(buildSourceAssetType);
+
+        FilterTerm nameFilter = new FilterTerm(buildSourceAssetType.getAttributeDefinition("Name"));
+        nameFilter.equal(isSuccessful ? "Passed" : "Failed");
+
+        query.setFilter(nameFilter);
+        QueryResult result = services.retrieve(query);
+        return result.getAssets()[0].getOid().toString();
     }
 
     /**
@@ -205,7 +211,6 @@ public class V1Worker implements Worker {
     }
 
     private void setChangeSets(Asset buildRun, BuildInfo info) throws V1Exception, MalformedURLException {
-        IServices services = config.getV1Services();
         for (VcsModification change : info.getChanges()) {
 
             logger.println("VersionOne: Processing changeset: " + change.getId());
@@ -257,7 +262,6 @@ public class V1Worker implements Worker {
     }
 
     private void associateWithBuildRun(Asset buildRun, Collection<Asset> changeSets, Set<Asset> workitems) throws V1Exception, MalformedURLException {
-        IServices services = config.getV1Services();
         IAttributeDefinition buildRunChangeSetsAttrDef = buildRun.getAssetType().getAttributeDefinition("ChangeSets");
         //List<Object> buildRunChangeSets = Arrays.asList(buildRun.getAttribute(buildRunChangeSetsAttrDef).getValues());
         for (Asset changeSet : changeSets) {
@@ -334,7 +338,6 @@ public class V1Worker implements Worker {
      */
     private List<Asset> getPrimaryWorkitemsByReference(String reference) throws V1Exception, MalformedURLException {
         List<Asset> result = new ArrayList<Asset>();
-        IServices services = config.getV1Services();
 
         IAssetType workItemType = services.getAssetType("Workitem");
         IAssetType primaryWorkItemType = services.getAssetType("PrimaryWorkitem");
@@ -394,7 +397,6 @@ public class V1Worker implements Worker {
      * @return short information about workitem
      */
     public WorkitemData getWorkitemData(String id) throws V1Exception, MalformedURLException {
-        IServices services = config.getV1Services();
         IAssetType workitemAssetType = services.getAssetType("Workitem");
         IAttributeDefinition workitemNameAttrDef = workitemAssetType.getAttributeDefinition("Name");
         IAttributeDefinition workitemNumberAttrDef = workitemAssetType.getAttributeDefinition("Number");
