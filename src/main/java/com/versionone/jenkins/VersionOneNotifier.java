@@ -1,8 +1,10 @@
 package com.versionone.jenkins;
 
 import com.versionone.apiclient.ProxyProvider;
+import com.versionone.apiclient.Query;
 import com.versionone.apiclient.Services;
 import com.versionone.apiclient.V1Connector;
+import com.versionone.apiclient.filters.FilterTerm;
 import com.versionone.apiclient.interfaces.*;
 import com.versionone.apiclient.exceptions.*;
 import com.versionone.integration.ciCommon.BuildInfo;
@@ -226,25 +228,26 @@ public class VersionOneNotifier extends Notifier {
                                                @QueryParameter(V1_PROXY_USERNAME) final String proxyUsername,
                                                @QueryParameter(V1_PROXY_PASSWORD) final String proxyPassword) {
             try {
-                ProxyProvider proxyProvider = null;
+                V1Connector.IsetProxyOrEndPointOrConnector connectorBuilder = V1Connector
+                        .withInstanceUrl(path)
+                        .withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
+                        .withUsernameAndPassword(username, password);
 
                 if(useProxy) {
-                	proxyProvider = new ProxyProvider(createUri(proxyUrl), proxyUsername, proxyPassword);
-
+                    ProxyProvider proxyProvider = new ProxyProvider(createUri(proxyUrl), proxyUsername, proxyPassword);
+                    connectorBuilder.withProxy(proxyProvider);
                 }
-
-                V1Connector connector = V1Connector
-                	.withInstanceUrl(path)
-                	.withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
-                	.withUsernameAndPassword(username, password)
-                	.withProxy(proxyProvider)
-                	.build();
-
+                V1Connector connector = connectorBuilder.build();
 
                 Services services = new Services(connector);
-                IMetaModel meta = services.getMeta();
-
-                meta.getAssetType("PrimaryWorkitem").getAttributeDefinition(refField);
+                IAssetType memberType = services.getAssetType("Member");
+                Query query = new Query(memberType);
+                IAttributeDefinition isSelfAttrDef = memberType.getAttributeDefinition("IsSelf");
+                query.getSelection().add(isSelfAttrDef);
+                FilterTerm filter = new FilterTerm(isSelfAttrDef);
+                filter.equal(true);
+                query.setFilter(filter);
+                services.retrieve(query);
                 return FormValidation.ok(MessagesRes.connectionValid());
             } catch(URISyntaxException e) {
                 return FormValidation.error(MessagesRes.connectionFailedProxyUrlMalformed());

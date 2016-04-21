@@ -1,10 +1,12 @@
 package com.versionone.integration.ciCommon;
 
 import com.versionone.apiclient.ProxyProvider;
+import com.versionone.apiclient.Query;
 import com.versionone.apiclient.Services;
 import com.versionone.apiclient.V1Connector;
+import com.versionone.apiclient.exceptions.V1Exception;
 import com.versionone.apiclient.interfaces.IMetaModel;
-import com.versionone.apiclient.exceptions.*;
+
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;

@@ -104,7 +104,6 @@ public class V1Worker implements Worker {
      * @param info information about build run
      * @return V1 representation of the project if match; otherwise - null.
      */
-
     private Asset getBuildProject(BuildInfo info) throws V1Exception, MalformedURLException {
         IAssetType buildProject = services.getMeta().getAssetType("BuildProject");
         Query query = new Query(buildProject);
@@ -119,7 +118,6 @@ public class V1Worker implements Worker {
         }
         return result.getAssets()[0];
     }
-
 
     private Asset createBuildRun(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
         //Generate the BuildRun asset.
