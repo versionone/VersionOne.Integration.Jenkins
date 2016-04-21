@@ -302,11 +302,10 @@ public class V1Worker implements Worker {
                 for (Asset otherRun : queryResult.getAssets()) {
                     Object buildRunBuildProject = buildRun.getAttribute(buildRunBuildProjectAttrDef).getValue();
                     if (otherRun.getAttribute(buildRunBuildProjectAttrDef).getValue().equals(buildRunBuildProject)) {
-                        workitem.removeAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRunBuildProject);
+                        workitem.removeAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
                     }
 
                 }
-
 
                 workitem.addAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
                 services.save(workitem);
