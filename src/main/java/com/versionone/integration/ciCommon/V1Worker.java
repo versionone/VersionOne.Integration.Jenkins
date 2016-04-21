@@ -309,6 +309,7 @@ public class V1Worker implements Worker {
 
                 workitem.addAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
                 services.save(workitem);
+                services.save(buildRun);
                 logger.println("VersionOne: Added workitem " + workitem.getOid() + " to buildrun");
             }
         }
