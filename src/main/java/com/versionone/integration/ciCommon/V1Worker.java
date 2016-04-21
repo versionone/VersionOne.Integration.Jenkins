@@ -266,7 +266,7 @@ public class V1Worker implements Worker {
         //List<Object> buildRunChangeSets = Arrays.asList(buildRun.getAttribute(buildRunChangeSetsAttrDef).getValues());
         for (Asset changeSet : changeSets) {
             IAttributeDefinition changeSetNameAttrDef = changeSet.getAssetType().getAttributeDefinition("Name");
-            IAttributeDefinition changeSetPrimaryWorkitemsAttrDef = changeSet.getAssetType().getAttributeDefinition("PrimaryWorkitems ");
+            IAttributeDefinition changeSetPrimaryWorkitemsAttrDef = changeSet.getAssetType().getAttributeDefinition("PrimaryWorkitems");
 
             buildRun.addAttributeValue(buildRunChangeSetsAttrDef, changeSet.getOid());
 
@@ -339,32 +339,25 @@ public class V1Worker implements Worker {
     private List<Asset> getPrimaryWorkitemsByReference(String reference) throws V1Exception, MalformedURLException {
         List<Asset> result = new ArrayList<Asset>();
 
-        IAssetType workItemType = services.getAssetType("Workitem");
         IAssetType primaryWorkItemType = services.getAssetType("PrimaryWorkitem");
+        Query query = new Query(primaryWorkItemType);
 
-        IAttributeDefinition primaryWorkItemParentAttrDef = primaryWorkItemType.getAttributeDefinition("Parent");
+        IAttributeDefinition completedInBuildRunsAttribute = primaryWorkItemType.getAttributeDefinition("CompletedInBuildRuns");
+        IAttributeDefinition isClosedAttribute = primaryWorkItemType.getAttributeDefinition("IsClosed");
+        IAttributeDefinition childrenAttribute = primaryWorkItemType.getAttributeDefinition("Children.Number");
+        query.getSelection().add(completedInBuildRunsAttribute);
+        query.getSelection().add(isClosedAttribute);
+        query.getSelection().add(childrenAttribute);
 
-        Query query = new Query(workItemType);
-
-        FilterTerm filter = new FilterTerm(workItemType.getAttributeDefinition(config.referenceField));
+        FilterTerm filter = new FilterTerm(primaryWorkItemType.getAttributeDefinition(config.referenceField));
         filter.equal(reference);
-        query.setFilter(filter);
+        FilterTerm filter2 = new FilterTerm(childrenAttribute);
+        filter2.equal(reference);
 
+        query.setFilter(new OrFilterTerm(filter,filter2));
         QueryResult queryResult = services.retrieve(query);
 
-        for (Asset workitem : queryResult.getAssets()) {
-            if (workitem.getAssetType().getBase().getToken().equals("PrimaryWorkitem")) {
-                result.add(workitem);
-            } else if (workitem.getAssetType().getBase().getToken().equals("Workitem")) {
-                Query query2 = new Query(services.getOid(workitem.getAttribute(primaryWorkItemParentAttrDef).getValue().toString()));
-                QueryResult queryResult2 = services.retrieve(query2);
-
-                result.add(queryResult2.getAssets()[0]);
-            } else {
-                throw new RuntimeException("Found unexpected Workitem type: " + workitem.getAssetType().getBase().getToken());
-            }
-            result.add(workitem);
-        }
+        result.addAll(Arrays.asList(queryResult.getAssets()));
 
         return result;
     }
