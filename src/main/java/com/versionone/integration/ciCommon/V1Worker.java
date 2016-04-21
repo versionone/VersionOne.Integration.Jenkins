@@ -290,21 +290,22 @@ public class V1Worker implements Worker {
                 query.getSelection().add(buildRunBuildProjectAttrDef);
                 List<IFilterTerm> filterTerms = new ArrayList<IFilterTerm>();
 
-                for (Object buildRunOid : workitem.getAttribute(workItemCompletedInBuildRunsAttrDef).getValues()) {
-                    FilterTerm filter = new FilterTerm(buildRun.getAssetType().getAttributeDefinition("ID"));
-                    filter.equal(buildRunOid);
-                    filterTerms.add(filter);
-                }
-
-                query.setFilter(new OrFilterTerm(filterTerms.toArray(new IFilterTerm[filterTerms.size()])));
-                QueryResult queryResult = services.retrieve(query);
-
-                for (Asset otherRun : queryResult.getAssets()) {
-                    Object buildRunBuildProject = buildRun.getAttribute(buildRunBuildProjectAttrDef).getValue();
-                    if (otherRun.getAttribute(buildRunBuildProjectAttrDef).getValue().equals(buildRunBuildProject)) {
-                        workitem.removeAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
+                Object[] values = workitem.getAttribute(workItemCompletedInBuildRunsAttrDef).getValues();
+                if (!filterTerms.isEmpty()) {
+                    for (Object buildRunOid : values) {
+                        FilterTerm filter = new FilterTerm(buildRun.getAssetType().getAttributeDefinition("ID"));
+                        filter.equal(buildRunOid);
+                        filterTerms.add(filter);
                     }
+                    query.setFilter(new OrFilterTerm(filterTerms.toArray(new IFilterTerm[filterTerms.size()])));
+                    QueryResult queryResult = services.retrieve(query);
 
+                    for (Asset otherRun : queryResult.getAssets()) {
+                        Object buildRunBuildProject = buildRun.getAttribute(buildRunBuildProjectAttrDef).getValue();
+                        if (otherRun.getAttribute(buildRunBuildProjectAttrDef).getValue().equals(buildRunBuildProject)) {
+                            workitem.removeAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
+                        }
+                    }
                 }
 
                 workitem.addAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
