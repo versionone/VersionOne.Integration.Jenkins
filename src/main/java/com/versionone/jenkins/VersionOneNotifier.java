@@ -27,6 +27,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -61,10 +64,10 @@ public class VersionOneNotifier extends Notifier {
 
         logger.println("About to configure with:");
         logger.printf("Path: %s. \n",descriptor.getV1Path());
-        logger.printf("Username: %s. \n",descriptor.getV1Username());
+        logger.printf("Access Token: %s. \n",descriptor.getV1AccessToken());
         logger.printf("Pattern: %s. \n",descriptor.getV1Pattern());
         logger.printf("RefField: %s. \n",descriptor.getV1RefField());
-        V1Config config = new V1Config(descriptor.getV1Path(), descriptor.getV1Username(), descriptor.getV1Password(),
+        V1Config config = new V1Config(descriptor.getV1Path(), descriptor.getV1AccessToken(),
                 descriptor.getV1Pattern(), descriptor.getV1RefField(), false,
                 descriptor.getV1UseProxy(), descriptor.getV1ProxyUrl(), descriptor.getV1ProxyUsername(), descriptor.getV1ProxyPassword());
 
@@ -114,8 +117,7 @@ public class VersionOneNotifier extends Notifier {
     public static final class Descriptor extends BuildStepDescriptor<Publisher> {
 
         private static final String V1_PATH = "v1Path";
-        private static final String V1_USERNAME = "v1Username";
-        private static final String V1_PASSWORD = "v1Password";
+        private static final String V1_ACCESSTOKEN = "v1AccessToken";
         private static final String V1_REF_FIELD = "v1RefField";
         private static final String V1_PATTERN = "v1Pattern";
 
@@ -125,8 +127,7 @@ public class VersionOneNotifier extends Notifier {
         private static final String V1_PROXY_PASSWORD = "v1ProxyPassword";
 
         private String v1Path;
-        private String v1Username;
-        private String v1Password;
+        private String v1AccessToken;
         private String v1RefField;
         private String v1Pattern;
         private boolean v1UseProxy;
@@ -213,25 +214,32 @@ public class VersionOneNotifier extends Notifier {
          * @param req      request
          * @param rsp      respond
          * @param path     path to the VersionOne
-         * @param username user name to VersionOne
-         * @param password password to VersionOne
+         * @param accessToken access token for VersionOne
          * @param refField field will be used to connect buildruns and changesets to story
          * @return validation result.
          */
         public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
                                                @QueryParameter(V1_PATH) final String path,
-                                               @QueryParameter(V1_USERNAME) final String username,
-                                               @QueryParameter(V1_PASSWORD) final String password,
+                                               @QueryParameter(V1_ACCESSTOKEN) final String accessToken,
                                                @QueryParameter(V1_REF_FIELD) final String refField,
                                                @QueryParameter(V1_USE_PROXY) final boolean useProxy,
                                                @QueryParameter(V1_PROXY_URL) final String proxyUrl,
                                                @QueryParameter(V1_PROXY_USERNAME) final String proxyUsername,
                                                @QueryParameter(V1_PROXY_PASSWORD) final String proxyPassword) {
+
+//            Logger logger = Logger.getLogger("MyLog");
+//            FileHandler fh;
+
             try {
+//                fh = new FileHandler("C:/MyLogFile.log");
+//                logger.addHandler(fh);
+//                SimpleFormatter formatter = new SimpleFormatter();
+//                fh.setFormatter(formatter);
+
                 V1Connector.IsetProxyOrEndPointOrConnector connectorBuilder = V1Connector
                         .withInstanceUrl(path)
                         .withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
-                        .withUsernameAndPassword(username, password);
+                        .withAccessToken(accessToken);
 
                 if(useProxy) {
                     ProxyProvider proxyProvider = new ProxyProvider(createUri(proxyUrl), proxyUsername, proxyPassword);
@@ -248,6 +256,7 @@ public class VersionOneNotifier extends Notifier {
                 filter.equal(true);
                 query.setFilter(filter);
                 services.retrieve(query);
+
                 return FormValidation.ok(MessagesRes.connectionValid());
             } catch(URISyntaxException e) {
                 return FormValidation.error(MessagesRes.connectionFailedProxyUrlMalformed());
@@ -257,6 +266,8 @@ public class VersionOneNotifier extends Notifier {
                 return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
             } catch (V1Exception e) {
                 return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
+            } catch (Exception e) {
+                return FormValidation.error(e.getMessage());
             }
         }
 
@@ -266,8 +277,7 @@ public class VersionOneNotifier extends Notifier {
 
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
             v1Path = o.getString(V1_PATH);
-            v1Username = o.getString(V1_USERNAME);
-            v1Password = o.getString(V1_PASSWORD);
+            v1AccessToken = o.getString(V1_ACCESSTOKEN);
             v1RefField = o.getString(V1_REF_FIELD);
             v1Pattern = o.getString(V1_PATTERN);
 
@@ -290,12 +300,8 @@ public class VersionOneNotifier extends Notifier {
             return v1Path;
         }
 
-        public String getV1Username() {
-            return v1Username;
-        }
-
-        public String getV1Password() {
-            return v1Password;
+        public String getV1AccessToken() {
+            return v1AccessToken;
         }
 
         public String getV1RefField() {
@@ -329,10 +335,9 @@ public class VersionOneNotifier extends Notifier {
             return new VersionOneNotifier();
         }
 
-        void setData(String v1Path, String v1Username, String v1Password, String v1RefField, String v1Pattern) {
+        void setData(String v1Path, String v1AccessToken, String v1RefField, String v1Pattern) {
             this.v1Path = v1Path;
-            this.v1Username = v1Username;
-            this.v1Password = v1Password;
+            this.v1AccessToken = v1AccessToken;
             this.v1RefField = v1RefField;
             this.v1Pattern = v1Pattern;
         }

@@ -16,8 +16,7 @@ import java.util.regex.Pattern;
 public final class V1Config {
 
     public final String url;
-    public final String userName;
-    public final String password;
+    public final String accessToken;
     public final Pattern pattern;
     public final String referenceField;
     public final Boolean isFullyQualifiedBuildName;
@@ -31,35 +30,32 @@ public final class V1Config {
     private PrintStream logger;
 
     public V1Config() {
-        this("http://localhost/VersionOne/", "admin", "admin");
+        this("http://localhost/VersionOne/", "");
     }
 
     /**
      * @param url VersionOne server URL
-     * @param userName VersionOne user name
-     * @param password VersionOne password
+     * @param accessToken access token for VersionOne
      */
-    public V1Config(String url, String userName, String password) {
-        this(url, userName, password, "[A-Z]{1,2}-[0-9]+", "Number", true);
+    public V1Config(String url, String accessToken) {
+        this(url, accessToken, "[A-Z]{1,2}-[0-9]+", "Number", true);
     }
 
     /**
      * @param url VersionOne server URL
-     * @param userName VersionOne user name
-     * @param password VersionOne password
+     * @param accessToken access token for VersionOne
      * @param pattern Regular expression to find VersionOne workitem IDs
      * @param referenceField Name of field used in VCS commit comments to reference VersionOne items
      * @param fullyQualifiedBuildName use full name of build
      */
-    public V1Config(String url, String userName, String password, String pattern,
+    public V1Config(String url, String accessToken, String pattern,
                     String referenceField, Boolean fullyQualifiedBuildName) {
-        this(url, userName, password, pattern, referenceField, fullyQualifiedBuildName, false, "", "", "");
+        this(url, accessToken, pattern, referenceField, fullyQualifiedBuildName, false, "", "", "");
     }
 
     /**
      * @param url VersionOne server URL
-     * @param userName VersionOne user name
-     * @param password VersionOne password
+     * @param accessToken access token for VersionOne
      * @param pattern Regular expression to find VersionOne workitem IDs
      * @param referenceField Name of field used in VCS commit comments to reference VersionOne items
      * @param fullyQualifiedBuildName use full name of build
@@ -68,13 +64,12 @@ public final class V1Config {
      * @param proxyUsername Proxy server username
      * @param proxyPassword Proxy server password
      */
-    public V1Config(String url, String userName, String password, String pattern,
+    public V1Config(String url, String accessToken, String pattern,
                     String referenceField, Boolean fullyQualifiedBuildName,
                     boolean useProxy, String proxyUrl, String proxyUsername, String proxyPassword) {
 
         this.url = url;
-        this.userName = userName;
-        this.password = password;
+        this.accessToken = accessToken;
         this.pattern = Pattern.compile(pattern);
         this.referenceField = referenceField;
         isFullyQualifiedBuildName = fullyQualifiedBuildName;
@@ -105,7 +100,7 @@ public final class V1Config {
             V1Connector.IsetProxyOrEndPointOrConnector connectorBuilder = V1Connector
                     .withInstanceUrl(url)
                     .withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
-                    .withUsernameAndPassword(userName, password);
+                    .withAccessToken(accessToken);
 
             if(useProxy) {
                 try {
@@ -129,22 +124,9 @@ public final class V1Config {
     public String toString() {
         return "Config{" +
                 "url='" + url + '\'' +
-                ", userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
+                ", accessToken='" + accessToken + '\'' +
                 ", referenceField='" + referenceField + '\'' +
                 ", pattern=" + pattern +
                 '}';
-    }
-
-    /**
-     * Checks whether {@link #referenceField} value is valid. Can be called only after {@link #isConnectionValid()
-     * returned true}.
-     *
-     * @return true if reference field is valid, otherwise - false
-     */
-    public boolean isReferenceFieldValid() {
-            final IMetaModel meta = services.getMeta();
-            meta.getAssetType("PrimaryWorkitem").getAttributeDefinition(referenceField);
-            return true;
     }
 }
