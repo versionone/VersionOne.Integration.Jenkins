@@ -226,16 +226,7 @@ public class VersionOneNotifier extends Notifier {
                                                @QueryParameter(V1_PROXY_URL) final String proxyUrl,
                                                @QueryParameter(V1_PROXY_USERNAME) final String proxyUsername,
                                                @QueryParameter(V1_PROXY_PASSWORD) final String proxyPassword) {
-
-//            Logger logger = Logger.getLogger("MyLog");
-//            FileHandler fh;
-
             try {
-//                fh = new FileHandler("C:/MyLogFile.log");
-//                logger.addHandler(fh);
-//                SimpleFormatter formatter = new SimpleFormatter();
-//                fh.setFormatter(formatter);
-
                 V1Connector.IsetProxyOrEndPointOrConnector connectorBuilder = V1Connector
                         .withInstanceUrl(path)
                         .withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
