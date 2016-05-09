@@ -251,10 +251,9 @@ public class VersionOneNotifier extends Notifier {
                 IAssetType primaryWorkitemType = services.getAssetType("PrimaryWorkitem");
                 primaryWorkitemType.getAttributeDefinition(refField);
 
-
                 return FormValidation.ok(MessagesRes.connectionValid());
             } catch (ConnectionException e) {
-                return FormValidation.error("Could not authenticate. The access token may be incorrect or may have expired.");
+                return FormValidation.error(MessagesRes.connectionFailedAccessToken());
             } catch (MetaException e) {
                 if (e.getMessage().contains(refField))
                     return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
