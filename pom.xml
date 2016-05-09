@@ -164,8 +164,7 @@
         <dependency>
             <groupId>com.versionone</groupId>
             <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
-            <!-- <version>13.0.2</version> -->
-            <version>15.2.0</version>
+            <version>15.3.0</version>
             <exclusions>
                 <!-- (Comment #2) exclude because Jenkins injected tests are failing otherwise -->
                 <exclusion>

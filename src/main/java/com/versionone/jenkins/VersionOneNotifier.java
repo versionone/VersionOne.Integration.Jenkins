@@ -232,7 +232,7 @@ public class VersionOneNotifier extends Notifier {
                         .withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
                         .withAccessToken(accessToken);
 
-                if(useProxy) {
+                if (useProxy) {
                     ProxyProvider proxyProvider = new ProxyProvider(createUri(proxyUrl), proxyUsername, proxyPassword);
                     connectorBuilder.withProxy(proxyProvider);
                 }
@@ -248,15 +248,17 @@ public class VersionOneNotifier extends Notifier {
                 query.setFilter(filter);
                 services.retrieve(query);
 
+                IAssetType primaryWorkitemType = services.getAssetType("PrimaryWorkitem");
+                primaryWorkitemType.getAttributeDefinition(refField);
+
+
                 return FormValidation.ok(MessagesRes.connectionValid());
-            } catch(URISyntaxException e) {
-                return FormValidation.error(MessagesRes.connectionFailedProxyUrlMalformed());
-            } catch (MalformedURLException e) {
-                return FormValidation.error(MessagesRes.connectionFailedPath());
+            } catch (ConnectionException e) {
+                return FormValidation.error("Could not authenticate. The access token may be incorrect or may have expired.");
             } catch (MetaException e) {
-                return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
-            } catch (V1Exception e) {
-                return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
+                if (e.getMessage().contains(refField))
+                    return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
+                return FormValidation.error(MessagesRes.connectionFailedPath());
             } catch (Exception e) {
                 return FormValidation.error(e.getMessage());
             }
