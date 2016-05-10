@@ -38,13 +38,6 @@ public class V1Worker implements Worker {
      * Adds to the VersionOne BuildRun and ChangesSet.
      */
     public Result submitBuildRun(final BuildInfo info) throws V1Exception, MalformedURLException {
-        //Validate connection to V1.
-        // if (!config.isConnectionValid()) {
-        // 	logger.println("VersionOne: Connection to VersionOne failed");
-        //     return Result.FAIL_CONNECTION;
-        // }
-        // logger.println("VersionOne: Connection to VersionOne succeeded");
-
         //Find a matching BuildProject.
 
         final Asset buildProject = getBuildProject(info);
@@ -397,7 +390,7 @@ public class V1Worker implements Worker {
         query.getSelection().add(workitemNameAttrDef);
         FilterTerm filter = new FilterTerm(workitemNumberAttrDef);
         filter.equal(id);
-
+        query.setFilter(filter);
         QueryResult queryResult = services.retrieve(query);
 
         Asset workitem = queryResult.getAssets()[0];
