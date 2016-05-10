@@ -37,6 +37,10 @@ public class MessagesRes {
         return holder.format("connectionFailedProxyUrlMalformed");
     }
 
+    public static String connectionFailedAccessToken() {
+        return holder.format("connectionFailedAccessToken");
+    }
+
     public static String cannotBeEmpty() {
         return holder.format("cannotBeEmpty");
     }

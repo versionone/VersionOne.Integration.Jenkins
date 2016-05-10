@@ -11,8 +11,7 @@
 
 	<groupId>com.versionone</groupId>
 	<artifactId>versionone-jenkins-notifier</artifactId>
-	<version>10.0.1-SNAPSHOT</version>
-	<version>10.0.2-SNAPSHOT</version>
+	<version>10.0.3-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 
 	<name>VersionOne Notifier for Jenkins</name>
@@ -51,14 +50,6 @@
 	</properties>
 
 	<repositories>
-		<!--
-		<repository>
-			<id>BUILDSERVER1</id>
-			<name>BUILDSERVER1-releases</name>
-			<url>http://buildserver1:8081/artifactory/libs-release-local</url>
-		</repository>
-		-->
-		
 		<repository>
 			<id>repo.jenkins-ci.org</id>
 			<url>http://repo.jenkins-ci.org/public/</url>
@@ -165,89 +156,6 @@
                 </configuration>
             </plugin>-->
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.jenkins-ci.tools
-										</groupId>
-										<artifactId>
-											maven-hpi-plugin
-										</artifactId>
-										<versionRange>
-											[1.74,)
-										</versionRange>
-										<goals>
-											<goal>validate</goal>
-											<goal>insert-test</goal>
-											<goal>test-hpl</goal>
-											<goal>
-												resolve-test-dependencies
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											properties-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0-alpha-2,)
-										</versionRange>
-										<goals>
-											<goal>
-												write-project-properties
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.7</version>
-					<executions>
-						<execution>
-							<id>add-eclipse-sources</id>
-							<phase>generate-sources</phase>
-							<goals>
-								<goal>add-source</goal>
-							</goals>
-							<configuration>
-								<sources>
-									<source>${basedir}/target/generated-sources/groovy-stubs/main</source>
-									<source>${basedir}/target/generated-sources/localizer</source>
-									<source>${basedir}/target/generated-sources/taglib-interface</source>
-								</sources>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 	<dependencies>
@@ -256,7 +164,7 @@
         <dependency>
             <groupId>com.versionone</groupId>
             <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
-            <version>13.0.2</version>
+            <version>15.3.0</version>
             <exclusions>
                 <!-- (Comment #2) exclude because Jenkins injected tests are failing otherwise -->
                 <exclusion>
@@ -271,27 +179,12 @@
 			<version>1.602</version>
 			<type>pom</type>
 		</dependency>
-
-		<dependency>
-			<groupId>com.versionone</groupId>
-			<artifactId>VersionOne.SDK.Java.ObjectModel</artifactId>
-			<version>12.1.0.150</version>
-            <exclusions>
-                <!-- See Comment #1 -->
-                <exclusion>
-                    <groupId>com.versionone</groupId>
-                    <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
-                </exclusion>
-            </exclusions>
-		</dependency>
-
 	    <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>subversion</artifactId>
             <version>2.0</version>
             <scope>compile</scope>
         </dependency>
-
 		<dependency>
 			<groupId>org.jvnet.hudson.plugins</groupId>
 			<artifactId>perforce</artifactId>
@@ -311,6 +204,11 @@
 			<version>2.0</version>
 			<scope>compile</scope>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jmock</groupId>
@@ -356,10 +254,10 @@
 
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-			</plugin>
+			<!--<plugin>-->
+				<!--<groupId>org.apache.maven.plugins</groupId>-->
+				<!--<artifactId>maven-plugin-plugin</artifactId>-->
+			<!--</plugin>-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>

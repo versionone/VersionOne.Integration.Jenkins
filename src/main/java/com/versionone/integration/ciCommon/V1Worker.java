@@ -1,75 +1,67 @@
 package com.versionone.integration.ciCommon;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.versionone.DB;
+
+import com.versionone.apiclient.exceptions.APIException;
+import com.versionone.apiclient.exceptions.ConnectionException;
+import com.versionone.apiclient.exceptions.OidException;
+import com.versionone.apiclient.filters.*;
+import com.versionone.apiclient.interfaces.IAttributeDefinition;
 import com.versionone.jenkins.MessagesRes;
-import com.versionone.om.BuildProject;
-import com.versionone.om.BuildRun;
-import com.versionone.om.ChangeSet;
-import com.versionone.om.PrimaryWorkitem;
-import com.versionone.om.SecondaryWorkitem;
-import com.versionone.om.Workitem;
-import com.versionone.om.filters.BuildProjectFilter;
-import com.versionone.om.filters.BuildRunFilter;
-import com.versionone.om.filters.ChangeSetFilter;
-import com.versionone.om.filters.WorkitemFilter;
+import com.versionone.apiclient.exceptions.V1Exception;
+import com.versionone.apiclient.interfaces.IAssetType;
+import com.versionone.apiclient.interfaces.IServices;
+import com.versionone.apiclient.services.QueryResult;
+import com.versionone.apiclient.*;
+
+import java.net.MalformedURLException;
+
 
 public class V1Worker implements Worker {
 
     private final V1Config config;
     private final PrintStream logger;
+    private final IServices services;
 
-    public V1Worker(V1Config config, PrintStream logger) {
+    public V1Worker(V1Config config, PrintStream logger) throws V1Exception, MalformedURLException {
         this.config = config;
         this.logger = logger;
+        services = config.getV1Services();
     }
 
     /**
      * Adds to the VersionOne BuildRun and ChangesSet.
      */
-    public Result submitBuildRun(final BuildInfo info) {
-    	
-        //Validate connection to V1.
-        if (!config.isConnectionValid()) {
-        	logger.println("VersionOne: Connection to VersionOne failed");
-            return Result.FAIL_CONNECTION;
-        }
-        logger.println("VersionOne: Connection to VersionOne succeeded");
-        
+    public Result submitBuildRun(final BuildInfo info) throws V1Exception, MalformedURLException {
         //Find a matching BuildProject.
-        final BuildProject buildProject = getBuildProject(info);
-        
+
+        final Asset buildProject = getBuildProject(info);
+
         //Validate that BuildProject exists.
         if (buildProject == null) {
-        	logger.println("VersionOne: No matching BuildProject found in VersionOne");
+            logger.println("VersionOne: No matching BuildProject found in VersionOne");
             return Result.FAIL_NO_BUILDPROJECT;
         }
-        
+
         //Validate that the BuildRun does not already exist.
         if (isBuildExist(buildProject, info)) {
-        	logger.println("VersionOne: BuildRun already exists in VersionOne");
+            logger.println("VersionOne: BuildRun already exists in VersionOne");
             return Result.FAIL_DUPLICATE;
         }
-        
+
         //Create a BuildRun in the V1 BuildProject.
-        final BuildRun buildRun = createBuildRun(buildProject, info);
-        logger.println("VersionOne: Created BuildRun " + buildRun.getName());
-        
+        final Asset buildRun = createBuildRun(buildProject, info);
+        IAttributeDefinition buildRunNameAttrDef = buildRun.getAssetType().getAttributeDefinition("Name");
+        logger.println("VersionOne: Created BuildRun " + buildRun.getAttribute(buildRunNameAttrDef));
+
         //If available, add ChangeSets.
         if (info.hasChanges()) {
-        	logger.println("VersionOne: Found changesets to process");
+            logger.println("VersionOne: Found changesets to process");
             setChangeSets(buildRun, info);
         }
         return Result.SUCCESS;
@@ -79,14 +71,24 @@ public class V1Worker implements Worker {
         return info.getProjectName() + " - build." + info.getBuildName();
     }
 
-    private boolean isBuildExist(BuildProject buildProject, BuildInfo info) {
-        BuildRunFilter filter = new BuildRunFilter();
-        filter.references.add(Long.toString(info.getBuildId()));
-        filter.name.add(getBuildName(info));
-        filter.buildProjects.add(buildProject);
+    private boolean isBuildExist(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
+        IAssetType buildRunAssetType = services.getAssetType("BuildRun");
 
-        Collection<BuildRun> buildRuns = config.getV1Instance().get().buildRuns(filter);
-        return buildRuns != null && buildRuns.size() != 0;
+        Query query = new Query(buildRunAssetType);
+
+        FilterTerm filterReference = new FilterTerm(buildRunAssetType.getAttributeDefinition("Reference"));
+        filterReference.equal(Long.toString(info.getBuildId()));
+        FilterTerm filterName = new FilterTerm(buildRunAssetType.getAttributeDefinition("Name"));
+        filterName.equal(getBuildName(info));
+        FilterTerm filterBuildProject = new FilterTerm(buildRunAssetType.getAttributeDefinition("BuildProject"));
+        filterBuildProject.equal(buildProject.getOid());
+
+        GroupFilterTerm groupFilter = new AndFilterTerm(filterReference, filterName, filterBuildProject);
+        query.setFilter(groupFilter);
+
+        QueryResult result = config.getV1Services().retrieve(query);
+
+        return result.getAssets() != null && result.getAssets().length != 0;
     }
 
     /**
@@ -95,57 +97,86 @@ public class V1Worker implements Worker {
      * @param info information about build run
      * @return V1 representation of the project if match; otherwise - null.
      */
-    private BuildProject getBuildProject(BuildInfo info) {
-        
-    	BuildProjectFilter filter = new BuildProjectFilter();
-        filter.references.add(info.getProjectName());
-        Collection<BuildProject> projects = config.getV1Instance().get().buildProjects(filter);
+    private Asset getBuildProject(BuildInfo info) throws V1Exception, MalformedURLException {
+        IAssetType buildProject = services.getMeta().getAssetType("BuildProject");
+        Query query = new Query(buildProject);
+        FilterTerm filter = new FilterTerm(buildProject.getAttributeDefinition("Reference"));
+        filter.equal(info.getProjectName());
 
-        if (projects.isEmpty()) {
+        query.setFilter(filter);
+        QueryResult result = services.retrieve(query);
+
+        if (result.getAssets().length == 0) {
             return null;
         }
-        return projects.iterator().next();
+        return result.getAssets()[0];
     }
 
-
-    private static BuildRun createBuildRun(BuildProject buildProject, BuildInfo info) {
-    	
+    private Asset createBuildRun(Asset buildProject, BuildInfo info) throws V1Exception, MalformedURLException {
         //Generate the BuildRun asset.
-        BuildRun run = buildProject.createBuildRun(getBuildName(info), new DB.DateTime(info.getStartTime()));
+        IAssetType buildRunType = services.getAssetType("BuildRun");
+        IAttributeDefinition buildRunNameAttrDef = buildRunType.getAttributeDefinition("Name");
+        IAttributeDefinition buildRunDateAttrDef = buildRunType.getAttributeDefinition("Date");
+        IAttributeDefinition buildRunElapsedAttrDef = buildRunType.getAttributeDefinition("Elapsed");
+        IAttributeDefinition buildRunReferenceAttrDef = buildRunType.getAttributeDefinition("Reference");
+        IAttributeDefinition buildRunSourceAttrDef = buildRunType.getAttributeDefinition("Source");
+        IAttributeDefinition buildRunStatusAttrDef = buildRunType.getAttributeDefinition("Status");
 
-        run.setElapsed((double) info.getElapsedTime());
-        run.setReference(Long.toString(info.getBuildId()));
-        run.getSource().setCurrentValue(getSourceName(info.isForced()));
-        run.getStatus().setCurrentValue(getStatusName(info.isSuccessful()));
+        Asset buildRun = services.createNew(buildRunType, buildProject.getOid());
+        buildRun.setAttributeValue(buildRunNameAttrDef, getBuildName(info));
+        buildRun.setAttributeValue(buildRunDateAttrDef, new DB.DateTime(info.getStartTime()));
+        buildRun.setAttributeValue(buildRunElapsedAttrDef, (double) info.getElapsedTime());
+        buildRun.setAttributeValue(buildRunReferenceAttrDef, Long.toString(info.getBuildId()));
+
+        buildRun.setAttributeValue(buildRunSourceAttrDef, getSourceOID(info.isForced()));
+        buildRun.setAttributeValue(buildRunStatusAttrDef, getStatusOID(info.isSuccessful()));
 
         if (info.hasChanges()) {
-            run.setDescription(getModificationDescription(info.getChanges()));
+            IAttributeDefinition descriptionAttrDef = buildRunType.getAttributeDefinition("Description");
+            buildRun.setAttributeValue(descriptionAttrDef, getModificationDescription(info.getChanges()));
         }
-        
-        run.save();
-        run.createLink("Build Report", info.getUrl(), true);
-        
-        return run;
+
+        services.save(buildRun);
+
+        IAssetType linkType = services.getAssetType("Link");
+        IAttributeDefinition linkAssetAttrDef = linkType.getAttributeDefinition("Asset");
+        IAttributeDefinition linkNameAttrDef = linkType.getAttributeDefinition("Name");
+        IAttributeDefinition linkUrlAttrDef = linkType.getAttributeDefinition("URL");
+        IAttributeDefinition linkOnMenuAttrDef = linkType.getAttributeDefinition("OnMenu");
+
+        Asset link = services.createNew(linkType, null);
+        link.setAttributeValue(linkAssetAttrDef, buildRun.getOid());
+        link.setAttributeValue(linkNameAttrDef, "Build Report");
+        link.setAttributeValue(linkUrlAttrDef, info.getUrl());
+        link.setAttributeValue(linkOnMenuAttrDef, true);
+
+        services.save(link);
+
+        return buildRun;
     }
 
-    /**
-     * Returns the V1 BuildRun source name.
-     *
-     * @param isForced true - if build was forced.
-     * @return V1 source name, "trigger" or "forced".
-     */
-    private static String getSourceName(boolean isForced) {
-        return isForced ? "forced" : "trigger";
+    private String getSourceOID (boolean isForced) throws ConnectionException, APIException, OidException {
+        IAssetType buildSourceAssetType = services.getAssetType("BuildSource");
+        Query query = new Query(buildSourceAssetType);
+
+        FilterTerm nameFilter = new FilterTerm(buildSourceAssetType.getAttributeDefinition("Name"));
+        nameFilter.equal(isForced ? "Forced" : "Trigger");
+
+        query.setFilter(nameFilter);
+        QueryResult result = services.retrieve(query);
+        return result.getAssets()[0].getOid().toString();
     }
 
-    /**
-     * Returns the V1 BuildRun status name.
-     *
-     * @param isSuccessful true - if build is successful.
-     * @return V1 source name, "trigger" or "forced".
-     */
-    private static String getStatusName(boolean isSuccessful) {
-        return isSuccessful ? "passed" : "failed";
+    private String getStatusOID(boolean isSuccessful) throws ConnectionException, APIException, OidException {
+        IAssetType buildSourceAssetType = services.getAssetType("BuildStatus");
+        Query query = new Query(buildSourceAssetType);
+
+        FilterTerm nameFilter = new FilterTerm(buildSourceAssetType.getAttributeDefinition("Name"));
+        nameFilter.equal(isSuccessful ? "Passed" : "Failed");
+
+        query.setFilter(nameFilter);
+        QueryResult result = services.retrieve(query);
+        return result.getAssets()[0].getOid().toString();
     }
 
     /**
@@ -155,10 +186,10 @@ public class V1Worker implements Worker {
      * @return description string.
      */
     public static String getModificationDescription(Iterable<VcsModification> changes) {
-    	
+
         //Create Set to filter changes unique by User and Comment.
         StringBuilder result = new StringBuilder(256);
-        for (Iterator<VcsModification> it = changes.iterator(); it.hasNext();) {
+        for (Iterator<VcsModification> it = changes.iterator(); it.hasNext(); ) {
             VcsModification mod = it.next();
             result.append(mod.getUserName());
             result.append(": ");
@@ -170,20 +201,23 @@ public class V1Worker implements Worker {
         return result.toString();
     }
 
-    private void setChangeSets(BuildRun buildRun, BuildInfo info) {
-    	
+    private void setChangeSets(Asset buildRun, BuildInfo info) throws V1Exception, MalformedURLException {
         for (VcsModification change : info.getChanges()) {
-        	
-        	logger.println("VersionOne: Processing changeset: " + change.getId());
-        	
+
+            logger.println("VersionOne: Processing changeset: " + change.getId());
+
             //See if we have this ChangeSet in the system.
-            ChangeSetFilter filter = new ChangeSetFilter();
-            String id = change.getId();
-            filter.reference.add(id);
-            Collection<ChangeSet> changeSetList = config.getV1Instance().get().changeSets(filter);
-            
-            if (changeSetList.isEmpty()) {
-            	
+            IAssetType changeSetType = services.getAssetType("ChangeSet");
+            Query query = new Query(changeSetType);
+            FilterTerm filter = new FilterTerm(changeSetType.getAttributeDefinition("Reference"));
+            filter.equal(change.getId());
+            query.setFilter(filter);
+
+            QueryResult result = services.retrieve(query);
+            Collection<Asset> changeSetList = null;
+
+            if (result.getAssets().length == 0) {
+
                 //We don't have one yet. Create one.
                 StringBuilder name = new StringBuilder();
                 name.append('\'');
@@ -193,66 +227,93 @@ public class V1Worker implements Worker {
                     name.append(new DB.DateTime(change.getDate()));
                 }
                 name.append('\'');
-                
-                Map<String, Object> attributes = new HashMap<String, Object>();
-                attributes.put("Description", change.getComment());
-                ChangeSet changeSet = config.getV1Instance().create().changeSet(name.toString(), id, attributes);
-                logger.println("VersionOne: Created changeset: " + changeSet.getName());
 
-                changeSetList = new ArrayList<ChangeSet>(1);
+                IAttributeDefinition changeSetNameAttrDef = changeSetType.getAttributeDefinition("Name");
+                IAttributeDefinition changeSetReferenceAttrDef = changeSetType.getAttributeDefinition("Reference");
+                IAttributeDefinition changeSetDescriptionAttrDef = changeSetType.getAttributeDefinition("Description");
+
+                Asset changeSet = services.createNew(changeSetType, null);
+                changeSet.setAttributeValue(changeSetNameAttrDef, name.toString());
+                changeSet.setAttributeValue(changeSetReferenceAttrDef, change.getId());
+                changeSet.setAttributeValue(changeSetDescriptionAttrDef, change.getComment());
+
+                services.save(changeSet);
+
+                logger.println("VersionOne: Created changeset: " + changeSet.getAttribute(changeSetNameAttrDef).getValue());
+
+                changeSetList = new ArrayList<Asset>(1);
                 changeSetList.add(changeSet);
             }
 
-            Set<PrimaryWorkitem> workitems = determineWorkitems(change.getComment());
-            
+            Set<Asset> workitems = determineWorkitems(change.getComment());
+
             logger.println("VersionOne: Associating " + changeSetList.size() + " changesets and " + workitems.size() + " workitems to buildrun");
             associateWithBuildRun(buildRun, changeSetList, workitems);
         }
     }
 
-    private void associateWithBuildRun(BuildRun buildRun, Collection<ChangeSet> changeSets, Set<PrimaryWorkitem> workitems) {
-    	
-        for (ChangeSet changeSet : changeSets) {
-        	
-            buildRun.getChangeSets().add(changeSet);
-            logger.println("VersionOne: Added changeset " + changeSet.getName());
-            
-            for (PrimaryWorkitem workitem : workitems) {
-            	
-                if (workitem.isClosed()) {
-                    logger.println("VersionOne: " + MessagesRes.workitemClosedCannotAttachData(workitem.getDisplayID()));
+    private void associateWithBuildRun(Asset buildRun, Collection<Asset> changeSets, Set<Asset> workitems) throws V1Exception, MalformedURLException {
+        IAttributeDefinition buildRunChangeSetsAttrDef = buildRun.getAssetType().getAttributeDefinition("ChangeSets");
+        //List<Object> buildRunChangeSets = Arrays.asList(buildRun.getAttribute(buildRunChangeSetsAttrDef).getValues());
+        for (Asset changeSet : changeSets) {
+            IAttributeDefinition changeSetNameAttrDef = changeSet.getAssetType().getAttributeDefinition("Name");
+            IAttributeDefinition changeSetPrimaryWorkitemsAttrDef = changeSet.getAssetType().getAttributeDefinition("PrimaryWorkitems");
+
+            buildRun.addAttributeValue(buildRunChangeSetsAttrDef, changeSet.getOid());
+
+            logger.println("VersionOne: Added changeset " + changeSet.getAttribute(changeSetNameAttrDef).getValue());
+
+            for (Asset workitem : workitems) {
+                IAttributeDefinition workItemIsClosedAttrDef = workitem.getAssetType().getAttributeDefinition("IsClosed");
+                IAttributeDefinition workItemCompletedInBuildRunsAttrDef = workitem.getAssetType().getAttributeDefinition("CompletedInBuildRuns");
+
+                if (Boolean.parseBoolean(workitem.getAttribute(workItemIsClosedAttrDef).getValue().toString())) {
+                    logger.println("VersionOne: " + MessagesRes.workitemClosedCannotAttachData(workitem.getOid().toString()));
                     continue;
                 }
 
-                final Collection<BuildRun> completedIn = workitem.getCompletedIn();
-                final List<BuildRun> toRemove = new ArrayList<BuildRun>(completedIn.size());
+                changeSet.addAttributeValue(changeSetPrimaryWorkitemsAttrDef, workitem.getOid());
+                services.save(changeSet);
+                logger.println("VersionOne: Added workitem " + workitem.getOid() + " to changset");
 
-                changeSet.getPrimaryWorkitems().add(workitem);
-                logger.println("VersionOne: Added workitem " + workitem.getDisplayID() + " to changset");
+                Query query = new Query(buildRun.getAssetType());
+                IAttributeDefinition buildRunBuildProjectAttrDef = buildRun.getAssetType().getAttributeDefinition("BuildProject");
+                query.getSelection().add(buildRunBuildProjectAttrDef);
+                List<IFilterTerm> filterTerms = new ArrayList<IFilterTerm>();
 
-                for (BuildRun otherRun : completedIn) {
-                    if (otherRun.getBuildProject().equals(buildRun.getBuildProject())) {
-                        toRemove.add(otherRun);
+                Object[] values = workitem.getAttribute(workItemCompletedInBuildRunsAttrDef).getValues();
+                if (!filterTerms.isEmpty()) {
+                    for (Object buildRunOid : values) {
+                        FilterTerm filter = new FilterTerm(buildRun.getAssetType().getAttributeDefinition("ID"));
+                        filter.equal(buildRunOid);
+                        filterTerms.add(filter);
+                    }
+                    query.setFilter(new OrFilterTerm(filterTerms.toArray(new IFilterTerm[filterTerms.size()])));
+                    QueryResult queryResult = services.retrieve(query);
+
+                    for (Asset otherRun : queryResult.getAssets()) {
+                        Object buildRunBuildProject = buildRun.getAttribute(buildRunBuildProjectAttrDef).getValue();
+                        if (otherRun.getAttribute(buildRunBuildProjectAttrDef).getValue().equals(buildRunBuildProject)) {
+                            workitem.removeAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
+                        }
                     }
                 }
 
-                for (BuildRun buildRunDel : toRemove) {
-                    completedIn.remove(buildRunDel);
-                }
-
-                completedIn.add(buildRun);
-                logger.println("VersionOne: Added workitem " + workitem.getDisplayID() + " to buildrun");
+                workitem.addAttributeValue(workItemCompletedInBuildRunsAttrDef, buildRun.getOid());
+                services.save(workitem);
+                services.save(buildRun);
+                logger.println("VersionOne: Added workitem " + workitem.getOid() + " to buildrun");
             }
         }
     }
 
-    private Set<PrimaryWorkitem> determineWorkitems(String comment) {
-    	
-    	logger.println("VersionOne: Processing changeset comment: " + comment + " with pattern " + config.pattern.toString());
+    private Set<Asset> determineWorkitems(String comment) throws V1Exception, MalformedURLException {
+
+        logger.println("VersionOne: Processing changeset comment: " + comment + " with pattern " + config.pattern.toString());
         List<String> ids = getWorkitemsIds(comment, config.pattern);
-        
+
         logger.println("VersionOne: Found " + ids.size() + " workitems to process");
-        Set<PrimaryWorkitem> result = new HashSet<PrimaryWorkitem>(ids.size());
+        Set<Asset> result = new HashSet<Asset>(ids.size());
 
         for (String id : ids) {
             result.addAll(getPrimaryWorkitemsByReference(id));
@@ -267,24 +328,28 @@ public class V1Worker implements Worker {
      * @param reference The identifier in the check-in comment.
      * @return A collection of matching PrimaryWorkitems.
      */
-    private List<PrimaryWorkitem> getPrimaryWorkitemsByReference(String reference) {
-    	
-        List<PrimaryWorkitem> result = new ArrayList<PrimaryWorkitem>();
+    private List<Asset> getPrimaryWorkitemsByReference(String reference) throws V1Exception, MalformedURLException {
+        List<Asset> result = new ArrayList<Asset>();
 
-        WorkitemFilter filter = new WorkitemFilter();
-        filter.find.setSearchString(reference);
-        filter.find.fields.add(config.referenceField);
-        Collection<Workitem> workitems = config.getV1Instance().get().workitems(filter);
-        
-        for (Workitem workitem : workitems) {
-            if (workitem instanceof PrimaryWorkitem) {
-                result.add((PrimaryWorkitem) workitem);
-            } else if (workitem instanceof SecondaryWorkitem) {
-                result.add( (PrimaryWorkitem)((SecondaryWorkitem) workitem).getParent() );
-            } else {
-                throw new RuntimeException("Found unexpected Workitem type: " + workitem.getClass());
-            }
-        }
+        IAssetType primaryWorkItemType = services.getAssetType("PrimaryWorkitem");
+        Query query = new Query(primaryWorkItemType);
+
+        IAttributeDefinition completedInBuildRunsAttribute = primaryWorkItemType.getAttributeDefinition("CompletedInBuildRuns");
+        IAttributeDefinition isClosedAttribute = primaryWorkItemType.getAttributeDefinition("IsClosed");
+        IAttributeDefinition childrenAttribute = primaryWorkItemType.getAttributeDefinition("Children.Number");
+        query.getSelection().add(completedInBuildRunsAttribute);
+        query.getSelection().add(isClosedAttribute);
+        query.getSelection().add(childrenAttribute);
+
+        FilterTerm filter = new FilterTerm(primaryWorkItemType.getAttributeDefinition(config.referenceField));
+        filter.equal(reference);
+        FilterTerm filter2 = new FilterTerm(childrenAttribute);
+        filter2.equal(reference);
+
+        query.setFilter(new OrFilterTerm(filter,filter2));
+        QueryResult queryResult = services.retrieve(query);
+
+        result.addAll(Arrays.asList(queryResult.getAssets()));
 
         return result;
     }
@@ -292,12 +357,12 @@ public class V1Worker implements Worker {
     /**
      * Return list of workitems got from the comment string.
      *
-     * @param comment string with some text with ids of tasks which cut using pattern set in the reference expression attribute.
+     * @param comment         string with some text with ids of tasks which cut using pattern set in the reference expression attribute.
      * @param v1PatternCommit regular expression for comment parse and getting data from it.
      * @return list of ids.
      */
     public static List<String> getWorkitemsIds(String comment, Pattern v1PatternCommit) {
-    	
+
         final List<String> result = new LinkedList<String>();
 
         if (v1PatternCommit != null) {
@@ -316,9 +381,21 @@ public class V1Worker implements Worker {
      * @param id idsplay id of workitem
      * @return short information about workitem
      */
-    public WorkitemData getWorkitemData(String id) {
-        Workitem workitem = config.getV1Instance().get().workitemByDisplayID(id);
+    public WorkitemData getWorkitemData(String id) throws V1Exception, MalformedURLException {
+        IAssetType workitemAssetType = services.getAssetType("Workitem");
+        IAttributeDefinition workitemNameAttrDef = workitemAssetType.getAttributeDefinition("Name");
+        IAttributeDefinition workitemNumberAttrDef = workitemAssetType.getAttributeDefinition("Number");
 
-        return new WorkitemData(workitem, config.url);
+        Query query = new Query(workitemAssetType);
+        query.getSelection().add(workitemNameAttrDef);
+        FilterTerm filter = new FilterTerm(workitemNumberAttrDef);
+        filter.equal(id);
+        query.setFilter(filter);
+        QueryResult queryResult = services.retrieve(query);
+
+        Asset workitem = queryResult.getAssets()[0];
+        return new WorkitemData(workitem.getOid().toString(),
+                workitem.getAttribute(workitemNameAttrDef).getValue().toString(),
+                config.url);
     }
 }

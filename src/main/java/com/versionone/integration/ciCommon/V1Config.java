@@ -1,23 +1,22 @@
 package com.versionone.integration.ciCommon;
 
+import com.versionone.apiclient.ProxyProvider;
+import com.versionone.apiclient.Query;
+import com.versionone.apiclient.Services;
+import com.versionone.apiclient.V1Connector;
+import com.versionone.apiclient.exceptions.V1Exception;
+import com.versionone.apiclient.interfaces.IMetaModel;
+
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
-import com.versionone.apiclient.IMetaModel;
-import com.versionone.apiclient.MetaException;
-import com.versionone.om.ApplicationUnavailableException;
-import com.versionone.om.AuthenticationException;
-import com.versionone.om.ProxySettings;
-import com.versionone.om.SDKException;
-import com.versionone.om.V1Instance;
-
 public final class V1Config {
 
     public final String url;
-    public final String userName;
-    public final String password;
+    public final String accessToken;
     public final Pattern pattern;
     public final String referenceField;
     public final Boolean isFullyQualifiedBuildName;
@@ -27,40 +26,36 @@ public final class V1Config {
     public final String proxyUsername;
     public final String proxyPassword;
 
-    private V1Instance v1Instance;
-
+    private Services services;
     private PrintStream logger;
 
     public V1Config() {
-        this("http://localhost/VersionOne/", "admin", "admin");
+        this("http://localhost/VersionOne/", "");
     }
 
     /**
      * @param url VersionOne server URL
-     * @param userName VersionOne user name
-     * @param password VersionOne password
+     * @param accessToken access token for VersionOne
      */
-    public V1Config(String url, String userName, String password) {
-        this(url, userName, password, "[A-Z]{1,2}-[0-9]+", "Number", true);
+    public V1Config(String url, String accessToken) {
+        this(url, accessToken, "[A-Z]{1,2}-[0-9]+", "Number", true);
     }
 
     /**
      * @param url VersionOne server URL
-     * @param userName VersionOne user name
-     * @param password VersionOne password
+     * @param accessToken access token for VersionOne
      * @param pattern Regular expression to find VersionOne workitem IDs
      * @param referenceField Name of field used in VCS commit comments to reference VersionOne items
      * @param fullyQualifiedBuildName use full name of build
      */
-    public V1Config(String url, String userName, String password, String pattern,
+    public V1Config(String url, String accessToken, String pattern,
                     String referenceField, Boolean fullyQualifiedBuildName) {
-        this(url, userName, password, pattern, referenceField, fullyQualifiedBuildName, false, "", "", "");
+        this(url, accessToken, pattern, referenceField, fullyQualifiedBuildName, false, "", "", "");
     }
 
     /**
      * @param url VersionOne server URL
-     * @param userName VersionOne user name
-     * @param password VersionOne password
+     * @param accessToken access token for VersionOne
      * @param pattern Regular expression to find VersionOne workitem IDs
      * @param referenceField Name of field used in VCS commit comments to reference VersionOne items
      * @param fullyQualifiedBuildName use full name of build
@@ -69,13 +64,12 @@ public final class V1Config {
      * @param proxyUsername Proxy server username
      * @param proxyPassword Proxy server password
      */
-    public V1Config(String url, String userName, String password, String pattern,
+    public V1Config(String url, String accessToken, String pattern,
                     String referenceField, Boolean fullyQualifiedBuildName,
                     boolean useProxy, String proxyUrl, String proxyUsername, String proxyPassword) {
-    	
+
         this.url = url;
-        this.userName = userName;
-        this.password = password;
+        this.accessToken = accessToken;
         this.pattern = Pattern.compile(pattern);
         this.referenceField = referenceField;
         isFullyQualifiedBuildName = fullyQualifiedBuildName;
@@ -95,36 +89,24 @@ public final class V1Config {
     }
 
     /**
-     * Validate connection to the VersionOne server
-     *
-     * @return true if all settings is correct and connection to V1 is valid, false - otherwise
-     */
-    public boolean isConnectionValid() {
-        try {
-            checkConnectionValid();
-            return true;
-        } catch (SDKException e) {
-            return false;
-        }
-    }
-
-    public void checkConnectionValid() throws AuthenticationException, ApplicationUnavailableException {
-        getV1Instance().validate();
-    }
-
-    /**
      * Get instance of connection to VersionOne with settings from this class.
      *
      * @return connection to VersionOne
+     * @throws V1Exception
      */
-    public V1Instance getV1Instance() {
-        if (v1Instance == null) {
-            ProxySettings proxySettings = null;
+    public Services getV1Services() throws V1Exception, MalformedURLException {
+        if (services == null) {
+
+            V1Connector.IsetProxyOrEndPointOrConnector connectorBuilder = V1Connector
+                    .withInstanceUrl(url)
+                    .withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
+                    .withAccessToken(accessToken);
 
             if(useProxy) {
                 try {
                     URI proxyURI = new URI(proxyUrl);
-                    proxySettings = new ProxySettings(proxyURI, proxyUsername, proxyPassword);
+                    ProxyProvider proxyProvider = new ProxyProvider(proxyURI, proxyUsername, proxyPassword);
+                    connectorBuilder.withProxy(proxyProvider);
                 } catch(URISyntaxException e) {
                     if(logger != null) {
                         logger.printf("Invalid proxy server URI %1$, skipping proxy connection.", proxyUrl);
@@ -132,38 +114,19 @@ public final class V1Config {
                 }
             }
 
-            String passwordToApply = userName != null? password : null;
-
-            v1Instance = new V1Instance(url, userName, passwordToApply, proxySettings);
-            v1Instance.validate();
+            V1Connector connector = connectorBuilder.build();
+            services = new Services(connector);
         }
-        return v1Instance;
+        return services;
     }
 
     @Override
     public String toString() {
         return "Config{" +
                 "url='" + url + '\'' +
-                ", userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
+                ", accessToken='" + accessToken + '\'' +
                 ", referenceField='" + referenceField + '\'' +
                 ", pattern=" + pattern +
                 '}';
-    }
-
-    /**
-     * Checks whether {@link #referenceField} value is valid. Can be called only after {@link #isConnectionValid()
-     * returned true}.
-     *
-     * @return true if reference field is valid, otherwise - false
-     */
-    public boolean isReferenceFieldValid() {
-        try {
-            final IMetaModel meta = getV1Instance().getApiClient().getMetaModel();
-            meta.getAssetType("PrimaryWorkitem").getAttributeDefinition(referenceField);
-            return true;
-        } catch (MetaException e) {
-            return false;
-        }
     }
 }
