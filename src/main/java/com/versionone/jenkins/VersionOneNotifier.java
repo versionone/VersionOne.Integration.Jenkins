@@ -149,7 +149,7 @@ public class VersionOneNotifier extends Notifier {
         }
 
         public String getHelpFile() {
-            return "/plugin/versionone/help-projectSettings.html";
+            return "/plugin/versionone-jenkins-notifier/help-projectSettings.html";
         }
 
         /**
