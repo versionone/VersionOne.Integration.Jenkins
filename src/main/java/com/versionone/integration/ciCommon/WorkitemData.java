@@ -1,36 +1,37 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
-import com.versionone.om.Workitem;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Representation of workitem from the VersionOne
  */
 public class WorkitemData {
 
-    private final Workitem workitem;
+    private final String id;
+    private final String name;
     private final String url;
     private static final String ASSETDETAIL = "assetdetail.v1?oid=";
 
     /**
      *
-     * @param workitem Workitem from the VersionOne
      * @param url url to the VersionOne server
      */
-    public WorkitemData(Workitem workitem, String url) {
-        this.workitem = workitem;
+    public WorkitemData(String id, String name, String url) {
         if (!url.endsWith("/")) {
             url += "/";
         }
         this.url = url;
+        this.name = name;
+        this.id = id;
+
     }
 
     public String getId() {
-        return workitem.getID().toString();
+        return id;
     }
 
     public String getName() {
-        return workitem.getName();
+        return name;
     }
 
     public String getUrl() {
@@ -38,6 +39,6 @@ public class WorkitemData {
     }
 
     public boolean hasValue() {
-        return workitem != null;
+        return StringUtils.isNotBlank(id);
     }
 }

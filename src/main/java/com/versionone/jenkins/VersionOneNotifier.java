@@ -1,37 +1,43 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
-import com.versionone.apiclient.IMetaModel;
-import com.versionone.apiclient.MetaException;
+import com.versionone.apiclient.ProxyProvider;
+import com.versionone.apiclient.Query;
+import com.versionone.apiclient.Services;
+import com.versionone.apiclient.V1Connector;
+import com.versionone.apiclient.filters.FilterTerm;
+import com.versionone.apiclient.interfaces.*;
+import com.versionone.apiclient.exceptions.*;
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
-import com.versionone.om.ApplicationUnavailableException;
-import com.versionone.om.AuthenticationException;
-import com.versionone.om.ProxySettings;
-import com.versionone.om.V1Instance;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
 import hudson.scm.ChangeLogAnnotator;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import net.sf.json.JSONObject;
+
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 public class VersionOneNotifier extends Notifier {
 
@@ -43,34 +49,63 @@ public class VersionOneNotifier extends Notifier {
         return DESCRIPTOR;
     }
 
+    private PrintStream logger;
+
+    /*
+     * Entry point for Jenkins to call the integration.
+     *
+     * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
+     */
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+        logger = listener.getLogger();
+
+        logger.println("VersionOne: Integration initialized");
         Descriptor descriptor = getDescriptor();
-        V1Config config = new V1Config(descriptor.getV1Path(), descriptor.getV1Username(), descriptor.getV1Password(),
+
+        logger.println("About to configure with:");
+        logger.printf("Path: %s. \n",descriptor.getV1Path());
+        logger.printf("Access Token: %s. \n",descriptor.getV1AccessToken());
+        logger.printf("Pattern: %s. \n",descriptor.getV1Pattern());
+        logger.printf("RefField: %s. \n",descriptor.getV1RefField());
+        V1Config config = new V1Config(descriptor.getV1Path(), descriptor.getV1AccessToken(),
                 descriptor.getV1Pattern(), descriptor.getV1RefField(), false,
                 descriptor.getV1UseProxy(), descriptor.getV1ProxyUrl(), descriptor.getV1ProxyUsername(), descriptor.getV1ProxyPassword());
-        config.setLogger(listener.getLogger());
-        V1Worker worker = new V1Worker(config, listener.getLogger());
+
+        config.setLogger(logger);
+
+        V1Worker worker = null;
+        try {
+            worker = new V1Worker(config, logger);
+        } catch (Exception e) {
+            e.printStackTrace(logger);
+        }
 
         for (ChangeLogAnnotator annot : ChangeLogAnnotator.all()) {
-            if (annot instanceof HudsonChangeLogAnnotator) {
-                ((HudsonChangeLogAnnotator) annot).setData(worker, config.pattern);
+            if (annot instanceof JenkinsChangeLogAnnotator) {
+                ((JenkinsChangeLogAnnotator) annot).setData(worker, config.pattern);
             }
         }
-        BuildInfo buildInfo = new HudsonBuildInfo(build);
 
-        switch (worker.submitBuildRun(buildInfo)) {
-            case SUCCESS:
-                listener.getLogger().println(MessagesRes.processSuccess());
-                break;
-            case FAIL_CONNECTION:
-                listener.getLogger().println(MessagesRes.connectionIsNotCorrect());
-                break;
-            case FAIL_DUPLICATE:
-                listener.getLogger().println(MessagesRes.buildRunAlreadyExist());
-                break;
-            case FAIL_NO_BUILDPROJECT:
-                listener.getLogger().println(MessagesRes.buildProjectNotFound());
-                break;
+        BuildInfo buildInfo = new JenkinsBuildInfo(build, logger);
+        logger.println("VersionOne: Processing build " + buildInfo.getBuildId() + ":" + buildInfo.getBuildName());
+
+        try {
+            switch (worker.submitBuildRun(buildInfo)) {
+                case SUCCESS:
+                    logger.println(MessagesRes.processSuccess());
+                    break;
+                case FAIL_CONNECTION:
+                    logger.println(MessagesRes.connectionIsNotCorrect());
+                    break;
+                case FAIL_DUPLICATE:
+                    logger.println(MessagesRes.buildRunAlreadyExist());
+                    break;
+                case FAIL_NO_BUILDPROJECT:
+                    logger.println(MessagesRes.buildProjectNotFound());
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace(logger);
         }
         return true;
     }
@@ -82,8 +117,7 @@ public class VersionOneNotifier extends Notifier {
     public static final class Descriptor extends BuildStepDescriptor<Publisher> {
 
         private static final String V1_PATH = "v1Path";
-        private static final String V1_USERNAME = "v1Username";
-        private static final String V1_PASSWORD = "v1Password";
+        private static final String V1_ACCESSTOKEN = "v1AccessToken";
         private static final String V1_REF_FIELD = "v1RefField";
         private static final String V1_PATTERN = "v1Pattern";
 
@@ -93,8 +127,7 @@ public class VersionOneNotifier extends Notifier {
         private static final String V1_PROXY_PASSWORD = "v1ProxyPassword";
 
         private String v1Path;
-        private String v1Username;
-        private String v1Password;
+        private String v1AccessToken;
         private String v1RefField;
         private String v1Pattern;
         private boolean v1UseProxy;
@@ -116,7 +149,7 @@ public class VersionOneNotifier extends Notifier {
         }
 
         public String getHelpFile() {
-            return "/plugin/versionone/help-projectSettings.html";
+            return "/plugin/versionone-jenkins-notifier/help-projectSettings.html";
         }
 
         /**
@@ -171,7 +204,7 @@ public class VersionOneNotifier extends Notifier {
             } catch (MalformedURLException e) {
                 return FormValidation.error(MessagesRes.pathWrong());
             }
-            
+
             return FormValidation.ok();
         }
 
@@ -181,40 +214,52 @@ public class VersionOneNotifier extends Notifier {
          * @param req      request
          * @param rsp      respond
          * @param path     path to the VersionOne
-         * @param username user name to VersionOne
-         * @param password password to VersionOne
+         * @param accessToken access token for VersionOne
          * @param refField field will be used to connect buildruns and changesets to story
          * @return validation result.
          */
         public FormValidation doTestConnection(StaplerRequest req, StaplerResponse rsp,
                                                @QueryParameter(V1_PATH) final String path,
-                                               @QueryParameter(V1_USERNAME) final String username,
-                                               @QueryParameter(V1_PASSWORD) final String password,
+                                               @QueryParameter(V1_ACCESSTOKEN) final String accessToken,
                                                @QueryParameter(V1_REF_FIELD) final String refField,
                                                @QueryParameter(V1_USE_PROXY) final boolean useProxy,
                                                @QueryParameter(V1_PROXY_URL) final String proxyUrl,
                                                @QueryParameter(V1_PROXY_USERNAME) final String proxyUsername,
                                                @QueryParameter(V1_PROXY_PASSWORD) final String proxyPassword) {
             try {
-                ProxySettings proxySettings = null;
+                V1Connector.IsetProxyOrEndPointOrConnector connectorBuilder = V1Connector
+                        .withInstanceUrl(path)
+                        .withUserAgentHeader("VersionOne.Integration.Jenkins", "0.1")
+                        .withAccessToken(accessToken);
 
-                if(useProxy) {
-                    proxySettings = new ProxySettings(createUri(proxyUrl), proxyUsername, proxyPassword);
+                if (useProxy) {
+                    ProxyProvider proxyProvider = new ProxyProvider(createUri(proxyUrl), proxyUsername, proxyPassword);
+                    connectorBuilder.withProxy(proxyProvider);
                 }
+                V1Connector connector = connectorBuilder.build();
 
-                final V1Instance v1 = new V1Instance(path, username, password, proxySettings);
-                v1.validate();
-                final IMetaModel meta = v1.getApiClient().getMetaModel();
-                meta.getAssetType("PrimaryWorkitem").getAttributeDefinition(refField);
+                Services services = new Services(connector);
+                IAssetType memberType = services.getAssetType("Member");
+                Query query = new Query(memberType);
+                IAttributeDefinition isSelfAttrDef = memberType.getAttributeDefinition("IsSelf");
+                query.getSelection().add(isSelfAttrDef);
+                FilterTerm filter = new FilterTerm(isSelfAttrDef);
+                filter.equal(true);
+                query.setFilter(filter);
+                services.retrieve(query);
+
+                IAssetType primaryWorkitemType = services.getAssetType("PrimaryWorkitem");
+                primaryWorkitemType.getAttributeDefinition(refField);
+
                 return FormValidation.ok(MessagesRes.connectionValid());
-            } catch(URISyntaxException e) {
-                return FormValidation.error(MessagesRes.connectionFailedProxyUrlMalformed());
-            } catch (ApplicationUnavailableException e) {
-                return FormValidation.error(MessagesRes.connectionFailedPath());
-            } catch (AuthenticationException e) {
-                return FormValidation.error(MessagesRes.connectionFailedUsername());
+            } catch (ConnectionException e) {
+                return FormValidation.error(MessagesRes.connectionFailedAccessToken());
             } catch (MetaException e) {
-                return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
+                if (e.getMessage().contains(refField))
+                    return FormValidation.error(MessagesRes.connectionFailedRefField(refField));
+                return FormValidation.error(MessagesRes.connectionFailedPath());
+            } catch (Exception e) {
+                return FormValidation.error(e.getMessage());
             }
         }
 
@@ -224,8 +269,7 @@ public class VersionOneNotifier extends Notifier {
 
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
             v1Path = o.getString(V1_PATH);
-            v1Username = o.getString(V1_USERNAME);
-            v1Password = o.getString(V1_PASSWORD);
+            v1AccessToken = o.getString(V1_ACCESSTOKEN);
             v1RefField = o.getString(V1_REF_FIELD);
             v1Pattern = o.getString(V1_PATTERN);
 
@@ -248,12 +292,8 @@ public class VersionOneNotifier extends Notifier {
             return v1Path;
         }
 
-        public String getV1Username() {
-            return v1Username;
-        }
-
-        public String getV1Password() {
-            return v1Password;
+        public String getV1AccessToken() {
+            return v1AccessToken;
         }
 
         public String getV1RefField() {
@@ -287,10 +327,9 @@ public class VersionOneNotifier extends Notifier {
             return new VersionOneNotifier();
         }
 
-        void setData(String v1Path, String v1Username, String v1Password, String v1RefField, String v1Pattern) {
+        void setData(String v1Path, String v1AccessToken, String v1RefField, String v1Pattern) {
             this.v1Path = v1Path;
-            this.v1Username = v1Username;
-            this.v1Password = v1Password;
+            this.v1AccessToken = v1AccessToken;
             this.v1RefField = v1RefField;
             this.v1Pattern = v1Pattern;
         }

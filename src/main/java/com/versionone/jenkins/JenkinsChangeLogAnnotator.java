@@ -1,13 +1,14 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
-import hudson.MarkupText;
+import com.versionone.apiclient.exceptions.V1Exception;
 import hudson.Extension;
+import hudson.MarkupText;
 import hudson.MarkupText.SubText;
 import hudson.model.AbstractBuild;
 import hudson.scm.ChangeLogAnnotator;
 import hudson.scm.ChangeLogSet.Entry;
 
+import java.net.MalformedURLException;
 import java.util.regex.Pattern;
 
 import com.versionone.integration.ciCommon.V1Worker;
@@ -17,7 +18,7 @@ import com.versionone.integration.ciCommon.WorkitemData;
  *
  */
 @Extension
-public class HudsonChangeLogAnnotator extends ChangeLogAnnotator {
+public class JenkinsChangeLogAnnotator extends ChangeLogAnnotator {
 
     private V1Worker worker;
     private Pattern pattern;
@@ -39,7 +40,14 @@ public class HudsonChangeLogAnnotator extends ChangeLogAnnotator {
         }
 
         for(SubText token : text.findTokens(pattern)) {
-            WorkitemData workitemData = worker.getWorkitemData(token.group(0));
+            WorkitemData workitemData = null;
+            try {
+                workitemData = worker.getWorkitemData(token.group(0));
+            } catch (V1Exception e) {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
 
             if(workitemData.hasValue()) {
                 String open = "window.open(\"" + workitemData.getUrl() + "\",\"V1Asset\", \"width=800,height=500,scrollbars=1,toolbar=0,directories=0,location=0\");return false;";

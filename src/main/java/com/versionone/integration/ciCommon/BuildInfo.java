@@ -1,4 +1,3 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
 import java.util.Date;
@@ -8,32 +7,9 @@ import java.util.Date;
  */
 public interface BuildInfo {
 
-    /**
-     * Project name is used for finding corresponding {@link com.versionone.om.BuildProject}.
-     *
-     * @return name of Project witch was build.
-     */
     String getProjectName();
-
-    /**
-     * This ID is written to the reference field of the {@link com.versionone.om.BuildRun}.
-     *
-     * @return build ID.
-     */
     long getBuildId();
-
-    /**
-     * StartTime is set as {@link com.versionone.om.BuildRun} creation time.
-     *
-     * @return start time.
-     */
     Date getStartTime();
-
-    /**
-     * ElapsedTime is used for setting {@link com.versionone.om.BuildRun} elapsed time.
-     *
-     * @return building time in milliseconds.
-     */
     long getElapsedTime();
 
     /**

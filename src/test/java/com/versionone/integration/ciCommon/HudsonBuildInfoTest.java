@@ -23,7 +23,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.versionone.hudson.HudsonBuildInfo;
+import com.versionone.jenkins.JenkinsBuildInfo;
 
 
 public class HudsonBuildInfoTest {
@@ -113,7 +113,7 @@ public class HudsonBuildInfoTest {
         }}
         );
         
-        BuildInfo info = new HudsonBuildInfo(build);
+        BuildInfo info = new JenkinsBuildInfo(build, System.out);
         Iterable<VcsModification> supportedVcsChange = info.getChanges();
         int i = 0;
         for (VcsModification mod : supportedVcsChange) {

@@ -1,5 +1,5 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
 
 import org.jvnet.localizer.Localizable;
@@ -35,6 +35,10 @@ public class MessagesRes {
 
     public static String connectionFailedProxyUrlMalformed() {
         return holder.format("connectionFailedProxyUrlMalformed");
+    }
+
+    public static String connectionFailedAccessToken() {
+        return holder.format("connectionFailedAccessToken");
     }
 
     public static String cannotBeEmpty() {

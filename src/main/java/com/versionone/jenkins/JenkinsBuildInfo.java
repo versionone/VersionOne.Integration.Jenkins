@@ -1,28 +1,35 @@
-/*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
-import com.versionone.integration.ciCommon.BuildInfo;
-import com.versionone.integration.ciCommon.VcsModification;
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.Cause;
+import hudson.model.CauseAction;
+import hudson.model.Hudson;
 import hudson.scm.ChangeLogSet;
 
+import java.io.PrintStream;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
-public class HudsonBuildInfo implements BuildInfo {
+import com.versionone.integration.ciCommon.BuildInfo;
+import com.versionone.integration.ciCommon.VcsModification;
+
+public class JenkinsBuildInfo implements BuildInfo {
 
     private final AbstractBuild build;
     private final long elapsedTime;
+    private final PrintStream logger;
 
-    public HudsonBuildInfo(AbstractBuild build) {
+    public JenkinsBuildInfo(AbstractBuild build, PrintStream logger) {
         this.build = build;
+        this.logger = logger;
         GregorianCalendar now = new GregorianCalendar();
         elapsedTime = now.getTime().getTime() - build.getTimestamp().getTime().getTime();
     }
 
-    @SuppressWarnings({"ConstantConditions"})
     public String getProjectName() {
         return build.getProject().getName();
     }
@@ -61,15 +68,18 @@ public class HudsonBuildInfo implements BuildInfo {
     }
 
     public Iterable<VcsModification> getChanges() {
-        List<VcsModification> supportedChanges = new LinkedList<VcsModification>();
 
+    	List<VcsModification> supportedChanges = new LinkedList<VcsModification>();
         ChangeLogSet<ChangeLogSet.Entry> changeSet = build.getChangeSet();
 
         for(ChangeLogSet.Entry entry : changeSet) {
             if(VcsModificationWrapperFactory.getInstance().isSupported(entry)) {
+            	logger.println("VersionOne: Using " + entry.getClass() + " which is supported");            	
                 VcsModification wrapper = VcsModificationWrapperFactory.getInstance().createWrapper(entry);
                 supportedChanges.add(wrapper);
             }
+            else
+            	logger.println("VersionOne: Tried to use " + entry.getClass() + " which is NOT supported");
         }
 
         return supportedChanges;
@@ -78,7 +88,7 @@ public class HudsonBuildInfo implements BuildInfo {
     /**
      * Return URL to the current build results.
      *
-     * @return url to the TeamCity with info about build
+     * @return url to the system with info about build
      */
     public String getUrl() {
         return Hudson.getInstance().getRootUrl() + build.getUrl();

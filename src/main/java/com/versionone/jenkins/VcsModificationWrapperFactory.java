@@ -1,11 +1,12 @@
-package com.versionone.hudson;
+package com.versionone.jenkins;
 
-import com.versionone.integration.ciCommon.VcsModification;
 import hudson.scm.ChangeLogSet;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.versionone.integration.ciCommon.VcsModification;
 
 public class VcsModificationWrapperFactory {
     private static VcsModificationWrapperFactory instance;
@@ -15,11 +16,11 @@ public class VcsModificationWrapperFactory {
 
     private VcsModificationWrapperFactory() {
         classNameMappings.put("hudson.scm.SubversionChangeLogSet$LogEntry",
-                              "com.versionone.hudson.SvnModification");
+                              "com.versionone.jenkins.SvnModification");
         classNameMappings.put("hudson.plugins.perforce.PerforceChangeLogEntry",
-                              "com.versionone.hudson.PerforceModification");
+                              "com.versionone.jenkins.PerforceModification");
         classNameMappings.put("hudson.plugins.git.GitChangeSet",
-                              "com.versionone.hudson.GitModification");
+                              "com.versionone.jenkins.GitModification");
 
         fillSupportedMappings();
     }
@@ -31,7 +32,8 @@ public class VcsModificationWrapperFactory {
                 Class wrapperClass = Class.forName(entry.getValue());
                 mappings.put(logEntryClass, wrapperClass);
             } catch(ClassNotFoundException e) {
-                // do nothing, it is unsupported VCS changeset type
+                // do nothing, it is an unsupported VCS changeset type
+            	e.printStackTrace();
             }
         }
     }

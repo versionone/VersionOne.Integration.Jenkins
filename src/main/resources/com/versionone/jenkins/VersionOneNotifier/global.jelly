@@ -22,11 +22,8 @@
 		<f:entry title="${%Path}" field="v1Path">
 			<f:textbox default="http://localhost/VersionOne"/>
 		</f:entry>
-		<f:entry title="${%Username}" field="v1Username">
-			<f:textbox default="admin"/>
-		</f:entry>
-		<f:entry title="${%Password}" field="v1Password">
-			<f:password default="admin"/>
+		<f:entry title="${%AccessToken}" field="v1AccessToken">
+			<f:textbox default=""/>
 		</f:entry>
 		<f:entry title="${%RefField}" field="v1RefField">
 			<f:textbox default="Number"/>
@@ -48,6 +45,6 @@
         </f:optionalBlock>
 
 		<f:validateButton title="${%TestConnection}" progress="${%Testing}"
-		   method="testConnection" with="v1Path,v1Username,v1Password,v1RefField,v1UseProxy,v1ProxyUrl,v1ProxyUsername,v1ProxyPassword"/>
+		   method="testConnection" with="v1Path,v1AccessToken,v1RefField,v1UseProxy,v1ProxyUrl,v1ProxyUsername,v1ProxyPassword" />
 	</f:section>
 </j:jelly>

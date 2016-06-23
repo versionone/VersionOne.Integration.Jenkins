@@ -1,16 +1,20 @@
 package com.versionone.hudson;
 
 import hudson.plugins.git.GitChangeSet;
-import junit.framework.Assert;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.lib.legacy.ClassImposteriser;
-import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import junit.framework.Assert;
+
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.Test;
+
+import com.versionone.jenkins.GitModification;
 
 public class GitModificationTest {
     private Mockery mockery = new Mockery() {
