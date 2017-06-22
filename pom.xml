@@ -11,7 +11,7 @@
 
     <groupId>com.versionone</groupId>
     <artifactId>versionone-jenkins-notifier</artifactId>
-    <version>11.0.0-SNAPSHOT</version>
+    <version>11.1.0</version>
     <packaging>hpi</packaging>
 
     <name>VersionOne Notifier for Jenkins</name>
