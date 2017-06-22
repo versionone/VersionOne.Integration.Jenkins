@@ -114,7 +114,8 @@ public final class V1Config {
                 }
             }
 
-            V1Connector connector = connectorBuilder.build();
+            V1Connector connector = connectorBuilder.useOAuthEndpoints().build();
+
             services = new Services(connector);
         }
         return services;

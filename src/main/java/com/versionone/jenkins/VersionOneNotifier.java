@@ -236,7 +236,7 @@ public class VersionOneNotifier extends Notifier {
                     ProxyProvider proxyProvider = new ProxyProvider(createUri(proxyUrl), proxyUsername, proxyPassword);
                     connectorBuilder.withProxy(proxyProvider);
                 }
-                V1Connector connector = connectorBuilder.build();
+                V1Connector connector = connectorBuilder.useOAuthEndpoints().build();
 
                 Services services = new Services(connector);
                 IAssetType memberType = services.getAssetType("Member");
