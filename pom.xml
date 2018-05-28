@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.602</version>
+        <version>3.4</version>
     </parent>
 
     <groupId>com.versionone</groupId>
@@ -49,6 +49,8 @@
         </developer>
     </developers>
     <properties>
+        <jenkins.version>2.107.3</jenkins.version>
+        <java.level>8</java.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <github.global.server>github</github.global.server>
         <VERSION_NUMBER>${project.version}</VERSION_NUMBER>
@@ -69,12 +71,11 @@
 
     <build>
         <plugins>
-            
-
             <!-- Write out maven properties so they can be used by Jenkins -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <phase>generate-resources</phase>
@@ -93,6 +94,22 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-support</artifactId>
+            <version>2.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>structs</artifactId>
+            <version>1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>jenkins-core</artifactId>
+            <version>2.107.3</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- (Comment #1) Overriding the transitive dependency coming from com.versionone:VersionOne.SDK.Java.ObjectModel -->
         <dependency>
             <groupId>com.versionone</groupId>
@@ -178,7 +195,4 @@
             </exclusions>
         </dependency>
     </dependencies>
-
-
-
 </project>

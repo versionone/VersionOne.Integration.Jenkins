@@ -11,10 +11,9 @@ import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.BuildListener;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
+import hudson.model.*;
 import hudson.scm.ChangeLogAnnotator;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -22,6 +21,7 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -33,15 +33,23 @@ import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-public class VersionOneNotifier extends Notifier {
+import javax.annotation.Nonnull;
 
-    @Extension
+public class VersionOneNotifier extends Notifier implements SimpleBuildStep {
+
+    @DataBoundConstructor
+    public VersionOneNotifier() {
+    }
+
     public static final Descriptor DESCRIPTOR = new Descriptor();
 
     @Override
@@ -56,7 +64,8 @@ public class VersionOneNotifier extends Notifier {
      *
      * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
      */
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+    @Override
+    public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         logger = listener.getLogger();
 
         logger.println("VersionOne: Integration initialized");
@@ -107,13 +116,14 @@ public class VersionOneNotifier extends Notifier {
         } catch (Exception e) {
             e.printStackTrace(logger);
         }
-        return true;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
 
+    @Symbol("VersionOneNotifier")
+    @Extension
     public static final class Descriptor extends BuildStepDescriptor<Publisher> {
 
         private static final String V1_PATH = "v1Path";
