@@ -1,5 +1,6 @@
 package com.versionone.jenkins;
 
+import hudson.AbortException;
 import hudson.model.*;
 import hudson.scm.ChangeLogSet;
 
@@ -46,7 +47,13 @@ public class JenkinsBuildInfo implements BuildInfo {
     }
 
     public boolean isSuccessful() {
-        return build.getResult() == Result.SUCCESS;
+        try {
+            // Using RunnerWrapper because for pipeline jobs currentResult is not same as Run.getResult().
+            return runWrapper.getCurrentResult().equals(Result.SUCCESS.toString());
+        } catch (AbortException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean isForced() {

@@ -110,6 +110,11 @@
             <version>2.107.3</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>matrix-project</artifactId>
+            <version>1.13</version>
+        </dependency>
         <!-- (Comment #1) Overriding the transitive dependency coming from com.versionone:VersionOne.SDK.Java.ObjectModel -->
         <dependency>
             <groupId>com.versionone</groupId>
