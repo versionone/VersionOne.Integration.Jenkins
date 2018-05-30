@@ -1,29 +1,18 @@
 /*(c) Copyright 2008, VersionOne, Inc. All rights reserved. (c)*/
 package com.versionone.integration.ciCommon;
 
-import hudson.model.Action;
-import hudson.model.Build;
-import hudson.model.FreeStyleBuild;
-import hudson.model.Cause;
-import hudson.model.CauseAction;
-import hudson.model.FreeStyleProject;
-import hudson.scm.CVSChangeLogSet;
-import hudson.scm.ChangeLogSet;
-import hudson.scm.SubversionChangeLogSet;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.List;
-
+import com.versionone.jenkins.JenkinsBuildInfo;
+import hudson.model.*;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.versionone.jenkins.JenkinsBuildInfo;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 
 public class HudsonBuildInfoTest {
@@ -33,31 +22,23 @@ public class HudsonBuildInfoTest {
         }
     };
 
+
     @Test
     public void test() {
         final String buildName = "Build name";
         final String projectName = "Project name";
         final int buildId = 1;
+        final String externalizableId = projectName + "#" + buildId;
         final Date startDate = new Date();
         final boolean isForced = true; // user initiated build  
         final GregorianCalendar timestamp = new GregorianCalendar();
-        final String[] comments = new String[]{"message 1", "message 3"};
         timestamp.setGregorianChange(startDate);
         timestamp.add(GregorianCalendar.MINUTE, -10);
 
-        final FreeStyleBuild build = mockery.mock(FreeStyleBuild.class, "build");
-        final FreeStyleProject project = mockery.mock(FreeStyleProject.class, "project");
-        final Build lastBuild = mockery.mock(Build.class, "last build");
-        final Action action = mockery.mock(CauseAction.class, "Action");
-        final Cause.UserCause userCause = mockery.mock(Cause.UserCause.class, "cause UserCause");
-        final ChangeLogSet changeLogSet = mockery.mock(ChangeLogSet.class, "ChangeLogSet");
-        final SubversionChangeLogSet.LogEntry modification1 = mockery.mock(SubversionChangeLogSet.LogEntry.class, "changelist 1 svn");
-        final CVSChangeLogSet.Entry modification2 = mockery.mock(CVSChangeLogSet.Entry.class, "changelist 2 cvs");
-        final SubversionChangeLogSet.LogEntry modification3 = mockery.mock(SubversionChangeLogSet.LogEntry.class, "changelist 3 svn");
-        final List<Action> actions = Arrays.asList(action);
-        final List userCauses = Arrays.asList(userCause); 
-
-        final Iterator iterator = mockery.mock(Iterator.class, "iterator"); 
+        final Run build = mockery.mock(FreeStyleBuild.class, "build");
+        final Job project = mockery.mock(FreeStyleProject.class, "project");
+        final Cause.UserIdCause userCause = mockery.mock(Cause.UserIdCause.class, "cause UserIdCause");
+        final List userCauses = Arrays.asList(userCause);
 
         mockery.checking(new Expectations() {
         {
@@ -66,67 +47,38 @@ public class HudsonBuildInfoTest {
 
                 allowing(build).getParent();
                 will(returnValue(project));
+
                 allowing(project).getName();
                 will(returnValue(projectName));
-                allowing(project).getLastBuild();
-                will(returnValue(lastBuild));
-                allowing(lastBuild).getDisplayName();
+
+                allowing(project).getFullName();
+                will(returnValue(projectName));
+
+                allowing(project).getBuildByNumber(buildId);
+                will(returnValue(build));
+
+                allowing(build).getExternalizableId();
+                will(returnValue(externalizableId));
+
+                allowing(build).getDisplayName();
                 will(returnValue(buildName));
-                allowing(lastBuild).getNumber();
+
+                allowing(build).getNumber();
                 will(returnValue(buildId));
 
                 // mock who start build
-                allowing(build).getActions();
-                will(returnValue(actions));
-                ((CauseAction)allowing(action)).getCauses();
+                allowing(build).getCauses();
                 will(returnValue(userCauses));
-
-                // mock change sets
-                allowing(build).getChangeSet();
-                will(returnValue(changeLogSet));
-                allowing((changeLogSet)).iterator();
-                will(returnValue(iterator));
-                one(iterator).hasNext();
-                will(returnValue(true));
-                one(iterator).next();
-                will(returnValue(modification1));
-
-                one(iterator).hasNext();
-                will(returnValue(true));
-                one(iterator).next();
-                will(returnValue(modification2));
-
-                one(iterator).hasNext();
-                will(returnValue(true));
-                one(iterator).next();
-                will(returnValue(modification3));
-
-                one(iterator).hasNext();
-                will(returnValue(false));
-
-                one(modification1).getMsg();
-                will(returnValue(comments[0]));
-
-                one(modification3).getMsg();
-                will(returnValue(comments[1]));
-
         }}
         );
-        
+        // TODO: Test for Changes sets.
         BuildInfo info = new JenkinsBuildInfo(build, System.out);
-        Iterable<VcsModification> supportedVcsChange = info.getChanges();
-        int i = 0;
-        for (VcsModification mod : supportedVcsChange) {
-            Assert.assertEquals(comments[i], mod.getComment());
-            i++;
-        }
 
         Assert.assertEquals(buildName, info.getBuildName());
         Assert.assertEquals(projectName, info.getProjectName());
         Assert.assertEquals(new Long(buildId), new Long(info.getBuildId()));
         Assert.assertEquals(new Long(timestamp.getTime().getTime()), new Long(info.getStartTime().getTime()));
         Assert.assertEquals(isForced, info.isForced());
-
     }
 
 }

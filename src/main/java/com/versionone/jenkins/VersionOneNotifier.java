@@ -4,38 +4,28 @@ import com.versionone.apiclient.ProxyProvider;
 import com.versionone.apiclient.Query;
 import com.versionone.apiclient.Services;
 import com.versionone.apiclient.V1Connector;
+import com.versionone.apiclient.exceptions.ConnectionException;
+import com.versionone.apiclient.exceptions.MetaException;
 import com.versionone.apiclient.filters.FilterTerm;
-import com.versionone.apiclient.interfaces.*;
-import com.versionone.apiclient.exceptions.*;
+import com.versionone.apiclient.interfaces.IAssetType;
+import com.versionone.apiclient.interfaces.IAttributeDefinition;
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.scm.ChangeLogAnnotator;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
-
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
-
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -43,6 +33,14 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class VersionOneNotifier extends Notifier implements SimpleBuildStep {
 
