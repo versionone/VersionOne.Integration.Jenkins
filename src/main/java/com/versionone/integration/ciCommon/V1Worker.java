@@ -1,25 +1,25 @@
 package com.versionone.integration.ciCommon;
 
-import java.io.PrintStream;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.versionone.DB;
-
+import com.versionone.apiclient.Asset;
+import com.versionone.apiclient.Attribute;
+import com.versionone.apiclient.Query;
 import com.versionone.apiclient.exceptions.APIException;
 import com.versionone.apiclient.exceptions.ConnectionException;
 import com.versionone.apiclient.exceptions.OidException;
-import com.versionone.apiclient.filters.*;
-import com.versionone.apiclient.interfaces.IAttributeDefinition;
-import com.versionone.jenkins.MessagesRes;
 import com.versionone.apiclient.exceptions.V1Exception;
+import com.versionone.apiclient.filters.*;
 import com.versionone.apiclient.interfaces.IAssetType;
+import com.versionone.apiclient.interfaces.IAttributeDefinition;
 import com.versionone.apiclient.interfaces.IServices;
 import com.versionone.apiclient.services.QueryResult;
-import com.versionone.apiclient.*;
+import com.versionone.jenkins.MessagesRes;
 
+import java.io.PrintStream;
 import java.net.MalformedURLException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class V1Worker implements Worker {
@@ -43,8 +43,8 @@ public class V1Worker implements Worker {
         final List<Asset> buildProjects = getBuildProjects(info);
 
         //Validate that BuildProject exists.
-        if (buildProjects.isEmpty()) {
-            logger.println("VersionOne: No matching BuildProject found in VersionOne");
+        if (buildProjects == null || buildProjects.isEmpty()) {
+            logger.println("VersionOne: No matching BuildProject found in VersionOne. Name of the VersionOne pipeline has to match with name of this job.");
             return Result.FAIL_NO_BUILDPROJECT;
         }
         for(Asset buildProject : buildProjects) {
