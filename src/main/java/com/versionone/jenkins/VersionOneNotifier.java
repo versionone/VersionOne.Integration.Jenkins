@@ -4,44 +4,50 @@ import com.versionone.apiclient.ProxyProvider;
 import com.versionone.apiclient.Query;
 import com.versionone.apiclient.Services;
 import com.versionone.apiclient.V1Connector;
+import com.versionone.apiclient.exceptions.ConnectionException;
+import com.versionone.apiclient.exceptions.MetaException;
 import com.versionone.apiclient.filters.FilterTerm;
-import com.versionone.apiclient.interfaces.*;
-import com.versionone.apiclient.exceptions.*;
+import com.versionone.apiclient.interfaces.IAssetType;
+import com.versionone.apiclient.interfaces.IAttributeDefinition;
 import com.versionone.integration.ciCommon.BuildInfo;
 import com.versionone.integration.ciCommon.V1Config;
 import com.versionone.integration.ciCommon.V1Worker;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.BuildListener;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.scm.ChangeLogAnnotator;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import jenkins.tasks.SimpleBuildStep;
+import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
+import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.sf.json.JSONObject;
+public class VersionOneNotifier extends Notifier implements SimpleBuildStep {
 
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+    @DataBoundConstructor
+    public VersionOneNotifier() {
+    }
 
-public class VersionOneNotifier extends Notifier {
-
-    @Extension
     public static final Descriptor DESCRIPTOR = new Descriptor();
 
     @Override
@@ -56,7 +62,8 @@ public class VersionOneNotifier extends Notifier {
      *
      * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
      */
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+    @Override
+    public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
         logger = listener.getLogger();
 
         logger.println("VersionOne: Integration initialized");
@@ -107,13 +114,14 @@ public class VersionOneNotifier extends Notifier {
         } catch (Exception e) {
             e.printStackTrace(logger);
         }
-        return true;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
 
+    @Symbol("VersionOneNotifier")
+    @Extension
     public static final class Descriptor extends BuildStepDescriptor<Publisher> {
 
         private static final String V1_PATH = "v1Path";

@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <div>
     Notifier for VersionOne system. Adds information about builds and changes which initiate build to VersionOne.
 </div>

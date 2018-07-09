@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <div>
 	Интеграция с VersionOne. Добавляет информацию о сборках и изменениях, которые вызвали сборку, в VersionOne.
 </div>
